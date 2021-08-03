@@ -16,6 +16,8 @@ target_sources (ibex PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_RoundRobin.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_SmearFunction.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_SmearFunction.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_MinlpLargestFirst.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_MinlpLargestFirst.h
   )
 
 target_include_directories (ibex PUBLIC
