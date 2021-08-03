@@ -14,6 +14,8 @@
 #include "ibex_OptimizerConfig.h"
 #include "ibex_CovOptimData.h"
 
+#include <utility>
+//#include "ibex_NormalizedSystem.h"
 namespace ibex {
 
 /**
@@ -72,7 +74,7 @@ public:
 	 *          the optimizer will only rely on the evaluation of f and will be very slow.
 	 *
 	 */
-	Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder, CellBufferOptim& buffer,
+        Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder, CellBufferOptim& buffer,
 			int goal_var,
 			double eps_x=OptimizerConfig::default_eps_x,
 			double rel_eps_f=OptimizerConfig::default_rel_eps_f,
@@ -259,9 +261,7 @@ public:
 	 */
 	CellBufferOptim& buffer;
 
-	/** Precision on variables (bisection control).
-	 *  Vector of size n. The goal variable precision
-	 *  is controlled #via abs_eps_f. */
+	/** Precision (bisection control) */
 	const Vector eps_x;
 
 	/** Relative precision on the objective */
@@ -314,8 +314,9 @@ public:
 	 */
 	bool anticipated_upper_bounding; // TODO: should be set in OptimizerConfig
 
+
 protected:
-	/*
+  /*
 	 * \brief Initialize the optimizer from a single box.
 	 */
 	void start(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
@@ -324,7 +325,6 @@ protected:
 	 * \brief Initialize the optimizer from a COV input file.
 	 */
 	void start(const CovOptimData& cov, double obj_init_bound=POS_INFINITY);
-
 	/**
 	 * \brief Run the optimizer (once started).
 	 */
@@ -406,7 +406,9 @@ protected:
 	 */
 	void read_ext_box(const IntervalVector& ext_box, IntervalVector& box);
 
-private:
+        virtual void qibex_contract( Interval& y, Cell& c);
+        
+
 
 	Optimizer(const Optimizer&); // forbidden
 

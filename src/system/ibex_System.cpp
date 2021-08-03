@@ -293,7 +293,20 @@ bool __is_inactive(const Interval& gx, CmpOp op) {
 	}
 	return inactive;
 }
-
+bool __is_ineffective(const Interval& gx, CmpOp op) {
+	bool ineffective;
+	double eps0=1.e-8;
+	//	double eps0=0.0;
+	switch (op) {
+	 
+	case LT:  ineffective=gx.ub()<0; break;
+	case LEQ: ineffective=gx.ub()<=eps0; break;
+	case EQ:  ineffective=(gx==Interval::zero()); break;
+	case GEQ: ineffective=gx.lb()>=-eps0; break;
+	case GT:  ineffective=gx.lb()>0; break;
+	}
+	return ineffective;
+}
 }
 
 //TODO: improvement: don't create a bitset in return when not necessary?
@@ -309,10 +322,25 @@ BitSet System::active_ctrs(const IntervalVector& box) const {
 	for (int c=0; c<f_ctrs.image_dim(); c++) {
 		if (__is_inactive(res[c],ops[c])) active.remove(c);
 	}
-
 	return active;
 }
 
+  BitSet System::effective_ctrs(const IntervalVector& box) const {
+
+	if (nb_ctr==0) return BitSet::empty(1);
+
+	BitSet effective(BitSet::all(f_ctrs.image_dim()));
+
+	IntervalVector res = f_ctrs.eval_vector(box);
+
+	for (int c=0; c<f_ctrs.image_dim(); c++) {
+		if (__is_ineffective(res[c],ops[c])) effective.remove(c);
+	}
+	return effective;
+}
+
+
+  
 IntervalVector System::active_ctrs_eval(const IntervalVector& box) const {
 
 	BitSet b=active_ctrs(box);
@@ -341,13 +369,30 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
 	return J;
 }
 
-bool System::is_inner(const IntervalVector& box) const {
+  bool System::is_inner(const IntervalVector& box) const {
+  //	return active_ctrs(box).empty();
+    //    std::cout << " effective_ctrs " <<  effective_ctrs(box) << std::endl;
+  	return effective_ctrs(box).empty();
 
-	return active_ctrs(box).empty();
+  }
 
-}
+  void System::set_integer_variables(const BitSet & is_int){
+    integer_variables=is_int;
+  }
 
-vector<string> System::var_names() const {
+  BitSet System::get_integer_variables() const {
+    return integer_variables;
+  }
+
+  bool System::is_integer(int i) const{
+    if  (minlp)
+      return integer_variables[i];
+    else
+      return false;
+  }
+  
+
+  vector<string> System::var_names() const {
 
 	vector<string> var_names;
 	int v=0;

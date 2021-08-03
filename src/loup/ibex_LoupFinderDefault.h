@@ -78,10 +78,15 @@ public:
 	 */
 	LoupFinder& finder_probing;
 
-	/**
+         /**
 	 * Loup finder using inner polytopes.
 	 */
 	LoupFinderXTaylor finder_x_taylor;
+
+        bool integer_check(Vector& pt);
+        bool is_inner(Vector& pt);
+        double goal_ub(Vector& pt);
+        const System& sys;
 };
 
 inline std::pair<IntervalVector, double> LoupFinderDefault::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {

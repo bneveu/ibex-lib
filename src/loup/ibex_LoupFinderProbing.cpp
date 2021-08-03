@@ -187,5 +187,12 @@ bool LoupFinderProbing::dichotomic_line_search(Vector& loup_point, double& loup,
 		return false;
 	}
 }
-
+  
+  bool LoupFinderProbing::integer_check(Vector& pt)
+           {return integer_check0(sys,pt);}
+  bool LoupFinderProbing::is_inner(Vector& pt)
+           {return is_inner0(sys,pt);}
+  double LoupFinderProbing::goal_ub(Vector& pt)
+           {return goal_ub0(sys,pt);}
+  
 } /* namespace ibex */

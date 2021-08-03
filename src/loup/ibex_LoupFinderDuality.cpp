@@ -88,5 +88,8 @@ std::pair<IntervalVector, double> LoupFinderDuality::find(const IntervalVector& 
 
 	throw NotFound();
 }
-
+  bool LoupFinderDuality::integer_check(Vector& pt) {return true;} // for compilation  TO DO ??
+  bool LoupFinderDuality::is_inner(Vector& pt) {return true;} // for compilation  TO DO ??
+  double LoupFinderDuality::goal_ub(Vector& pt) {return goal_ub0(sys,pt);} // for compilation  TO DO ??
+  
 } /* namespace ibex */

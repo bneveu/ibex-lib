@@ -60,7 +60,9 @@ public:
 	 * \brief The NLP problem.
 	 */
 	const NormalizedSystem& sys;
-
+  bool integer_check(Vector & pt);
+    bool is_inner(Vector & pt);
+  double goal_ub(Vector & pt);
 protected:
 
 	/** Total number of variables */

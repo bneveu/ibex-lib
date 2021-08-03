@@ -11,6 +11,7 @@
 #define __IBEX_LOUP_FINDER__
 
 #include "ibex_Vector.h"
+#include "ibex_BitSet.h"
 #include "ibex_Exception.h"
 #include "ibex_System.h"
 #include "ibex_BoxProperties.h"
@@ -86,6 +87,10 @@ public:
 	 */
 	virtual ~LoupFinder();
 
+  virtual bool integer_check(Vector& pt)=0;
+  virtual bool is_inner(Vector& pt)=0;
+  virtual double goal_ub(Vector&pt)=0;
+  
 protected:
 
 	/**
@@ -101,8 +106,19 @@ protected:
 	 *
 	 * \return true in case of success, i.e., if the loup has been decreased.
 	 */
-	bool check(const System& sys, const Vector& pt, double& loup, bool is_inner);
+	bool check(const System& sys, Vector& pt, double& loup, bool is_inner);
+         /**
+	 * \brief In case of a Minlp program, try to modify the values of integer variables 
+         *        to make them integer
+	 *
+	 * \param sys      - The NLP problem.
+	 * \param pt       - The candidate point.
+	 */
+  
+         bool integer_check0(const System& sys, Vector& pt);
 
+         bool is_inner0(const System& sys, Vector& pt);
+         double goal_ub0(const System& sys, Vector& pt);
 	/**
 	 * \brief Monotonicity analysis.
 	 *

@@ -13,10 +13,12 @@
 #include "ibex_NoBisectableVariableException.h"
 #include "ibex_BxpOptimData.h"
 #include "ibex_CovOptimData.h"
+#include "ibex_LoupFinderDefault.h"
 
 #include <float.h>
 #include <stdlib.h>
 #include <iomanip>
+
 
 using namespace std;
 
@@ -41,12 +43,11 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 	}
 }
 
-Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
+  Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
 		CellBufferOptim& buffer,
-		int goal_var, double eps_x, double rel_eps_f, double abs_eps_f) :
-                						n(n), goal_var(goal_var),
+		       int goal_var, double eps_x, double rel_eps_f, double abs_eps_f) :   n(n), goal_var(goal_var),
 										ctc(ctc), bsc(bsc), loup_finder(finder), buffer(buffer),
-										eps_x(n, eps_x), rel_eps_f(rel_eps_f), abs_eps_f(abs_eps_f),
+											   eps_x(n,eps_x), rel_eps_f(rel_eps_f), abs_eps_f(abs_eps_f),
 										trace(0), timeout(-1), extended_COV(true), anticipated_upper_bounding(true),
 										status(SUCCESS),
 										uplo(NEG_INFINITY), uplo_of_epsboxes(POS_INFINITY), loup(POS_INFINITY),
@@ -111,12 +112,13 @@ bool Optimizer::update_loup(const IntervalVector& box, BoxProperties& prop) {
 		if (trace) {
 			cout << "                    ";
 			cout << "\033[32m loup= " << loup << "\033[0m" << endl;
+		}
 //			cout << " loup point=";
 //			if (loup_finder.rigorous())
 //				cout << loup_point << endl;
 //			else
 //				cout << loup_point.lb() << endl;
-		}
+	       
 		return true;
 
 	} catch(LoupFinder::NotFound&) {
@@ -140,11 +142,11 @@ bool Optimizer::update_loup(const IntervalVector& box, BoxProperties& prop) {
 
 void Optimizer::update_uplo() {
 	double new_uplo=POS_INFINITY;
-
+	//        cout << " buffer empty "  << buffer.empty() << endl;
 	if (! buffer.empty()) {
 		new_uplo= buffer.minimum();
 		if (new_uplo > loup && uplo_of_epsboxes > loup) {
-			cout << " loup = " << loup << " new_uplo=" << new_uplo <<  " uplo_of_epsboxes=" << uplo_of_epsboxes << endl;
+		        cout << " loup = " << loup << " new_uplo=" << new_uplo <<  " uplo_of_epsboxes=" << uplo_of_epsboxes << endl;
 			ibex_error("optimizer: new_uplo>loup (please report bug)");
 		}
 		if (new_uplo < uplo) {
@@ -166,10 +168,13 @@ void Optimizer::update_uplo() {
 	else if (buffer.empty() && loup != POS_INFINITY) {
 		// empty buffer : new uplo is set to ymax (loup - precision) if a loup has been found
 		new_uplo=compute_ymax(); // not new_uplo=loup, because constraint y <= ymax was enforced
-		//    cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
-
+		//	        cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
+		//                cout << "uplo of epsboxes" << uplo_of_epsboxes << endl;
 		double m = (new_uplo < uplo_of_epsboxes) ? new_uplo :  uplo_of_epsboxes;
+		
 		if (uplo < m) uplo = m; // warning: hides the field "m" of the class
+		if (trace)
+					cout << "\033[33m uplo= " << uplo << "\033[0m" << endl;
 		// note: we always have uplo <= uplo_of_epsboxes but we may have uplo > new_uplo, because
 		// ymax is strictly lower than the loup.
 	}
@@ -193,9 +198,9 @@ void Optimizer::update_uplo_of_epsboxes(double ymin) {
 }
 
 void Optimizer::handle_cell(Cell& c) {
-
+  //  cout << " before contraction " << c.box << endl;
 	contract_and_bound(c);
-
+	//cout << " after contraction " << c.box << endl;
 	if (c.box.is_empty()) {
 		delete &c;
 	} else {
@@ -207,7 +212,7 @@ void Optimizer::contract_and_bound(Cell& c) {
 
 	/*======================== contract y with y<=loup ========================*/
 	Interval& y=c.box[goal_var];
-
+	//        cout << " box before contract " << c.box << endl;
 	double ymax;
 	if (loup==POS_INFINITY) ymax = POS_INFINITY;
 	// ymax is slightly increased to favour subboxes of the loup
@@ -222,6 +227,7 @@ void Optimizer::contract_and_bound(Cell& c) {
 	} else {
 		c.prop.update(BoxEvent(c.box,BoxEvent::CONTRACT,BitSet::singleton(n+1,goal_var)));
 	}
+	
 
 	/*================ contract x with f(x)=y and g(x)<=0 ================*/
 	//cout << " [contract]  x before=" << c.box << endl;
@@ -237,13 +243,22 @@ void Optimizer::contract_and_bound(Cell& c) {
 	ctc.contract(c.box, context);
 	//cout << c.prop << endl;
 	if (c.box.is_empty()) return;
-
+	qibex_contract(y,c);
+        if (y.is_empty()) {
+	    c.box.set_empty();
+	    return;
+	  }
+	
+	
 	//cout << " [contract]  x after=" << c.box << endl;
 	//cout << " [contract]  y after=" << y << endl;
 	/*====================================================================*/
 
 	/*========================= update loup =============================*/
 
+
+
+	
 	IntervalVector tmp_box(n);
 	read_ext_box(c.box,tmp_box);
 
@@ -270,10 +285,11 @@ void Optimizer::contract_and_bound(Cell& c) {
 	// Note: there are three different cases of "epsilon" box,
 	// - NoBisectableVariableException raised by the bisector (---> see optimize(...)) which
 	//   is independent from the optimizer
-	// - the width of the box is less than the precision given to the optimizer ("eps_x" for
-	//   the original variables and "abs_eps_f" for the goal variable)
-	// - the extended box has no bisectable domains (if eps_x=0 or <1 ulp)
+	// - the width of the box is less than the precision given to the optimizer ("prec" for the original variables
+	//   and "goal_abs_prec" for the goal variable)
+	// - the extended box has no bisectable domains (if prec=0 or <1 ulp)
 	if (((tmp_box.diam()-eps_x).max()<=0 && y.diam() <=abs_eps_f) || !c.box.is_bisectable()) {
+	  //	  cout << tmp_box.max_diam() << "  box  " << c.box << endl;
 		update_uplo_of_epsboxes(y.lb());
 		c.box.set_empty();
 		return;
@@ -307,7 +323,8 @@ Optimizer::Status Optimizer::optimize(const char* cov_file, double obj_init_boun
 	return optimize();
 }
 
-void Optimizer::start(const IntervalVector& init_box, double obj_init_bound) {
+  
+ void Optimizer::start(const IntervalVector& init_box, double obj_init_bound) {
 
 	loup=obj_init_bound;
 
@@ -317,6 +334,7 @@ void Optimizer::start(const IntervalVector& init_box, double obj_init_bound) {
 
 	uplo=NEG_INFINITY;
 	uplo_of_epsboxes=POS_INFINITY;
+	loup_point = init_box; //.set_empty();
 
 	nb_cells=0;
 
@@ -325,7 +343,8 @@ void Optimizer::start(const IntervalVector& init_box, double obj_init_bound) {
 	Cell* root=new Cell(IntervalVector(n+1));
 
 	write_ext_box(init_box, root->box);
-
+	root->box[goal_var]=Interval(uplo,loup);
+        cout << "root->box[goal_var]" <<  root->box[goal_var] << endl; 
 	// add data required by the bisector
 	bsc.add_property(init_box, root->prop);
 
@@ -343,7 +362,7 @@ void Optimizer::start(const IntervalVector& init_box, double obj_init_bound) {
 	loup_changed=false;
 	initial_loup=obj_init_bound;
 
-	loup_point = init_box; //.set_empty();
+
 	time=0;
 
 	if (cov) delete cov;
@@ -379,7 +398,9 @@ void Optimizer::start(const CovOptimData& data, double obj_init_bound) {
 			box = data[i];
 		else {
 			write_ext_box(data[i], box);
+			cout << " init box " << box << endl;
 			box[goal_var] = Interval(uplo,loup);
+			cout << " contracted box " << box << endl;
 			ctc.contract(box);
 			if (box.is_empty()) continue;
 		}
@@ -411,6 +432,10 @@ void Optimizer::start(const CovOptimData& data, double obj_init_bound) {
 	cov->data->_optim_time = data.time();
 	cov->data->_optim_nb_cells = data.nb_cells();
 }
+
+
+
+  void Optimizer::qibex_contract(Interval& y, Cell & c){;}
 
 Optimizer::Status Optimizer::optimize() {
 	Timer timer;

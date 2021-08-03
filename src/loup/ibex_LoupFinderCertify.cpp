@@ -69,7 +69,7 @@ std::pair<IntervalVector, double> LoupFinderCertify::find(const IntervalVector& 
 		eps_h /= 2.;
 	} while (af->image_dim() > sys.nb_var && eps_h>min_activity_thershold);
 	if (af->image_dim() > sys.nb_var) {
-		ibex_warning("too many active constraints, cannot prove feasibility -> loup lost!");
+	  //		ibex_warning("too many active constraints, cannot prove feasibility -> loup lost!");
 		delete af;
 		throw NotFound();
 	}
@@ -134,5 +134,10 @@ std::pair<IntervalVector, double> LoupFinderCertify::find(const IntervalVector& 
 	delete af;
 	throw NotFound();
 }
-
+ 
+  
+  bool LoupFinderCertify::integer_check(Vector& pt) {return true;}  // something to do ???
+    bool LoupFinderCertify::is_inner(Vector& pt) {return true;}  // something to do ???
+  double LoupFinderCertify::goal_ub(Vector& pt) {return goal_ub0(sys,pt);}  // something to do ???
+  
 } /* namespace ibex */

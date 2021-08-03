@@ -70,7 +70,10 @@ public:
 	 * By default: true.
 	 */
 	bool mono_analysis_flag;
-
+  bool integer_check(Vector& pt);
+  bool is_inner(Vector& pt);
+   double goal_ub(Vector& pt);
+  
 protected:
 
 	/**

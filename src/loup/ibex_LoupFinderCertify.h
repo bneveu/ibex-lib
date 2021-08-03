@@ -58,6 +58,10 @@ public:
 	 */
 	const double min_activity_thershold = 1e-20;
 
+  bool integer_check(Vector& pt); // To do
+  bool is_inner(Vector& pt); // To do
+  double goal_ub(Vector& pt); // To do
+
 protected:
 
 	/**

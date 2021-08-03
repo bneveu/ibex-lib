@@ -183,11 +183,12 @@ public:
 	 *          in the case of vector/matrix constraints).
 	 */
 	BitSet active_ctrs(const IntervalVector& box) const;
+  	BitSet effective_ctrs(const IntervalVector& box) const;
 
 	/**
 	 * \brief Quick check that the box is inside g(x)<=0.
 	 *
-	 * \return True only if all the constraints are inactive
+	 * \return True only if all the constraints are satisfied
 	 */
 	bool is_inner(const IntervalVector& box) const;
 
@@ -280,6 +281,17 @@ public:
 	 * this array is zero-sized. */
 	Array<NumConstraint> ctrs;
 
+        /** Integer variables : function setting the integer variables 
+	 */
+        void set_integer_variables(const BitSet & is_int);
+
+        BitSet get_integer_variables() const;
+
+        bool is_integer(int i) const;
+
+        /** Boolean : true if  the system contains integer variables , false if all variables are real */
+        bool minlp=false;
+
 
 protected:
 	/** Uninitialized system */
@@ -290,6 +302,10 @@ protected:
 
 	SymbolMap<Domain*> mutable_constants;
 
+        /** Bitset indicating which variables are integer (to be used only when minlp is true) */
+        BitSet integer_variables;
+      
+
 private:
 	friend class parser::P_SysGenerator;
 	friend class NumConstraint; // NumConstraint requires to build a temporary system for parsing a string
@@ -299,6 +315,7 @@ private:
 	// initialize f and ops from the constraints in ctrs,
 	// once *all* the other fields are set (including args and nb_ctr).
 	void init_f_ctrs(const std::vector<const ExprNode*>& fac_f_ctrs, int simpl_level);
+  
 };
 
 std::ostream& operator<<(std::ostream&, const System&);

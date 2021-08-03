@@ -41,7 +41,7 @@ public:
 	 */
 	SmearFunction(System& sys, double prec, double ratio=Bsc::default_ratio());
 
-	SmearFunction(System& sys, double prec, LargestFirst& lf);
+  SmearFunction(System& sys, double prec, LargestFirst& lf, bool gb=true);
 
 	/**
 	 * \brief Create a bisector with Smear function heuristic.
@@ -52,10 +52,8 @@ public:
 	 */
 	SmearFunction(System& sys, const Vector& prec, double ratio=Bsc::default_ratio());
 
-	SmearFunction(System& sys, const Vector& prec,LargestFirst& lf);
-
+  SmearFunction(System& sys, const Vector& prec,LargestFirst& lf);
 	~SmearFunction();
-
 	/**
 	 * \brief Return next variable to be bisected.
 	 *
@@ -88,14 +86,15 @@ protected :
 
 	int nbvars;
 	System& sys;
-	int goal_ctr () const;
-	int goal_var () const;
+        int goal_ctr () const;
+        int goal_var () const;
 	bool constraint_to_consider(int i, const IntervalVector & box) const;
 	bool goal_to_consider( const IntervalMatrix& J, int i) const;
-
-private :
-	bool lftodelete; // = true means that  default bisector has to be deleted by the destuctor when the it has been allocated by the constructor.
+        bool goal_to_bisect;
+ private :
+        bool lftodelete; // = true means that  default bisector has to be deleted by the destuctor when the it has been allocated by the constructor.
 	bool _goal_to_consider;
+
 };
 
 /**
@@ -117,7 +116,7 @@ public :
      *
 	 */
 	SmearMax (System& sys,  double prec, double ratio=Bsc::default_ratio());
-	SmearMax(System& sys,  double prec, LargestFirst& lf );
+  SmearMax(System& sys,  double prec, LargestFirst& lf, bool gb=true );
 	/*
 	 * \brief Create a bisector using the Smear function heuristic
 	 *
@@ -158,7 +157,7 @@ public :
      * For the parameters, see #SmearFunction::SmearFunction(System&, double, double).
 	 */
 	SmearSum (System& sys, double prec, double ratio=Bsc::default_ratio());
-	SmearSum (System& sys,  double prec, LargestFirst& lf );
+  SmearSum (System& sys,  double prec, LargestFirst& lf, bool gb=true );
 	 /*
 	 * \brief Create a bisector using Hansen's variant of the Smear function heuristic.
 	 *
@@ -169,7 +168,7 @@ public :
 
 	
 	SmearSum (System& sys, const Vector& prec, double ratio=Bsc::default_ratio());
-	SmearSum (System& sys, const Vector& prec, LargestFirst& lf);
+  SmearSum (System& sys, const Vector& prec, LargestFirst& lf);
 
 	/**
 	 * \brief Returns the variable to bisect.
@@ -203,7 +202,7 @@ public :
 	 */
 	SmearSumRelative (System& sys,  double prec, double ratio=Bsc::default_ratio());
 
-	SmearSumRelative (System& sys,  double prec, LargestFirst& lf );
+  SmearSumRelative (System& sys,  double prec, LargestFirst& lf, bool gb=true );
 
 	 /*
 	 * Variant with a vector of precisions.
@@ -211,7 +210,7 @@ public :
 	 * \see #SmearSumRelative(System&, double, double)
 	 */
 	SmearSumRelative (System& sys, const Vector& prec, double ratio=Bsc::default_ratio());
-	SmearSumRelative (System& sys, const Vector& prec, LargestFirst& lf);
+  SmearSumRelative (System& sys, const Vector& prec, LargestFirst& lf);
  
 	/**
 	 * \brief Returns the variable to bisect.
@@ -223,6 +222,7 @@ public :
 	 * \param J the jacobian matrix J
 	 */
 	int var_to_bisect(IntervalMatrix & J, const IntervalVector& box ) const;
+
 };
 
 
@@ -241,14 +241,14 @@ public :
      * For the parameters, see #SmearFunction::SmearFunction(System&, double, double).
 	 */
 	SmearMaxRelative (System& sys, double prec, double ratio=Bsc::default_ratio());
-	SmearMaxRelative (System& sys,  double prec, LargestFirst& lf);
+  SmearMaxRelative (System& sys,  double prec, LargestFirst& lf, bool gb=true);
 	 /*
 	 * Variant with a vector of precisions.
 	 *
 	 * \see #SmearMaxRelative(System&, double, double)
 	 */
 	SmearMaxRelative (System& sys, const Vector& prec, double ratio=Bsc::default_ratio());
-	SmearMaxRelative (System& sys, const Vector& prec, LargestFirst& lf);
+  SmearMaxRelative (System& sys, const Vector& prec, LargestFirst& lf);
 
 	/**
 	 * Returns the variable to bisect : the variable i with the greatest normalized  impact over the constraints fj :  Dfj/Dxi * Diam (xi) / NC(fj) , where NC(fj) = sum(i) Abs(Dfj/Dxi) * Diam(xi)
@@ -267,10 +267,11 @@ inline SmearFunction::SmearFunction(System& sys, double prec, double ratio) : Bs
 	nbvars=sys.nb_var;
 }
 
- inline SmearFunction::SmearFunction(System& sys, double prec, LargestFirst& lf1) : Bsc(prec), sys(sys) {
+  inline SmearFunction::SmearFunction(System& sys, double prec, LargestFirst& lf1, bool gb) : Bsc(prec), sys(sys) {
    lf= &lf1;
    lftodelete=false;
    nbvars=sys.nb_var;
+   goal_to_bisect=gb;
 }
 
 
@@ -292,7 +293,7 @@ inline SmearMax::SmearMax(System& sys,  double prec, double ratio) : SmearFuncti
 
 }
 
- inline SmearMax::SmearMax(System& sys,  double prec, LargestFirst& lf) : SmearFunction(sys,prec,lf) {
+  inline SmearMax::SmearMax(System& sys,  double prec, LargestFirst& lf, bool gb) : SmearFunction(sys,prec,lf,gb) {
 }
 
 inline SmearMax::SmearMax(System& sys,  const Vector& prec, double ratio) : SmearFunction(sys,prec,ratio) {
@@ -303,11 +304,11 @@ inline SmearMax::SmearMax(System& sys,  const Vector& prec, double ratio) : Smea
 
 }
 
-inline SmearSum::SmearSum(System& sys, double prec, double ratio) : SmearFunction(sys,prec,ratio) {
+  inline SmearSum::SmearSum(System& sys, double prec, double ratio) : SmearFunction(sys,prec,ratio) {
 
 }
 
- inline SmearSum::SmearSum(System& sys,  double prec, LargestFirst& lf) : SmearFunction(sys,prec,lf) {
+  inline SmearSum::SmearSum(System& sys,  double prec, LargestFirst& lf, bool gb) : SmearFunction(sys,prec,lf,gb) {
 
 }
 inline SmearSum::SmearSum(System& sys, const Vector& prec, double ratio) : SmearFunction(sys,prec,ratio) {
@@ -325,18 +326,18 @@ inline SmearSumRelative::SmearSumRelative(System& sys, const Vector& prec, doubl
 
 }
 
-inline SmearSumRelative::SmearSumRelative(System& sys, const Vector& prec, LargestFirst& lf) : SmearFunction(sys,prec,lf) {
+  inline SmearSumRelative::SmearSumRelative(System& sys,  double prec, LargestFirst& lf, bool gb) : SmearFunction(sys,prec,lf,gb) {
 
 }
 
-inline SmearSumRelative::SmearSumRelative(System& sys,  double prec, LargestFirst& lf) : SmearFunction(sys,prec,lf) {
+inline SmearSumRelative::SmearSumRelative(System& sys,  const Vector& prec, LargestFirst& lf) : SmearFunction(sys,prec,lf) {
 
 }
-
+  
 inline SmearMaxRelative::SmearMaxRelative(System& sys, double prec, double ratio) : SmearFunction(sys,prec,ratio) {
 
 }
- inline SmearMaxRelative::SmearMaxRelative(System& sys,  double prec, LargestFirst& lf) : SmearFunction(sys,prec,lf) {
+  inline SmearMaxRelative::SmearMaxRelative(System& sys,  double prec, LargestFirst& lf, bool gb) : SmearFunction(sys,prec,lf,gb) {
 
 }
 

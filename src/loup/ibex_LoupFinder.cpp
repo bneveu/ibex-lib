@@ -4,7 +4,7 @@
 // Author      : Gilles Chabert, Ignacio Araya, Bertrand Neveu
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
-// Created     : Jul 09, 2017
+// Created     : July 09, 2017
 //============================================================================
 
 #include "ibex_LoupFinder.h"
@@ -20,9 +20,39 @@ LoupFinder::~LoupFinder() {
 void LoupFinder::add_property(const IntervalVector& init_box, BoxProperties& prop) {
 
 }
+  
+  /*
+  bool LoupFinder::point_check(const System& sys, Vector & pt){
+    return    sys.is_inner(pt);
+  }
+  */
+  
+bool LoupFinder::integer_check0(const System& sys, Vector & pt){
+  
+    if (sys.minlp){
+      //      double eps=1.e-2;
+      double eps=0.4;
+      //      cout << " pt " << pt << endl;
+      BitSet b = sys.get_integer_variables();
+      for (int i=0; i< pt.size(); i++){
+	//	cout << i << " " << integer_variables[i] << endl;
+	if (b[i])
+	  {Interval intvec =integer(Interval(pt[i]-eps,pt[i]+eps));
+	    if (intvec.is_empty() || intvec.diam() >=1)
+	      return false;
+	    else{
+	      //     cout << i << "  " << pt[i] << endl;
+	      pt[i]= intvec.mid();
+	      if (pt[i] < sys.box[i].lb() || pt[i] > sys.box[i].ub())
+		return false;
+	    }
+	  }
+      }
+    }
+    return true;
+  }
 
-bool LoupFinder::check(const System& sys, const Vector& pt, double& loup, bool _is_inner) {
-
+bool LoupFinder::check(const System& sys,  Vector& pt, double& loup, bool _is_inner) {
 	// "res" will contain an upper bound of the criterion
 	double res = sys.goal_ub(pt);
 
@@ -33,17 +63,31 @@ bool LoupFinder::check(const System& sys, const Vector& pt, double& loup, bool _
 	// The test of the constraints is done only when the evaluation of the criterion
 	// is better than the loup (a cheaper test).
 
-	//        cout << " res " <<  res << " loup " <<  pseudo_loup <<  " is_inner " << _is_inner << endl;
 	if (res<loup) {
-		if (_is_inner || sys.is_inner(pt)) {
-			loup = res;
-			return true;
-		}
+	  if (sys.minlp){
+	  //	  cout << " loup " << loup << " res " << res << " pt " << pt << endl;
+	    if (integer_check0(sys,pt) && sys.is_inner(pt)) {
+	      res = sys.goal_ub(pt); // integer_check may modify the loup_point by making integer the values of integer variables; we have to recompute the criterion.
+	      if (res<loup) {
+		loup = res;
+		return true;}
+	      else return false;
+	    }
+	    return false;
+	  }
+	  else
+	    if (_is_inner || sys.is_inner(pt)){
+	      loup = res;
+	      return true;
+	    }
+	  return false;
 	}
-
 	return false;
 }
 
+  bool LoupFinder::is_inner0(const System& sys, Vector& pt) {return sys.is_inner(pt);}
+  double LoupFinder::goal_ub0(const System& sys, Vector& pt) {return sys.goal_ub(pt);}
+  
 void LoupFinder::monotonicity_analysis(const System& sys, IntervalVector& box, bool is_inner) {
 
 	size_t n=sys.nb_var;

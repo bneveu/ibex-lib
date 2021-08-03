@@ -75,6 +75,12 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 	}
 
 	throw NotFound();
+
+	
 }
+  bool LoupFinderXTaylor::integer_check(Vector& pt) {return integer_check0(sys,pt);}
+  bool LoupFinderXTaylor::is_inner(Vector& pt) {return is_inner0(sys,pt);}
+ double LoupFinderXTaylor::goal_ub(Vector& pt) {return goal_ub0(sys,pt);}
+ 
 
 } /* namespace ibex */
