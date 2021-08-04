@@ -1,0 +1,24 @@
+variables
+x2 in [12,60];
+x3 in [12,60];
+x4 in [12,60];
+x5 in [12,60];
+y6 in [12,60];
+y7 in [12,60];
+y8 in [12,60];
+y9 in [12,60];
+
+minimize
+(0.14427932477276 - (y6*y7)/(y8*y9))^2;
+
+constraints
+sin(pi*x2)=0;
+sin(pi*x3)=0;
+sin(pi*x4)=0;
+sin(pi*x5)=0;
+x2=y6;
+x3=y7;
+x4=y8;
+x5=y9;
+
+end

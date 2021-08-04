@@ -1,0 +1,6 @@
+variables
+x in [-10 ,1];
+minimize x^2+x;
+constraints
+integer(x);
+end

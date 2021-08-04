@@ -37,11 +37,7 @@ minimize  (1 + i1^2 + i1)^2 + (1 + i1^2 + i1)*(1 + i4^2 + i4) + (1 + i1^2
     x14) + (1 + x14^2 + x14)^2 + (1 + x15^2 + x15)^2 + (1 + x16^2 + x16)^2;
 
 constraints
-integer(i1);
-integer(i2);
-integer(i3);
-integer(i4);
-integer(i5);
+
 0.22*i1 + 0.2*i2 + 0.19*i3 + 0.25*i4 + 0.15*i5 + 0.11*x6 + 0.12*x7
      + 0.13*x8 + x9 >= 2.5;
      
@@ -58,5 +54,11 @@ integer(i5);
     1.12*i1 + 0.31*i4 + 1.12*x7 - 0.36*x9 + x15 >= 2.3;
 
     0.45*i2 + 0.26*i3 - 1.1*i4 + 0.58*i5 - 1.03*x7 + 0.1*x8 + x16 >= -1.5;
+
+integer(i1);
+integer(i2);
+integer(i3);
+integer(i4);
+integer(i5);
 
 end

@@ -5,10 +5,10 @@ i3 in [4,10];
 i4 in [7,15];
 i5 in [1,2];
 i6 in [3,4];
-i7 in[2,5];
+i7 in [2,5];
 x8 in [-1.e100,1.e100];
 minimize
-x8
+x8;
 constraints
 integer(i1);
 integer(i2);
@@ -17,6 +17,8 @@ integer(i4);
 integer(i5);
 integer(i6);
 integer(i7);
+
+
 
 
  -(0.289028728*exp(-22.00930458*(-0.303 + 0.1*i1)^2)*exp(-12.76383299*(-

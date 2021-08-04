@@ -41,6 +41,7 @@ minimize
 -x25/x23 ;
 
 constraints
+
 integer(i1);
 integer(i2);
 integer(i3);
