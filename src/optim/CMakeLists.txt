@@ -18,6 +18,8 @@ target_sources (ibex PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_OptimMemory.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_UnconstrainedLocalSearch.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_UnconstrainedLocalSearch.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_QibexOptimizer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_QibexOptimizer.h
 )
 
 target_include_directories (ibex PUBLIC
