@@ -406,7 +406,7 @@ protected:
 	 */
 	void read_ext_box(const IntervalVector& ext_box, IntervalVector& box);
 
-        virtual void qibex_contract( Interval& y, Cell& c);
+        virtual void qibex_contract(Cell& c);
         
 
 

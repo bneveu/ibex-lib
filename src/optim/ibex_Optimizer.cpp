@@ -239,15 +239,15 @@ void Optimizer::contract_and_bound(Cell& c) {
 		context.impact.add(c.bisected_var);
 		context.impact.add(goal_var);
 	}
-
+	//	cout << " before contract " << c.box << endl;
 	ctc.contract(c.box, context);
+	//	cout << " after contract " << c.box << endl;
 	//cout << c.prop << endl;
 	if (c.box.is_empty()) return;
-	qibex_contract(y,c);
-        if (y.is_empty()) {
-	    c.box.set_empty();
-	    return;
-	  }
+	qibex_contract(c);
+	if (c.box.is_empty()) return;
+        
+	  
 	
 	
 	//cout << " [contract]  x after=" << c.box << endl;
@@ -434,8 +434,8 @@ void Optimizer::start(const CovOptimData& data, double obj_init_bound) {
 }
 
 
-
-  void Optimizer::qibex_contract(Interval& y, Cell & c){;}
+  // virtual function to implement specific work to do in some optimizer subclasses.
+  void Optimizer::qibex_contract(Cell & c){;}
 
 Optimizer::Status Optimizer::optimize() {
 	Timer timer;
@@ -456,7 +456,7 @@ Optimizer::Status Optimizer::optimize() {
 				pair<Cell*,Cell*> new_cells=bsc.bisect(*c);
 				buffer.pop();
 				delete c; // deletes the cell.
-
+				//	cout << " after bisection" << c->box << endl;
 				nb_cells+=2;  // counting the cells handled ( in previous versions nb_cells was the number of cells put into the buffer after being handled)
 
 				handle_cell(*new_cells.first);
@@ -495,6 +495,7 @@ Optimizer::Status Optimizer::optimize() {
 
 			}
 			catch (NoBisectableVariableException& ) {
+			  cout << "NoBisectableVariableException" << endl;
 				update_uplo_of_epsboxes((c->box)[goal_var].lb());
 				buffer.pop();
 				delete c; // deletes the cell.

@@ -46,7 +46,7 @@ public:
 	 *
 	 * \param box - Box (passed by copy).
 	 */
-	explicit Cell(const IntervalVector& box, int bisected_var=-1, unsigned int depth=0);
+  explicit Cell(const IntervalVector& box, int bisected_var=-1,unsigned int depth=0, int var_to_bisect=-1);
 
 	/**
 	 * \brief Constructor by copy.
@@ -88,6 +88,14 @@ public:
 	 * Last bisected variable (-1 if root node).
 	 */
 	int bisected_var;
+	/**
+	 * In case of precomputed var to bisect (-1 if root node).
+	 */
+        int var_to_bisect;
+	/**
+	 * In case of precomputed ratio (-1 if root node).
+	 */
+        double ratio;
 
 	/**
 	 * Cell depth (0 if root node).

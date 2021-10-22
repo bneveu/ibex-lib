@@ -18,6 +18,12 @@ target_sources (ibex PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_SmearFunction.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_MinlpLargestFirst.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_MinlpLargestFirst.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_QibexLargestFirst.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_QibexLargestFirst.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_QibexSmearsumRelative.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_QibexSmearsumRelative.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_QibexRoundRobin.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_QibexRoundRobin.h
   )
 
 target_include_directories (ibex PUBLIC
