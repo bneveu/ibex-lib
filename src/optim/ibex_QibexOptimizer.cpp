@@ -111,7 +111,7 @@ namespace ibex {
 
   pair<Vector,double> QibexOptimizer::qibex_newbounds(IntervalVector & box, int& var_to_bisect, double& ratio, double& gap0){
     var_to_bisect=-1;
-    //     cout << " box before qibex " << box << endl;
+
 	ofstream fic ("bound.ampl", ofstream::trunc);
 	int n_x=box.size();
 
@@ -119,11 +119,11 @@ namespace ibex {
 	fic << "param ub :=" << endl;
 	
 	for (int i=0; i< n_x; i++)
-	  fic << i+1 << " " << std::setprecision(9) << box[i].ub() << endl;
+	  fic << i+1 << " " << std::setprecision(9) << box[i].ub()+1.e-9 << endl;
 	fic << ";" <<endl;
 	fic << "param lb :=" << endl; 
 	for (int i=0; i< n_x; i++)
-	  fic << i+1 << " " << std::setprecision(9) << box[i].lb() << endl;
+	  fic << i+1 << " " << std::setprecision(9) << box[i].lb()-1.e-9 << endl;
 	fic << ";" << endl;
 	fic << "end ;";
 	fic.close();
@@ -144,7 +144,8 @@ namespace ibex {
 	    int j; int n_y;
             fic1 >> a; fic1 >>a; fic1 >> b; fic1>> a ; fic1>> a ; fic1 >> n_y;
 
-	    if (b=="solved"){
+	    //	    if (b=="solved"){
+
 	      fic1 >> a;
 	      fic1>> a;
 	      fic1 >> newlb;
@@ -170,20 +171,27 @@ namespace ibex {
 		//		fic3 >> v[j-1];
 	      }
 	      fic1 >> a;
-	      var_to_bisect=compute_var_to_bisect(box, n_y,  v,  w, gap0);
+              if (b!= "failure")	      
+		var_to_bisect=compute_var_to_bisect(box, n_y,  v,  w, gap0);
 	      if (var_to_bisect != -1)
 		ratio=compute_ratio(box, v, var_to_bisect);
 
-	    }
-	    /*
-	    else if (b=="infeasible")
-	      box.set_empty();
-	    */
+	      //	    }
+	      /*
+	      if (b=="infeasible")
+		box.set_empty();
+	      */
+	      else if  (b!= "solved")
+	      newlb = NEG_INFINITY;
+	      
+	    
+	    
+	    
 	    fic1.close();
 	}
         pair<Vector,double> p(v,newlb);
 	//	cout << " newlb "<< newlb << " box " << box << endl;
-	//	cout << " p.first  "<< p.first  <<  " p.second " << p.second << endl;
+	//	cout << " v"<< p.first << endl;
 	return p;
   }
     

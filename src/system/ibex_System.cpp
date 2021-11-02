@@ -265,7 +265,6 @@ System::~System() {
 }
 
 
-namespace {
 
 /*
  * Note:
@@ -282,7 +281,7 @@ namespace {
  *  However, the case where a constraint is not effective but
  *  active almost never happens.
  */
-bool __is_inactive(const Interval& gx, CmpOp op) {
+   bool  System::is_inactive( Interval& gx, CmpOp op) const {
 	bool inactive;
 	switch (op) {
 	case LT:  inactive=gx.ub()<0; break;
@@ -293,21 +292,19 @@ bool __is_inactive(const Interval& gx, CmpOp op) {
 	}
 	return inactive;
 }
-bool __is_ineffective(const Interval& gx, CmpOp op) {
+  bool System::is_ineffective( Interval& gx, CmpOp op)const {
 	bool ineffective;
-	double eps0=1.e-8;
-	//	double eps0=0.0;
 	switch (op) {
 	 
 	case LT:  ineffective=gx.ub()<0; break;
-	case LEQ: ineffective=gx.ub()<=eps0; break;
+	case LEQ: ineffective=gx.ub()<= tolerance; break;
 	case EQ:  ineffective=(gx==Interval::zero()); break;
-	case GEQ: ineffective=gx.lb()>=-eps0; break;
+	case GEQ: ineffective=gx.lb()>=-tolerance; break;
 	case GT:  ineffective=gx.lb()>0; break;
 	}
 	return ineffective;
 }
-}
+
 
 //TODO: improvement: don't create a bitset in return when not necessary?
 
@@ -320,7 +317,7 @@ BitSet System::active_ctrs(const IntervalVector& box) const {
 	IntervalVector res = f_ctrs.eval_vector(box);
 
 	for (int c=0; c<f_ctrs.image_dim(); c++) {
-		if (__is_inactive(res[c],ops[c])) active.remove(c);
+		if (is_inactive(res[c],ops[c])) active.remove(c);
 	}
 	return active;
 }
@@ -334,7 +331,7 @@ BitSet System::active_ctrs(const IntervalVector& box) const {
 	IntervalVector res = f_ctrs.eval_vector(box);
 
 	for (int c=0; c<f_ctrs.image_dim(); c++) {
-		if (__is_ineffective(res[c],ops[c])) effective.remove(c);
+		if (is_ineffective(res[c],ops[c])) effective.remove(c);
 	}
 	return effective;
 }
@@ -376,8 +373,8 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
 
   }
 
-  void System::set_integer_variables(const BitSet & is_int){
-    integer_variables=is_int;
+  void System::set_integer_variables(const BitSet & integer_vars){
+    integer_variables=integer_vars;
   }
 
   BitSet System::get_integer_variables() const {

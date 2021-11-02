@@ -19,12 +19,13 @@ using namespace std;
 namespace ibex {
 
   LoupFinderDefault::LoupFinderDefault(const System& sys, bool inHC4)  : sys(sys),
-	finder_probing(inHC4? (LoupFinder&) *new LoupFinderInHC4(sys) : (LoupFinder&) *new LoupFinderFwdBwd(sys)),
+									 //	finder_probing(inHC4? (LoupFinder&) *new LoupFinderInHC4(sys) : (LoupFinder&) *new LoupFinderFwdBwd(sys)),
+        finder_probing(inHC4? (LoupFinder&) *new LoupFinderInHC4(sys) : (LoupFinder&) *new LoupFinderProbing(sys)),
 	finder_x_taylor(sys) {
 
 }
 
-  bool LoupFinderDefault::integer_check(Vector& pt) {return integer_check0(sys,pt);}
+  bool LoupFinderDefault::integer_check(Vector& pt) {return integer_and_bound_check(sys,pt);}
   bool LoupFinderDefault::is_inner (Vector& pt) {return is_inner0(sys,pt);}
   double LoupFinderDefault::goal_ub (Vector& pt) {return goal_ub0(sys,pt);}
   

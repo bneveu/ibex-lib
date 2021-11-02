@@ -189,7 +189,7 @@ bool LoupFinderProbing::dichotomic_line_search(Vector& loup_point, double& loup,
 }
   
   bool LoupFinderProbing::integer_check(Vector& pt)
-           {return integer_check0(sys,pt);}
+           {return integer_and_bound_check(sys,pt);}
   bool LoupFinderProbing::is_inner(Vector& pt)
            {return is_inner0(sys,pt);}
   double LoupFinderProbing::goal_ub(Vector& pt)

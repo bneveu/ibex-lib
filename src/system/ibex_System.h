@@ -291,6 +291,9 @@ public:
 
         /** Boolean : true if  the system contains integer variables , false if all variables are real */
         bool minlp=false;
+   
+        /** the tolerance for checking an inequality (by default no tolerance)*/
+        double tolerance =0.0;
 
 
 protected:
@@ -304,8 +307,9 @@ protected:
 
         /** Bitset indicating which variables are integer (to be used only when minlp is true) */
         BitSet integer_variables;
-      
-
+        bool is_inactive( Interval& gx, CmpOp op) const ;
+  
+        bool  is_ineffective( Interval& gx, CmpOp op) const;
 private:
 	friend class parser::P_SysGenerator;
 	friend class NumConstraint; // NumConstraint requires to build a temporary system for parsing a string

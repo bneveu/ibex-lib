@@ -57,7 +57,7 @@ std::pair<IntervalVector, double> LoupFinderFwdBwd::find(const IntervalVector& b
 	return LoupFinderProbing(sys).find(inner_found? inbox : box,loup_point,loup);
 }
   
- bool  LoupFinderFwdBwd::integer_check(Vector& pt) {return integer_check0(sys,pt);}
+ bool  LoupFinderFwdBwd::integer_check(Vector& pt) {return integer_and_bound_check(sys,pt);}
    bool  LoupFinderFwdBwd::is_inner(Vector& pt) {return is_inner0(sys,pt);}
      double  LoupFinderFwdBwd::goal_ub(Vector& pt) {return goal_ub0(sys,pt);}
   

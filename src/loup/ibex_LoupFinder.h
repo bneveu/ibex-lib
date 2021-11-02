@@ -115,10 +115,12 @@ protected:
 	 * \param pt       - The candidate point.
 	 */
   
-         bool integer_check0(const System& sys, Vector& pt);
+         bool integer_and_bound_check(const System& sys, Vector& pt);
 
          bool is_inner0(const System& sys, Vector& pt);
          double goal_ub0(const System& sys, Vector& pt);
+         void bound_check_i(const System& sys, Vector& pt, int i);
+         void bound_check(const System& sys, Vector& pt);
 	/**
 	 * \brief Monotonicity analysis.
 	 *

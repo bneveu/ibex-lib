@@ -63,8 +63,9 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 		// To deal with the latter case, we apply the following
 		// simple change to the loup point (which would be lost anyway)
 		for (uint i=0; i<n; i++) {
-			if (loup_point[i] < sys.box[i].lb()) loup_point[i] = sys.box[i].lb();
-			if (loup_point[i] > sys.box[i].ub()) loup_point[i] = sys.box[i].ub();
+		  bound_check_i(sys,loup_point,i);
+		  //			if (loup_point[i] < sys.box[i].lb()) loup_point[i] = sys.box[i].lb();
+		  //	if (loup_point[i] > sys.box[i].ub()) loup_point[i] = sys.box[i].ub();
 		}
 
 		double new_loup=current_loup;
@@ -78,7 +79,7 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 
 	
 }
-  bool LoupFinderXTaylor::integer_check(Vector& pt) {return integer_check0(sys,pt);}
+  bool LoupFinderXTaylor::integer_check(Vector& pt) {return integer_and_bound_check(sys,pt);}
   bool LoupFinderXTaylor::is_inner(Vector& pt) {return is_inner0(sys,pt);}
  double LoupFinderXTaylor::goal_ub(Vector& pt) {return goal_ub0(sys,pt);}
  

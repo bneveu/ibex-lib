@@ -142,9 +142,10 @@ bool Optimizer::update_loup(const IntervalVector& box, BoxProperties& prop) {
 
 void Optimizer::update_uplo() {
 	double new_uplo=POS_INFINITY;
-	//        cout << " buffer empty "  << buffer.empty() << endl;
+	//	cout << " buffer empty "  << buffer.empty() << " uplo " << uplo << endl;
 	if (! buffer.empty()) {
 		new_uplo= buffer.minimum();
+		//		cout << " new_uplo " << new_uplo << endl;
 		if (new_uplo > loup && uplo_of_epsboxes > loup) {
 		        cout << " loup = " << loup << " new_uplo=" << new_uplo <<  " uplo_of_epsboxes=" << uplo_of_epsboxes << endl;
 			ibex_error("optimizer: new_uplo>loup (please report bug)");
@@ -167,9 +168,9 @@ void Optimizer::update_uplo() {
 	}
 	else if (buffer.empty() && loup != POS_INFINITY) {
 		// empty buffer : new uplo is set to ymax (loup - precision) if a loup has been found
-		new_uplo=compute_ymax(); // not new_uplo=loup, because constraint y <= ymax was enforced
-		//	        cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
-		//                cout << "uplo of epsboxes" << uplo_of_epsboxes << endl;
+		new_uplo=compute_ymax()+1.e-15; // not new_uplo=loup, because constraint y <= ymax was enforced
+		//	cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
+		//		cout << "uplo of epsboxes" << uplo_of_epsboxes << endl;
 		double m = (new_uplo < uplo_of_epsboxes) ? new_uplo :  uplo_of_epsboxes;
 		
 		if (uplo < m) uplo = m; // warning: hides the field "m" of the class
@@ -502,7 +503,7 @@ Optimizer::Status Optimizer::optimize() {
 				update_uplo(); // the heap has changed -> recalculate the uplo (eg: if not in best-first search)
 
 			}
-		}
+	     }
 
 	 	timer.stop();
 	 	time = timer.get_time();
