@@ -139,5 +139,6 @@ std::pair<IntervalVector, double> LoupFinderCertify::find(const IntervalVector& 
   bool LoupFinderCertify::integer_check(Vector& pt) {return true;}  // something to do ???
     bool LoupFinderCertify::is_inner(Vector& pt) {return true;}  // something to do ???
   double LoupFinderCertify::goal_ub(Vector& pt) {return goal_ub0(sys,pt);}  // something to do ???
-  
+  void LoupFinderCertify::sysbound(Vector& pt) {bound_check(sys,pt);}
+    void LoupFinderCertify::sysbound(IntervalVector& vec) {bound_check(sys,vec);}
 } /* namespace ibex */

@@ -28,6 +28,8 @@ namespace ibex {
   bool LoupFinderDefault::integer_check(Vector& pt) {return integer_and_bound_check(sys,pt);}
   bool LoupFinderDefault::is_inner (Vector& pt) {return is_inner0(sys,pt);}
   double LoupFinderDefault::goal_ub (Vector& pt) {return goal_ub0(sys,pt);}
+  void LoupFinderDefault::sysbound(Vector& pt) {bound_check(sys,pt);}
+  void LoupFinderDefault::sysbound(IntervalVector& vec) {bound_check(sys,vec);}
   
 void LoupFinderDefault::add_property(const IntervalVector& init_box, BoxProperties& prop) {
 	finder_probing.add_property(init_box,prop);

@@ -90,6 +90,8 @@ public:
   virtual bool integer_check(Vector& pt)=0;
   virtual bool is_inner(Vector& pt)=0;
   virtual double goal_ub(Vector&pt)=0;
+  virtual void sysbound(Vector& pt)=0;
+  virtual void sysbound(IntervalVector& pt)=0;
   
 protected:
 
@@ -121,6 +123,8 @@ protected:
          double goal_ub0(const System& sys, Vector& pt);
          void bound_check_i(const System& sys, Vector& pt, int i);
          void bound_check(const System& sys, Vector& pt);
+         void bound_check_i(const System& sys,IntervalVector & vec,int i);
+         void bound_check(const System& sys,IntervalVector & vec);
 	/**
 	 * \brief Monotonicity analysis.
 	 *

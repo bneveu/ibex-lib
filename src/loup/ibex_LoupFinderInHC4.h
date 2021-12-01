@@ -72,7 +72,9 @@ public:
 	bool mono_analysis_flag;
   bool integer_check(Vector& pt);
   bool is_inner(Vector& pt);
-   double goal_ub(Vector& pt);
+  double goal_ub(Vector& pt);
+  void sysbound(Vector& pt);
+  void sysbound(IntervalVector& vec);
   
 protected:
 

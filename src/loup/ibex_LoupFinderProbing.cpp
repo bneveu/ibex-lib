@@ -194,5 +194,6 @@ bool LoupFinderProbing::dichotomic_line_search(Vector& loup_point, double& loup,
            {return is_inner0(sys,pt);}
   double LoupFinderProbing::goal_ub(Vector& pt)
            {return goal_ub0(sys,pt);}
-  
+  void LoupFinderProbing::sysbound(Vector& pt) {bound_check(sys,pt);}
+    void LoupFinderProbing::sysbound(IntervalVector& vec) {bound_check(sys,vec);}
 } /* namespace ibex */

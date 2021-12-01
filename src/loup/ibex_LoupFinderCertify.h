@@ -61,7 +61,8 @@ public:
   bool integer_check(Vector& pt); // To do
   bool is_inner(Vector& pt); // To do
   double goal_ub(Vector& pt); // To do
-
+  void sysbound(Vector& pt);
+    void sysbound(IntervalVector& vec);
 protected:
 
 	/**

@@ -28,10 +28,9 @@ void LoupFinder::add_property(const IntervalVector& init_box, BoxProperties& pro
   */
   
 bool LoupFinder::integer_and_bound_check(const System& sys, Vector & pt){
-  
-    if (sys.minlp){
+  if (sys.minlp){
       //      double eps=1.e-2;
-      double eps=0.4;
+      double eps=0.5;
       //      cout << " pt " << pt << endl;
       BitSet b = sys.get_integer_variables();
       for (int i=0; i< pt.size(); i++){
@@ -62,13 +61,26 @@ bool LoupFinder::integer_and_bound_check(const System& sys, Vector & pt){
   }
     
   
-    void LoupFinder::bound_check_i(const System& sys,Vector & pt, int i)
-    {if (pt[i] < sys.box[i].lb())
+  void LoupFinder::bound_check_i(const System& sys,Vector & pt, int i){
+    if (pt[i] < sys.box[i].lb())
 	  pt[i]=sys.box[i].lb();
       if (pt[i] > sys.box[i].ub())
 	pt[i]=sys.box[i].ub();
-    }
+  }
 
+  void LoupFinder::bound_check(const System& sys,IntervalVector & vec){
+    for (int i=0; i< vec.size() ; i++)
+      bound_check_i(sys,vec,i);
+  }
+
+  void LoupFinder::bound_check_i(const System& sys,IntervalVector & vec,int i){
+    if (vec[i].lb() < sys.box[i].lb())
+      vec[i]=Interval(sys.box[i].lb(),vec[i].ub());
+    if (vec[i].ub() > sys.box[i].ub())
+      vec[i]=Interval(vec[i].lb(),sys.box[i].ub());
+  }		      
+
+  
 bool LoupFinder::check(const System& sys,  Vector& pt, double& loup, bool _is_inner) {
 	// "res" will contain an upper bound of the criterion
 	double res = sys.goal_ub(pt);
@@ -84,7 +96,9 @@ bool LoupFinder::check(const System& sys,  Vector& pt, double& loup, bool _is_in
 	  if (sys.minlp){
 	  //	  cout << " loup " << loup << " res " << res << " pt " << pt << endl;
 	    if (integer_and_bound_check(sys,pt) && sys.is_inner(pt)) {
-	      res = sys.goal_ub(pt); // integer_check may modify the loup_point by making integer the values of integer variables; we have to recompute the criterion.
+	      res = sys.goal_ub(pt); // integer_and_bound_check may modify the loup_point by making integer the values of integer variables
+	      // and putting it in the initial box
+	      // we have to recompute the criterion.
 	      if (res<loup) {
 		loup = res;
 		return true;}
@@ -105,7 +119,7 @@ bool LoupFinder::check(const System& sys,  Vector& pt, double& loup, bool _is_in
   bool LoupFinder::is_inner0(const System& sys, Vector& pt) {return sys.is_inner(pt);}
   double LoupFinder::goal_ub0(const System& sys, Vector& pt) {return sys.goal_ub(pt);}
   
-void LoupFinder::monotonicity_analysis(const System& sys, IntervalVector& box, bool is_inner) {
+  void LoupFinder::monotonicity_analysis(const System& sys, IntervalVector& box, bool is_inner) {
 
 	size_t n=sys.nb_var;
 

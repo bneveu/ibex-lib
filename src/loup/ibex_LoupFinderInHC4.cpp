@@ -128,8 +128,10 @@ std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& bo
 
 	return LoupFinderProbing(sys).find(inner_found? inbox : box, loup_point, loup);
 }
- bool LoupFinderInHC4::integer_check(Vector& pt) {return integer_and_bound_check(sys,pt);}
-   bool LoupFinderInHC4::is_inner(Vector& pt) {return is_inner0(sys,pt);}
-     double LoupFinderInHC4::goal_ub(Vector& pt) {return goal_ub0(sys,pt);}
+  bool LoupFinderInHC4::integer_check(Vector& pt) {return integer_and_bound_check(sys,pt);}
+  bool LoupFinderInHC4::is_inner(Vector& pt) {return is_inner0(sys,pt);}
+  double LoupFinderInHC4::goal_ub(Vector& pt) {return goal_ub0(sys,pt);}
+  void LoupFinderInHC4::sysbound(Vector& pt) {bound_check(sys,pt);}
+  void LoupFinderInHC4::sysbound(IntervalVector& vec) {bound_check(sys,vec);}
   
 } /* namespace ibex */
