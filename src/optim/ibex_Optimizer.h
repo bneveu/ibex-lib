@@ -374,8 +374,7 @@ protected:
 	/**
 	 * \brief Main procedure for updating the loup.
 	 */
-	virtual bool update_loup(const IntervalVector& box, BoxProperties& prop);
-
+        virtual bool update_loup(const IntervalVector& box, BoxProperties& prop);
 	/**
 	 * \brief Computes and returns  the value ymax (the loup decreased with the precision)
 	 * the heap and the current box are actually contracted with y <= ymax
@@ -406,9 +405,13 @@ protected:
 	 */
 	void read_ext_box(const IntervalVector& ext_box, IntervalVector& box);
 
+<<<<<<< HEAD
         virtual void qibex_contract(Cell& c);
         
 
+=======
+        virtual void qibex_contract_and_bound(Cell& c);
+>>>>>>> minlp
 
 	Optimizer(const Optimizer&); // forbidden
 
