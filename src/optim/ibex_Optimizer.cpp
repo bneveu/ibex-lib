@@ -4,7 +4,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 14, 2012
-// Last Update : Apr 08, 2019
+// Last Update : Apr 08, 2021
 //============================================================================
 
 #include "ibex_Optimizer.h"
@@ -167,7 +167,7 @@ void Optimizer::update_uplo() {
 	}
 	else if (buffer.empty() && loup != POS_INFINITY) {
 		// empty buffer : new uplo is set to ymax (loup - precision) if a loup has been found
-		new_uplo=compute_ymax(); // not new_uplo=loup, because constraint y <= ymax was enforced
+		new_uplo=compute_ymax()+1.e-15; // not new_uplo=loup, because constraint y <= ymax was enforced
 		//	        cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
 		//                cout << "uplo of epsboxes" << uplo_of_epsboxes << endl;
 		double m = (new_uplo < uplo_of_epsboxes) ? new_uplo :  uplo_of_epsboxes;
@@ -243,12 +243,8 @@ void Optimizer::contract_and_bound(Cell& c) {
 	ctc.contract(c.box, context);
 	//cout << c.prop << endl;
 	if (c.box.is_empty()) return;
-	qibex_contract(y,c);
-        if (y.is_empty()) {
-	    c.box.set_empty();
-	    return;
-	  }
-	
+	qibex_contract_and_bound(c);
+	if (c.box.is_empty()) return;
 	
 	//cout << " [contract]  x after=" << c.box << endl;
 	//cout << " [contract]  y after=" << y << endl;
@@ -435,7 +431,7 @@ void Optimizer::start(const CovOptimData& data, double obj_init_bound) {
 
 
 
-  void Optimizer::qibex_contract(Interval& y, Cell & c){;}
+  void Optimizer::qibex_contract_and_bound(Cell & c){;}
 
 Optimizer::Status Optimizer::optimize() {
 	Timer timer;
