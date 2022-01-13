@@ -1,10 +1,11 @@
+
 //                                  I B E X
 // File        : ibex_QibexOptimizer.cpp
 // Author      : Bertrand Neveu
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Sep 01, 2021
-// Last Update : Nov 29, 2021
+// Last Update : Jan 06, 2022
 //============================================================================
 
 #include "ibex_QibexOptimizer.h"
@@ -87,7 +88,7 @@ namespace ibex {
       for (int j=i ; j< n_x; j++)
 	fic8 >> ref_coefs[i][j];
     }
-	  
+  
     /*
     res=system("~/imagine4/RECHERCHE/ampl/ampl model_quad_init.run");
     ifstream fic7("diag_hessian.txt");
@@ -196,18 +197,20 @@ namespace ibex {
 	Vector w(n_y_max);
 	string b;
 	if (quadratic_relaxation_results(b, newlb, v, w)){
+	  //cout << "b " << b << endl;
+	  //	  cout << " v " << v << endl;
 	  //	  cout << "n_x " << n_x << " n_y " << n_y << " v " << v << endl;
 	  //	 cout << " w " << w << endl;
 	  var_to_bisect=-1;
-	  if (b!= "failure")
-	    //  if  (b== "solved" || b== "'solved?'")
+	  //	  if (b!= "failure")
+	  if  (b== "solved" || b== "'solved?'")
 	    var_to_bisect=compute_var_to_bisect(box,  v,  w, gap0);
 	  if (var_to_bisect != -1)
 	    ratio=compute_ratio(box, v, var_to_bisect);
 	  //	  cout << " var_to_bisect" << var_to_bisect << " ratio " << ratio << endl;
 	    
 	  /*
-	    if (b=="infeasible")  //too strong for soplex (useful for ipopt ??)
+	    if (b=="infeasible")  //too strong for cplex (useful for ipopt ??)
 	    box.set_empty();
 	  */
 	  if  (b!= "solved")
@@ -300,10 +303,9 @@ namespace ibex {
   
   }
 
-  void QibexOptimizer::qibex_loupfinder(Vector& v, Cell& c, double newlb){
-    Interval& y=c.box[goal_var];
-    //    cout << " v " << v << endl;
+  double QibexOptimizer::qibex_loupfinder(Vector& v){
     double newub=POS_INFINITY;
+    double ymax=POS_INFINITY;
     if (loup_finder.integer_check(v)){
       newub=loup_finder.goal_ub(v); 
       if (newub < loup && loup_finder.is_inner(v)){
@@ -316,37 +318,15 @@ namespace ibex {
 	loup_point = v;
 	loup_changed=true;
 
-	//  semble inutile (si le pt faisable est l'optimum, newlb=newub et l'arret de la branche est automatique 
-	/*
-	if (c.var_to_bisect==-1 && gap0 <= 1.e-10 && loup_finder.integer_check(v))
-	  {cout << " leaf found " << endl;
-	    y.set_empty();
-	  }
-	*/
-	double ymax=compute_ymax();
-	//	cout << " newlb " << newlb << " ymax " << ymax  << endl;
-	if (newlb<= ymax){
-	  y &= Interval(newlb,ymax);
-	  buffer.contract(ymax);
-	}
-	else
-	  y.set_empty();
 
-	/*
-        if(newub > newlb){
-	  cout << " error : relaxed bound greater than original objective " << newlb << "  >  " << newub << endl;
-	  y.set_empty();}
-	*/
-	c.prop.update(BoxEvent(c.box,BoxEvent::CONTRACT,BitSet::singleton(n+1,goal_var)));
-      }
-      else{
-	y &= Interval(newlb,POS_INFINITY);
-	c.prop.update(BoxEvent(c.box,BoxEvent::CONTRACT,BitSet::singleton(n+1,goal_var)));
+	ymax=compute_ymax();
+	//	buffer.contract(ymax);
       }
     }
+    return ymax;
   }
   
-void QibexOptimizer::qibex_contract(Cell & c){
+void QibexOptimizer::qibex_contract_and_bound(Cell & c){
   
   IntervalVector qcp_box(n);
   read_ext_box(c.box,qcp_box);
@@ -362,13 +342,48 @@ void QibexOptimizer::qibex_contract(Cell & c){
   c.ratio=ratio;
   
   Vector v= vecnewbounds.first;
-  double newlb=vecnewbounds.second-epsilonlb;
+  //  double newlb=vecnewbounds.second-epsilonlb;
+  double newlb=vecnewbounds.second;
   Interval& y=c.box[goal_var];
+  Interval y0=y;
+  double ymax=POS_INFINITY;
   if (newlb > NEG_INFINITY){
-    qibex_loupfinder(v, c , newlb);
-  }
-  if (y.is_empty() ) {
-    c.box.set_empty();
+    ymax=qibex_loupfinder(v);
+    if (ymax < POS_INFINITY){
+      if (newlb<= ymax){
+	y &= Interval(newlb,ymax);
+	//	buffer.contract(ymax);
+      }
+      else{
+	y.set_empty();
+      }
+	//  semble inutile (si le pt faisable est l'optimum, newlb=newub et l'arret de la branche est automatique 
+	/*
+	if (c.var_to_bisect==-1 && gap0 <= 1.e-10 && loup_finder.integer_check(v))
+	  {cout << " leaf found " << endl;
+	    y.set_empty();
+	  }
+	*/
+
+      
+	/*
+        if(newub > newlb){
+	  cout << " error : relaxed bound greater than original objective " << newlb << "  >  " << newub << endl;
+	  y.set_empty();}
+	*/
+      c.prop.update(BoxEvent(c.box,BoxEvent::CONTRACT,BitSet::singleton(n+1,goal_var)));
+    }
+    else{
+      y &= Interval(newlb,POS_INFINITY);
+      c.prop.update(BoxEvent(c.box,BoxEvent::CONTRACT,BitSet::singleton(n+1,goal_var)));
+    }
+    
+
+    if (y.is_empty() ) {
+      c.box.set_empty();
+    }
+    else if (y.diam() < y0.diam())
+      ctc.contract(c.box);
   }
 }
 

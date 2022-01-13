@@ -186,13 +186,19 @@ public:
   	BitSet effective_ctrs(const IntervalVector& box) const;
 
 	/**
-	 * \brief Quick check that the box is inside g(x)<=0.
+	 * \brief Check that the box is inside g(x)<=0.
 	 *
 	 * \return True only if all the constraints are satisfied
 	 */
 	bool is_inner(const IntervalVector& box) const;
-
-	/**
+        /**
+	 * \brief Check that the point pt is satisfies g(x)<=0.
+	 *
+	 * \return True only if all the constraints are satisfied
+	 */
+        bool is_inner(const Vector& pt) const; 
+  
+	/**	
 	 * \brief Interval evaluation of the active constraints.
 	 *
 	 * \pre The number of (potentially) active constraints must be >0
@@ -306,7 +312,7 @@ protected:
 	SymbolMap<Domain*> mutable_constants;
 
         /** Bitset indicating which variables are integer (to be used only when minlp is true) */
-        BitSet integer_variables;
+        BitSet* integer_variables;
         bool is_inactive( Interval& gx, CmpOp op) const ;
   
         bool  is_ineffective( Interval& gx, CmpOp op) const;

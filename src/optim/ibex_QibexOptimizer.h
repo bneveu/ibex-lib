@@ -18,29 +18,27 @@
 using namespace std;
 namespace ibex {
 
-
   class QibexOptimizer : public Optimizer {
 
   public:
 
-        QibexOptimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder, CellBufferOptim& buffer,
-		       int goal_var, double minwidth, double tolerance=0.0, 
-			double eps_x=OptimizerConfig::default_eps_x,
-			double rel_eps_f=OptimizerConfig::default_rel_eps_f,
-			double abs_eps_f=OptimizerConfig::default_abs_eps_f);
+    QibexOptimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder, CellBufferOptim& buffer,
+		   int goal_var, double minwidth, double tolerance=0.0, 
+		   double eps_x=OptimizerConfig::default_eps_x,
+		   double rel_eps_f=OptimizerConfig::default_rel_eps_f,
+		   double abs_eps_f=OptimizerConfig::default_abs_eps_f);
 
     void init();
     /* when using quadratic convex relaxation, contracts the objective and may return a new loup  */
-    void qibex_contract(Cell& c);
+    void qibex_contract_and_bound(Cell& c);
 
     /* the external call through ampl */
     void quadratic_relaxation_call(const IntervalVector & box);
 
-    /* use of the results of the quadratic convex relaxation */
-   
-
-    /* when using quadratic convex relaxation,  the external solver  returns 
-       the best point v computed by the relaxation that may be a new loup,
+    /* results of the quadratic convex relaxation 
+       when using quadratic convex relaxation,  the external solver  returns 
+       the status b of the relaxation 
+       the best point v computed by the relaxation that may be a new loup point,
        the point w of the auxiliary variables (used for the bisection strategy)
        and the lower bound newlb*/
     bool quadratic_relaxation_results(string & b, double& newlb, Vector & v, Vector& w);
@@ -59,7 +57,8 @@ namespace ibex {
     // boolean to use the ibex loupfinder (the qibex loup finder is inside the relaxation)
     bool loupfinderp=true;
     bool update_loup(const IntervalVector& box, BoxProperties& prop);
-    void qibex_loupfinder(Vector& v, Cell& c, double newlb);
+    // checks if v is a new louppoint (after rounding it to integer in case of integer minlp variable) update the loup and louppoint  and returns the new ymax 
+    double qibex_loupfinder(Vector& v);
   private :
     int n_x;
     int n_y;

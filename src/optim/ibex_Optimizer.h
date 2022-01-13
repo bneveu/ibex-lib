@@ -405,13 +405,8 @@ protected:
 	 */
 	void read_ext_box(const IntervalVector& ext_box, IntervalVector& box);
 
-<<<<<<< HEAD
-        virtual void qibex_contract(Cell& c);
-        
 
-=======
         virtual void qibex_contract_and_bound(Cell& c);
->>>>>>> minlp
 
 	Optimizer(const Optimizer&); // forbidden
 

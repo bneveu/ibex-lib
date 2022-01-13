@@ -262,6 +262,7 @@ System::~System() {
 	for (IBEXMAP(Domain*)::iterator it=mutable_constants.begin(); it!=mutable_constants.end(); ++it) {
 		delete it->second;
 	}
+	if (integer_variables) delete integer_variables;
 }
 
 
@@ -329,7 +330,7 @@ BitSet System::active_ctrs(const IntervalVector& box) const {
 	BitSet effective(BitSet::all(f_ctrs.image_dim()));
 
 	IntervalVector res = f_ctrs.eval_vector(box);
-
+	//	cout << " res " << res << endl;
 	for (int c=0; c<f_ctrs.image_dim(); c++) {
 		if (is_ineffective(res[c],ops[c])) effective.remove(c);
 	}
@@ -368,22 +369,27 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
 
   bool System::is_inner(const IntervalVector& box) const {
   //	return active_ctrs(box).empty();
-    //    std::cout << " effective_ctrs " <<  effective_ctrs(box) << std::endl;
+    //    std::cout << " effective_ctrs  " <<  effective_ctrs(box) << std::endl;
   	return effective_ctrs(box).empty();
 
   }
 
+  bool System::is_inner(const Vector & pt) const {
+    IntervalVector box(pt);
+    return is_inner(box);
+  }
+  
   void System::set_integer_variables(const BitSet & integer_vars){
-    integer_variables=integer_vars;
+    integer_variables=new BitSet(integer_vars);
   }
 
   BitSet System::get_integer_variables() const {
-    return integer_variables;
+    return *integer_variables;
   }
 
   bool System::is_integer(int i) const{
     if  (minlp)
-      return integer_variables[i];
+      return (*integer_variables)[i];
     else
       return false;
   }

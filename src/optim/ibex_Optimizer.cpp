@@ -245,16 +245,9 @@ void Optimizer::contract_and_bound(Cell& c) {
 	//	cout << " after contract " << c.box << endl;
 	//cout << c.prop << endl;
 	if (c.box.is_empty()) return;
-<<<<<<< HEAD
-	qibex_contract(c);
-	if (c.box.is_empty()) return;
-        
-	  
-	
-=======
+
 	qibex_contract_and_bound(c);
 	if (c.box.is_empty()) return;
->>>>>>> minlp
 	
 	//cout << " [contract]  x after=" << c.box << endl;
 	//cout << " [contract]  y after=" << y << endl;
@@ -440,13 +433,10 @@ void Optimizer::start(const CovOptimData& data, double obj_init_bound) {
 }
 
 
-<<<<<<< HEAD
-  // virtual function to implement specific work to do in some optimizer subclasses.
-  void Optimizer::qibex_contract(Cell & c){;}
-=======
 
+  // virtual function to implement specific work to do in some optimizer subclasses.
   void Optimizer::qibex_contract_and_bound(Cell & c){;}
->>>>>>> minlp
+
 
 Optimizer::Status Optimizer::optimize() {
 	Timer timer;

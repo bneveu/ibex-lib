@@ -30,7 +30,7 @@ namespace ibex {
     int var = -1;
     BitSet b= sys.get_integer_variables();
     for (int j=0; j<nbvars; j++) {
-      if ((!too_small(box,j))&& (goal_to_bisect || j!= goal_var())&& b[j]) { // && (box[j].mag() <1 ||  box[j].diam()/ box[j].mag() >= prec(j))) {
+      if ((!too_small(box,j))&& (goal_to_bisect || j!= goal_var())&& b[j]) { 
 	double sum_smear=0;
 	for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
 	  if (constraint_to_consider (i, box))
@@ -43,7 +43,7 @@ namespace ibex {
       }
     }
    
-    if (var==-1)
+    if (var==-1)  // no integer variable was chosen
       {
 	double max_magn = NEG_INFINITY;
 	for (int j=0; j<nbvars; j++) {

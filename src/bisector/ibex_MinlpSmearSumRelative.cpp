@@ -45,7 +45,7 @@ namespace ibex {
     }
     // computes the variable with the maximal sum of normalized impacts
     for (int j=0; j<nbvars; j++) {
-      if (!too_small(box,j) && (goal_to_bisect || j!= goal_var()) && b[j]==1){ //&&  (box[j].mag() <1 ||  box[j].diam()/ box[j].mag() >= prec(j))) {
+      if (!too_small(box,j) && (goal_to_bisect || j!= goal_var()) && b[j]==1){
 	double sum_smear=0;
 	for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
 	  if (ctrjsum[i]!=0)
