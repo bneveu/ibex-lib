@@ -314,7 +314,13 @@ public:
 	 */
 	bool anticipated_upper_bounding; // TODO: should be set in OptimizerConfig
 
-
+         /**
+	 * \brief Whether the objective is an integer.
+	 *
+	 * Default value: false.
+	 */
+        bool integerobj=false;
+  
 protected:
   /*
 	 * \brief Initialize the optimizer from a single box.
