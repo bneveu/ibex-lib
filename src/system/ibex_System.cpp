@@ -262,10 +262,10 @@ System::~System() {
 	for (IBEXMAP(Domain*)::iterator it=mutable_constants.begin(); it!=mutable_constants.end(); ++it) {
 		delete it->second;
 	}
+	if (integer_variables) delete integer_variables;
 }
 
 
-namespace {
 
 /*
  * Note:
@@ -282,7 +282,7 @@ namespace {
  *  However, the case where a constraint is not effective but
  *  active almost never happens.
  */
-bool __is_inactive(const Interval& gx, CmpOp op) {
+   bool  System::is_inactive( Interval& gx, CmpOp op) const {
 	bool inactive;
 	switch (op) {
 	case LT:  inactive=gx.ub()<0; break;
@@ -293,21 +293,19 @@ bool __is_inactive(const Interval& gx, CmpOp op) {
 	}
 	return inactive;
 }
-bool __is_ineffective(const Interval& gx, CmpOp op) {
+  bool System::is_ineffective( Interval& gx, CmpOp op)const {
 	bool ineffective;
-	double eps0=1.e-8;
-	//	double eps0=0.0;
 	switch (op) {
 	 
 	case LT:  ineffective=gx.ub()<0; break;
-	case LEQ: ineffective=gx.ub()<=eps0; break;
+	case LEQ: ineffective=gx.ub()<= tolerance; break;
 	case EQ:  ineffective=(gx==Interval::zero()); break;
-	case GEQ: ineffective=gx.lb()>=-eps0; break;
+	case GEQ: ineffective=gx.lb()>=-tolerance; break;
 	case GT:  ineffective=gx.lb()>0; break;
 	}
 	return ineffective;
 }
-}
+
 
 //TODO: improvement: don't create a bitset in return when not necessary?
 
@@ -320,7 +318,7 @@ BitSet System::active_ctrs(const IntervalVector& box) const {
 	IntervalVector res = f_ctrs.eval_vector(box);
 
 	for (int c=0; c<f_ctrs.image_dim(); c++) {
-		if (__is_inactive(res[c],ops[c])) active.remove(c);
+		if (is_inactive(res[c],ops[c])) active.remove(c);
 	}
 	return active;
 }
@@ -332,9 +330,9 @@ BitSet System::active_ctrs(const IntervalVector& box) const {
 	BitSet effective(BitSet::all(f_ctrs.image_dim()));
 
 	IntervalVector res = f_ctrs.eval_vector(box);
-
+	//	cout << " res " << res << endl;
 	for (int c=0; c<f_ctrs.image_dim(); c++) {
-		if (__is_ineffective(res[c],ops[c])) effective.remove(c);
+		if (is_ineffective(res[c],ops[c])) effective.remove(c);
 	}
 	return effective;
 }
@@ -371,22 +369,27 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
 
   bool System::is_inner(const IntervalVector& box) const {
   //	return active_ctrs(box).empty();
-    //    std::cout << " effective_ctrs " <<  effective_ctrs(box) << std::endl;
+    //    std::cout << " effective_ctrs  " <<  effective_ctrs(box) << std::endl;
   	return effective_ctrs(box).empty();
 
   }
 
-  void System::set_integer_variables(const BitSet & is_int){
-    integer_variables=is_int;
+  bool System::is_inner(const Vector & pt) const {
+    IntervalVector box(pt);
+    return is_inner(box);
+  }
+  
+  void System::set_integer_variables(const BitSet & integer_vars){
+    integer_variables=new BitSet(integer_vars);
   }
 
   BitSet System::get_integer_variables() const {
-    return integer_variables;
+    return *integer_variables;
   }
 
   bool System::is_integer(int i) const{
     if  (minlp)
-      return integer_variables[i];
+      return (*integer_variables)[i];
     else
       return false;
   }
