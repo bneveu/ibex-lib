@@ -16,6 +16,7 @@ using namespace std;
 
 namespace ibex {
 
+  // to not bisect very big objectives 
   double objectivebisect_ratiolimit0=1.e10;
 
   MinlpLargestFirst::MinlpLargestFirst(System& sys, int goal_var,bool choose_obj, double prec,  double ratio) : OptimLargestFirst(goal_var,choose_obj,prec, ratio), sys(sys)  {
@@ -28,7 +29,7 @@ namespace ibex {
 
 BisectionPoint MinlpLargestFirst::choose_var(const Cell& cell) {
   //  cout << " choose var " << endl;
-  const IntervalVector& box=cell.box;
+        const IntervalVector& box=cell.box;
 	int var =-1;
 	double l=0.0;
 	BitSet b= sys.get_integer_variables();
@@ -90,19 +91,5 @@ BisectionPoint MinlpLargestFirst::choose_var(const Cell& cell) {
 	
 }
   
-  // supplementary sufficient condition for not bisecting the objective (not bounded or too big :max_diam_nobj is the maximum diameter for the other variables)
-/*
-  bool OptimLargestFirst::nobisectable(const IntervalVector& box, int i) const {
-    cout << " optim largest first  nobisectable " <<  i << "  " << max_diam_nobj << " " << objectivebisect_ratiolimit << "  "  << endl << box[i].diam() << endl;
-    return (LargestFirst::nobisectable ( box, i) 
-	    ||
-	    (i == goal_var && 
-	     ((choose_obj==false) // the objective should not be chosen
-	      ||  // to avoid bisecting a no bounded objective
-	      (max_diam_nobj < DBL_MAX
-	       && box[i].diam()/max_diam_nobj > objectivebisect_ratiolimit))
-	     )
-	    );
-  }
-*/
+ 
 } // end namespace ibex

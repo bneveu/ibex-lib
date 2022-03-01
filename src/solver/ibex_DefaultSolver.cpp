@@ -12,6 +12,7 @@
 
 #include "ibex_LinearizerXTaylor.h"
 #include "ibex_SmearFunction.h"
+#include "ibex_RoundRobin.h"
 #include "ibex_CtcHC4.h"
 #include "ibex_CtcAcid.h"
 #include "ibex_CtcNewton.h"

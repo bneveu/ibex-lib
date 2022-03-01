@@ -34,18 +34,20 @@ public:
   MinlpSmearSumRelative(System& sys,  double prec,   LargestFirst& lf, bool gb=true);
 
 	/**
-	 * \brief Create a bisector with largest first heuristic.
+	 * \brief Create a bisector with SmearSumRelative heuristic (choosing first among the integer variables, and if
+         * no integer variable could be chosen, among the real variables) see ibex_SmearFunction.h for explanation
+         * of this heuristic.
 	 *
 	 * \param prec             - see #Bsc::Bsc(double).
-	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
-	 *                           bisected interval. Default value is 0.45.
+	 * \param lf : a largest first bisector to be used when the Smear based heuristic could not choose any variable        * \param gb : boolean indicating if the goal variable can be bisected : default true.
+         * TODO . reintroduce param ratio . It is now set to its default value 0.45
 	 */
   MinlpSmearSumRelative(System& sys,const Vector& prec,LargestFirst& lf);
 
 	/**
 	 * \brief Return next variable to be bisected.
 	 *
-	 * called by Bsc::bisect(...)
+	 * called by SmearFunction::choose_var
 	 */
   int var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const;
 	

@@ -12,7 +12,6 @@
 #define __IBEX_SMEAR_FUNCTION_H__
 
 #include "ibex_Bsc.h"
-#include "ibex_RoundRobin.h"
 #include "ibex_LargestFirst.h"
 #include "ibex_System.h"
 
@@ -41,7 +40,10 @@ public:
 	 */
 	SmearFunction(System& sys, double prec, double ratio=Bsc::default_ratio());
 
-  SmearFunction(System& sys, double prec, LargestFirst& lf, bool gb=true);
+        /** Variant with a LargestFirst bisector, called when no variable could be chosen,
+         *\param gb :  boolean indicating if the goal variable can be bisected : default true.
+	 */
+        SmearFunction(System& sys, double prec, LargestFirst& lf, bool gb=true);
 
 	/**
 	 * \brief Create a bisector with Smear function heuristic.
@@ -52,7 +54,7 @@ public:
 	 */
 	SmearFunction(System& sys, const Vector& prec, double ratio=Bsc::default_ratio());
 
-  SmearFunction(System& sys, const Vector& prec,LargestFirst& lf);
+         SmearFunction(System& sys, const Vector& prec,LargestFirst& lf);
 	~SmearFunction();
 	/**
 	 * \brief Return next variable to be bisected.
@@ -60,7 +62,7 @@ public:
 	 * called by Bsc::bisect(...)
 	 *
 	 * In case the jacobian matrix could not be computed correctly, the box is split
-	 * with the \link ibex::RoundRobin::choose_var((const Cell&) round-robin strategy \endlink.
+	 * with the \link ibex::LargestFirst::choose_var((const Cell&) largest first strategy \endlink.
 	 */
 	virtual BisectionPoint choose_var(const Cell& cell);
 
@@ -74,7 +76,7 @@ public:
 	virtual int var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const=0;
 
 	/**
-	 * \brief Add backtrackable data required by round robin.
+	 * \brief Add backtrackable data 
 	 */
 	virtual void add_property(const IntervalVector& init_box, BoxProperties& map);
 
@@ -82,7 +84,7 @@ public:
 protected :
 	LargestFirst* lf; // the bisector by default when smear function strategy does not apply: 
 	//	the corresponding bisector can be created by the constructor or can be an argument of 
-	//      the constructor (when used in optimization with an OptimLargestFirst object.
+	//      the constructor (when used in optimization with an OptimLargestFirst object).
 
 	int nbvars;
 	System& sys;

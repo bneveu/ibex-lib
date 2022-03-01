@@ -93,7 +93,7 @@ namespace ibex {
 	double max_magn = NEG_INFINITY;
 	int var=-1;
 	for (int j=0; j<nbvars; j++) {
-	  if ((!too_small(box,j))&& (goal_to_bisect || j!= goal_var())){ // && (box[j].mag() <1 ||  box[j].diam()/ box[j].mag() >= prec(j))) {
+	  if ((!too_small(box,j))&& (goal_to_bisect || j!= goal_var())){ 
 	    for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
 	      if (constraint_to_consider (i, box))
 		if ( J[i][j].mag() * box[j].diam() > max_magn ) {
@@ -111,7 +111,7 @@ namespace ibex {
     double max_magn = NEG_INFINITY;
     int var = -1;
     for (int j=0; j<nbvars; j++) {
-      if ((!too_small(box,j))&& (goal_to_bisect || j!= goal_var())) { // && (box[j].mag() <1 ||  box[j].diam()/ box[j].mag() >= prec(j))) {
+      if ((!too_small(box,j))&& (goal_to_bisect || j!= goal_var())) {
 	double sum_smear=0;
 	for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
 	  if (constraint_to_consider (i, box))
@@ -142,7 +142,7 @@ namespace ibex {
     }
     // computes the variable with the maximal sum of normalized impacts
     for (int j=0; j<nbvars; j++) {
-      if (!too_small(box,j) && (goal_to_bisect || j!= goal_var())){ //&&  (box[j].mag() <1 ||  box[j].diam()/ box[j].mag() >= prec(j))) {
+      if (!too_small(box,j) && (goal_to_bisect || j!= goal_var())){ 
 	double sum_smear=0;
 	for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
 	  if (ctrjsum[i]!=0)
@@ -177,7 +177,7 @@ namespace ibex {
 	// computes the variable with the greatest normalized impact
 	double maxsmear=0;
 	for (int j=0; j<nbvars; j++) {
-	  if ((!too_small(box,j)  && (goal_to_bisect || j!= goal_var()))) { // && (box[j].mag() <1 ||  box[j].diam()/ box[j].mag() >= prec(j))) {
+	  if ((!too_small(box,j)  && (goal_to_bisect || j!= goal_var()))) {
 		  for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
 		    if (constraint_to_consider(i,box))
 		      if (ctrjsum[i]!=0)
