@@ -204,8 +204,10 @@ void Optimizer::handle_cell(Cell& c) {
 	//cout << " after contraction " << c.box << endl;
 	if (c.box.is_empty()) {
 		delete &c;
-	} else {
-		buffer.push(&c);
+	}
+	else {
+	  if (integerobj) c.box[goal_var]=integer( c.box[goal_var]);
+	  buffer.push(&c);
 	}
 }
 
