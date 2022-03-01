@@ -28,7 +28,6 @@ namespace ibex {
 
 
 BisectionPoint MinlpLargestFirst::choose_var(const Cell& cell) {
-  //  cout << " choose var " << endl;
         const IntervalVector& box=cell.box;
 	int var =-1;
 	double l=0.0;

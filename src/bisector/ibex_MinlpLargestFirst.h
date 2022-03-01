@@ -8,7 +8,7 @@
 // Last Update : Oct 17, 2019
 //============================================================================
 
-#ifndef __IBEX_MINLP_FIRST_H__
+#ifndef __IBEX_MINLP_LARGEST_FIRST_H__
 #define __IBEX_MINLP_LARGEST_FIRST_H__
 
 #include "ibex_Bsc.h"
