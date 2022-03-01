@@ -269,7 +269,7 @@ int main(int argc, char** argv) {
 		Optimizer o(config);
 		// display solutions with up to 12 decimals
 		cout.precision(12);
-                o.trace=2;
+
 		if (!quiet)
 			cout << "running............" << endl << endl;
 
