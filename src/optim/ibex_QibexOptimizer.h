@@ -59,6 +59,8 @@ namespace ibex {
     bool update_loup(const IntervalVector& box, BoxProperties& prop);
     // checks if v is a new louppoint (after rounding it to integer in case of integer minlp variable) update the loup and louppoint  and returns the new ymax 
     double qibex_loupfinder(Vector& v);
+    double compute_ymax();
+    double compute_emptybuffer_uplo();
   private :
     int n_x;
     int n_y;

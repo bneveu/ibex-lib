@@ -168,7 +168,8 @@ void Optimizer::update_uplo() {
 	}
 	else if (buffer.empty() && loup != POS_INFINITY) {
 		// empty buffer : new uplo is set to ymax (loup - precision) if a loup has been found
-		new_uplo=compute_ymax()+1.e-15; // not new_uplo=loup, because constraint y <= ymax was enforced
+	  new_uplo=compute_emptybuffer_uplo();
+
 		//	        cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
 		//              cout << "uplo of epsboxes" << uplo_of_epsboxes << endl;
 		double m = (new_uplo < uplo_of_epsboxes) ? new_uplo :  uplo_of_epsboxes;
@@ -182,6 +183,11 @@ void Optimizer::update_uplo() {
 
 }
 
+double Optimizer::compute_emptybuffer_uplo(){
+   return compute_ymax()+1.e-15; // not new_uplo=loup, because constraint y <= ymax was enforced
+  }
+
+  
 void Optimizer::update_uplo_of_epsboxes(double ymin) {
 
 	// the current box cannot be bisected.  ymin is a lower bound of the objective on this box
@@ -192,9 +198,10 @@ void Optimizer::update_uplo_of_epsboxes(double ymin) {
 	assert(ymin >= uplo);
 	if (uplo_of_epsboxes > ymin) {
 		uplo_of_epsboxes = ymin;
-		if (trace) {
-			cout << " unprocessable tiny box: now uplo<=" << setprecision(12) <<  uplo_of_epsboxes << " uplo=" << uplo << endl;
-		}
+		if (ymin < loup)
+		  if (trace) {
+		    cout << " unprocessable tiny box: now uplo<=" << setprecision(12) <<  uplo_of_epsboxes << " uplo=" << uplo << endl;
+		  }
 	}
 }
 

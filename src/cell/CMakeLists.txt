@@ -17,6 +17,8 @@ target_sources (ibex PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CellList.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CellStack.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CellStack.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CellStackOptim.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_CellStackOptim.h
 )
 
 target_include_directories (ibex PUBLIC

@@ -34,10 +34,7 @@ class Ctc {
 
 protected:
 
-	/**
-	 * \brief Build a contractor for n-dimensional boxes
-	 */
-	Ctc(int nb_var);
+
 
 	/**
 	 * \brief Build a contractor for (size of the contractor inside l)-dimensional boxes
@@ -47,6 +44,12 @@ protected:
 
 
 public:
+
+	/**
+	 * \brief Build a contractor for n-dimensional boxes
+	 */
+	Ctc(int nb_var);
+  
 	/**
 	 * \brief Output flag numbers
 	 *
@@ -74,7 +77,8 @@ public:
 	/**
 	 * \brief Contraction.
 	 */
-	virtual void contract(IntervalVector& box)=0;
+  //	virtual void contract(IntervalVector& box)=0;
+  	virtual void contract(IntervalVector& box);
 
 	/*
 	 * Contract a box with a context.
@@ -156,6 +160,8 @@ inline Ctc::Ctc(const Array<Ctc>& l) : nb_var(l[0].nb_var), input(NULL), output(
 
 inline Ctc::~Ctc() { }
 
+  inline void Ctc::contract(IntervalVector& box) {;}
+  
 inline void Ctc::contract(IntervalVector& box, ContractContext& context) {
 	contract(box);
 	// TODO: the input impact of update is the "output" impact

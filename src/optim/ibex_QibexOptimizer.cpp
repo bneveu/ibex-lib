@@ -221,6 +221,10 @@ namespace ibex {
 	    
 
 	}
+	if (integerobj && newlb != NEG_INFINITY)
+	  if (newlb != std::floor(newlb))
+	    newlb= std::ceil(newlb);
+	
         pair<Vector,double> p(v,newlb);
 	//	cout << " newlb "<< newlb << " box " << box << endl;
 	//	cout << " v"<< p.first << endl;
@@ -327,7 +331,14 @@ namespace ibex {
   }
   
 void QibexOptimizer::qibex_contract_and_bound(Cell & c){
-  
+   Interval& y=c.box[goal_var];
+   if (integerobj){
+    y=integer(y);
+    if (y.is_empty()){
+      c.box.set_empty(); return;
+    }
+   }
+   
   IntervalVector qcp_box(n);
   read_ext_box(c.box,qcp_box);
   int var_to_bisect=-1;
@@ -344,7 +355,7 @@ void QibexOptimizer::qibex_contract_and_bound(Cell & c){
   Vector v= vecnewbounds.first;
   //  double newlb=vecnewbounds.second-epsilonlb;
   double newlb=vecnewbounds.second;
-  Interval& y=c.box[goal_var];
+
   Interval y0=y;
   double ymax=POS_INFINITY;
   if (newlb > NEG_INFINITY){
@@ -355,7 +366,7 @@ void QibexOptimizer::qibex_contract_and_bound(Cell & c){
 	//	buffer.contract(ymax);
       }
       else{
-	y.set_empty();
+	y &= Interval(newlb,newlb);
       }
 	//  semble inutile (si le pt faisable est l'optimum, newlb=newub et l'arret de la branche est automatique 
 	/*
@@ -382,10 +393,32 @@ void QibexOptimizer::qibex_contract_and_bound(Cell & c){
     if (y.is_empty() ) {
       c.box.set_empty();
     }
-    else if (y.diam() < y0.diam())
+    else if (y.diam() < y0.diam()){
+      if (integerobj){
+	y=integer(y);
+	if (y.is_empty()){
+	  c.box.set_empty(); return;}
+	if (y.lb()==y.ub()){
+	  c.box.set_empty(); return;}
+      }
       ctc.contract(c.box);
+    }
   }
 }
+
+  double QibexOptimizer::compute_ymax(){
+     if (integerobj)
+       return loup-1;
+     else
+       return Optimizer::compute_ymax();
+   }
+  
+  double QibexOptimizer::compute_emptybuffer_uplo(){
+     if (integerobj)
+       return loup;
+     else
+       return Optimizer::compute_emptybuffer_uplo();
+   }
 
 
 } // end namespace ibex

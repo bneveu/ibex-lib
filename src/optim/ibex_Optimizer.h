@@ -386,8 +386,10 @@ protected:
 	 * the heap and the current box are actually contracted with y <= ymax
 	 *
 	 */
-	double compute_ymax ();
+	virtual double compute_ymax ();
 
+  
+        virtual double compute_emptybuffer_uplo();
 	/**
 	 * \brief Check time is not out.
 	 */
