@@ -15,6 +15,7 @@
 #include "ibex_OptimMemory.h"
 #include "ibex_ExtendedSystem.h"
 #include <vector>
+#include <string>
 
 namespace ibex {
 
@@ -98,7 +99,17 @@ public:
 	 * Set by default to #default_random_seed.
 	 */
 	void set_random_seed(int random_seed);
-
+  
+        /**
+	 * \brief Set bisector
+	 *
+	 * The bisector (one among : smearsum, smearsumrel, largestfirst, minlpsmearsum,
+	 * minlpsmearsumrel, roundrobin, smearsumnoobj, smearsumrelnoobj, largestfirstnoobj,
+         * minlpsmearsumnoobj, roundrobin)
+	 *
+	 * Set by default to smearsumrelnoobj (smearsumrel without bisecting the objective)
+	 */
+        void set_bisector(std::string& bisector);
 
         void set_integer_variables(std::vector<int>& l);
 	/** \see #set_eps_h(). */
@@ -116,6 +127,7 @@ public:
 	/** \see #set_random_seed(). */
 	int get_random_seed();
 
+        std::string get_bisector();
 	/** Default random seed: 1.0. */
 	static constexpr int default_random_seed = 1;
 
@@ -166,6 +178,7 @@ protected:
 	bool inHC4;
 	bool kkt;
 	double random_seed;
+  std::string bisector;
 };
 
 
@@ -178,6 +191,8 @@ inline bool DefaultOptimizerMinlpConfig::with_inHC4() { return inHC4; }
 inline bool DefaultOptimizerMinlpConfig::with_kkt() { return kkt; }
 
 inline int DefaultOptimizerMinlpConfig::get_random_seed() { return random_seed; }
+
+  inline std::string DefaultOptimizerMinlpConfig::get_bisector() { return bisector; }
 
 } /* namespace ibex */
 

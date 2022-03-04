@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
 	args::ValueFlag<double> eps_h(parser, "float", _eps_h.str(), {"eps-h"});
 	args::ValueFlag<double> timeout(parser, "float", "Timeout (time in seconds). Default value is +oo.", {'t', "timeout"});
 	args::ValueFlag<double> random_seed(parser, "float", _random_seed.str(), {"random-seed"});
-	args::ValueFlag<double> eps_x(parser, "float", _eps_x.str(), {"eps-x"});
+	args::ValueFlag<double> eps_x_arg(parser, "float", _eps_x.str(), {"eps-x"});
 	args::ValueFlag<int>    simpl_level(parser, "int", "Expression simplification level. Possible values are:\n"
 			"\t\t* 0:\tno simplification at all (fast).\n"
 			"\t\t* 1:\tbasic simplifications (fairly fast). E.g. x+1+1 --> x+2\n"
@@ -58,10 +58,11 @@ int main(int argc, char** argv) {
 	args::Flag output_no_obj(parser, "output-no-obj", "Generate a COV with domains of variables only (not objective values).", {"output-no-obj"});
 	args::Flag trace(parser, "trace", "Activate trace. Updates of loup/uplo are printed while minimizing.", {"trace"});
 	args::Flag format(parser, "format", "Give a description of the COV format used by IbexOpt", {"format"});
+	args::ValueFlag<string> no_split_arg(parser, "vars","Prevent some variables to be bisected, separated by '+'.\nExample: --no-split=x+y",{"no-split"});
 	args::Flag quiet(parser, "quiet", "Print no report on the standard output.",{'q',"quiet"});
 
 	args::ValueFlag<string> integers(parser, "integers", "file giving the integer variables",{"integers"});
-
+	args::ValueFlag<string> bisector(parser, "bisector", "bisection policy",{"bisector"});
 	args::Positional<std::string> filename(parser, "filename", "The name of the MINIBEX file.");
 
 	try
@@ -147,26 +148,63 @@ int main(int argc, char** argv) {
 			if (!quiet)
 				cout << "  eps-h:\t\t" << eps_h.Get() << "\t(equality thickening)" << endl;
 		}
+		if (eps_x_arg) {
+			if (!quiet)
+				cout << "  eps-x:\t\t" << eps_x_arg.Get() << "\t(precision on variables domain)" << endl;
+		}
 
+		Vector eps_x(sys->nb_var, eps_x_arg ? eps_x_arg.Get() : OptimizerConfig::default_eps_x);
+
+		if (no_split_arg) {
+			if (!quiet)
+				cout << "  don't split:\t\t";
+
+			vector<const ExprNode*> no_split = parse_symbols_list(sys->args, no_split_arg.Get());
+
+			if (!quiet) {
+				for (vector<const ExprNode*>::const_iterator it=no_split.begin(); it!=no_split.end(); ++it)
+					cout << **it << ' ';
+				cout << endl;
+			}
+
+			if (!no_split.empty()) {
+				// we use VarSet for convenience (handling of indexed symbols)
+				VarSet varset(sys->f_ctrs,no_split,true);
+
+				for (int i=0; i<varset.nb_var; i++) {
+					eps_x[varset.var(i)]=POS_INFINITY;
+				}
+				for (vector<const ExprNode*>::iterator it=no_split.begin(); it!=no_split.end(); ++it) {
+					cleanup(**it,false);
+				}
+			}
+		}
+		bool uniform=1;  double a = eps_x[0];
+		for (int i=1; i< eps_x.size() ;i++){
+		  if (eps_x[i] != a) {uniform=0; break;}
+		}
+		config.set_eps_x(uniform? Vector(1,eps_x[0]) : eps_x);
+		/*
 		if (eps_x) {
-			config.set_eps_x(eps_x.Get());
+		  config.set_eps_x(Vector(1,eps_x.Get()));
 			if (!quiet)
 				cout << "  eps-x:\t\t" << eps_x.Get() << "\t(precision on variables domain)" << endl;
 		}
-
+		*/
 		// This option certifies feasibility with equalities
+		/*
 		if (rigor) {
 			config.set_rigor(rigor.Get());
 			if (!quiet)
 				cout << "  rigor mode:\t\tON\t(feasibility of equalities certified)" << endl;
 		}
-
+		
 		if (kkt) {
 			config.set_kkt(kkt.Get());
 			if (!quiet)
 				cout << "  KKT contractor:\tON" << endl;
 		}
-
+		*/
 		if (simpl_level)
 			cout << "  symbolic simpl level:\t" << simpl_level.Get() << "\t" << endl;
 
@@ -201,8 +239,12 @@ int main(int argc, char** argv) {
 		    config.set_integer_variables(l);
 		    config.set_kkt(false); //no kkt for minlp optimization
 		  }
-		if (output_file) {
-			output_cov_file = output_file.Get();
+		if (bisector){
+		  cout << " bisector " << bisector.Get() << endl;
+		  config.set_bisector(bisector.Get());
+		}
+		if (output_file){
+		  output_cov_file = output_file.Get();
 		} else {
 			// got from stackoverflow.com:
 			string::size_type const p(filename.Get().find_last_of('.'));

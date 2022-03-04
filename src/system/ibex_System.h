@@ -312,7 +312,7 @@ protected:
 	SymbolMap<Domain*> mutable_constants;
 
         /** Bitset indicating which variables are integer (to be used only when minlp is true) */
-        BitSet* integer_variables;
+        BitSet* integer_variables=NULL;
         bool is_inactive( Interval& gx, CmpOp op) const ;
   
         bool  is_ineffective( Interval& gx, CmpOp op) const;

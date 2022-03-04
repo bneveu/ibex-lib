@@ -178,9 +178,12 @@ int main(int argc, char** argv) {
 				}
 			}
 		}
-
-		config.set_eps_x(eps_x);
-
+		bool uniform=1;  double a = eps_x[0];
+		for (int i=1; i< eps_x.size() ;i++){
+		  if (eps_x[i] != a) {uniform=0; break;}
+		}
+		//		config.set_eps_x(eps_x);
+		config.set_eps_x(uniform? Vector(1,eps_x[0]) : eps_x);
 		// This option certifies feasibility with equalities
 		if (rigor) {
 			config.set_rigor(rigor.Get());
