@@ -28,7 +28,7 @@ namespace ibex {
    int MinlpSmearSum::var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const {
     double max_magn = NEG_INFINITY;
     int var = -1;
-    BitSet b= sys.get_integer_variables();
+    BitSet& b= *(sys.get_integer_variables());
     for (int j=0; j<nbvars; j++) {
       if ((!too_small(box,j))&& (goal_to_bisect || j!= goal_var())&& b[j]) { 
 	double sum_smear=0;

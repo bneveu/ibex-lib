@@ -291,7 +291,7 @@ public:
 	 */
         void set_integer_variables(const BitSet & is_int);
 
-        BitSet get_integer_variables() const;
+        BitSet* get_integer_variables() const;
 
         bool is_integer(int i) const;
 
@@ -313,6 +313,8 @@ protected:
 
         /** Bitset indicating which variables are integer (to be used only when minlp is true) */
         BitSet* integer_variables=NULL;
+
+  
         bool is_inactive( Interval& gx, CmpOp op) const ;
   
         bool  is_ineffective( Interval& gx, CmpOp op) const;

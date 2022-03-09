@@ -206,7 +206,7 @@ void Optimizer::update_uplo_of_epsboxes(double ymin) {
 }
 
 void Optimizer::handle_cell(Cell& c) {
-  //  cout << " before contraction " << c.box << endl;
+        //  cout << " before contraction " << c.box << endl;
 	contract_and_bound(c);
 	//cout << " after contraction " << c.box << endl;
 	if (c.box.is_empty()) {
@@ -230,7 +230,7 @@ void Optimizer::contract_and_bound(Cell& c) {
 	else ymax = compute_ymax()+1.e-15;
 
 	y &= Interval(NEG_INFINITY,ymax);
-
+        if (integerobj) y=integer(y);
 	if (y.is_empty()) {
 		c.box.set_empty();
 		return;
@@ -505,6 +505,7 @@ Optimizer::Status Optimizer::optimize() {
 
 			}
 			catch (NoBisectableVariableException& ) {
+			  cout << "box " << c->box << endl;
 			  cout << "NoBisectableVariableException" << endl;
 				update_uplo_of_epsboxes((c->box)[goal_var].lb());
 				buffer.pop();

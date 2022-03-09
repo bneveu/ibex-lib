@@ -31,7 +31,7 @@ BisectionPoint MinlpLargestFirst::choose_var(const Cell& cell) {
         const IntervalVector& box=cell.box;
 	int var =-1;
 	double l=0.0;
-	BitSet b= sys.get_integer_variables();
+	BitSet& b= *(sys.get_integer_variables());
 	//	cout << " b" << b << endl ;
 	for (int i=0; i< box.size(); i++){
 

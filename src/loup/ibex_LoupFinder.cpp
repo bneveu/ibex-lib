@@ -32,7 +32,7 @@ bool LoupFinder::integer_and_bound_check(const System& sys, Vector & pt){
       //      double eps=1.e-2;
       double eps=0.5;
       //      cout << " pt " << pt << endl;
-      BitSet b = sys.get_integer_variables();
+      BitSet& b = *(sys.get_integer_variables());
       for (int i=0; i< pt.size(); i++){
 	//	cout << i << " " << integer_variables[i] << endl;
 	if (b[i])
@@ -91,9 +91,7 @@ bool LoupFinder::check(const System& sys,  Vector& pt, double& loup, bool _is_in
 	// will be updated if the constraints are satisfied.
 	// The test of the constraints is done only when the evaluation of the criterion
 	// is better than the loup (a cheaper test).
-
-	if (res<loup) {
-	  if (sys.minlp){
+	if (sys.minlp){
 	  //	  cout << " loup " << loup << " res " << res << " pt " << pt << endl;
 	    if (integer_and_bound_check(sys,pt) && sys.is_inner(pt)) {
 	      res = sys.goal_ub(pt); // integer_and_bound_check may modify the loup_point by making integer the values of integer variables
@@ -105,14 +103,15 @@ bool LoupFinder::check(const System& sys,  Vector& pt, double& loup, bool _is_in
 	      else return false;
 	    }
 	    return false;
-	  }
-	  else
+	}
+	else
+	  if (res<loup) {
 	    if (_is_inner || sys.is_inner(pt)){
 	      loup = res;
 	      return true;
 	    }
-	  return false;
-	}
+	    return false;
+	  }
 	return false;
 }
 

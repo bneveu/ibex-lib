@@ -383,8 +383,8 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
     integer_variables=new BitSet(integer_vars);
   }
 
-  BitSet System::get_integer_variables() const {
-    return *integer_variables;
+  BitSet* System::get_integer_variables() const {
+    return integer_variables;
   }
 
   bool System::is_integer(int i) const{

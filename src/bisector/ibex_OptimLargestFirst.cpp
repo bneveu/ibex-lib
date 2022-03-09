@@ -47,17 +47,18 @@ const IntervalVector& box=cell.box;
 	  }
 	}
 	// special conditions for choosing the objective as variable to bisect	
-  if ((choose_obj == true)
-      &&  !(nobisectable (box,goal_var))
-      && (l < box[goal_var].diam())
-      && box[goal_var].diam()/l < objectivebisect_ratiolimit)
-    var=goal_var;
-  //  cout << " bisected var " << var  << " l " << l << endl ;
-  if (var !=-1){
-    return BisectionPoint(var,ratio,true);
-  }
-  else {
-    throw NoBisectableVariableException();
+	if ((choose_obj == true)
+	    &&  !(nobisectable (box,goal_var))
+	    && (l < box[goal_var].diam())
+	    && box[goal_var].diam()/l < objectivebisect_ratiolimit){
+	  var=goal_var;
+	}
+	//	cout << " bisected var " << var  << " l " << l << endl ;
+	if (var !=-1){
+	  return BisectionPoint(var,ratio,true);
+	}
+	else {
+	  throw NoBisectableVariableException();
   }
 
 }

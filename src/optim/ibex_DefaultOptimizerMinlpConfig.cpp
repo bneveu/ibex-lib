@@ -142,7 +142,7 @@ void DefaultOptimizerMinlpConfig::set_random_seed(int _random_seed) {
       b.add(l[i]);
     ext_sys.set_integer_variables(b);
     ext_sys.minlp=true;
-    cout << " integer variables " << ext_sys.get_integer_variables() << endl;
+    cout << " integer variables " << *(ext_sys.get_integer_variables()) << endl;
     NormalizedSystem& norm_sys=get_norm_sys();
     norm_sys.set_integer_variables(b);
     norm_sys.minlp=true;
@@ -182,15 +182,15 @@ Ctc& DefaultOptimizerMinlpConfig::get_ctc() {
 	Array<Ctc> ctc_list( 3);
 	
         cout << "minlp " << ext_sys.minlp << endl;
-	cout << "integer_variables " << ext_sys.get_integer_variables() << endl;
+	cout << "integer_variables " << *(ext_sys.get_integer_variables()) << endl;
 	// first contractor on ext_sys : incremental HC4 (propag ratio=0.01)
 	ctc_list.set_ref(0, rec(new CtcCompo (
-						rec (new CtcInteger (ext_sys.nb_var, ext_sys.get_integer_variables())),
-						rec (new CtcHC4 (ext_sys,0.01,true)),
-						rec (new CtcInteger (ext_sys.nb_var, ext_sys.get_integer_variables())))));
+					      rec (new CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables()))),
+					      rec (new CtcHC4 (ext_sys,0.01,true)),
+					      rec (new CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables()))))));
 	// second contractor on ext_sys : "Acid" with incremental HC4 (propag ratio=0.1)
         ctc_list.set_ref(1, rec(new CtcCompo (rec (new CtcAcid (ext_sys,rec(new CtcHC4 (ext_sys,0.1,true)),true)),
-					      rec(new  CtcInteger (ext_sys.nb_var, ext_sys.get_integer_variables())))));
+					      rec(new  CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables()))))));
 
 				;
 	// the last contractor is "XNewton"
@@ -198,13 +198,13 @@ Ctc& DefaultOptimizerMinlpConfig::get_ctc() {
 	if (ext_sys.nb_ctr > 1) {
 	  ctc_list.set_ref(2,rec(new CtcFixPoint
 				(rec(new CtcCompo(
-						rec (new CtcInteger (ext_sys.nb_var, ext_sys.get_integer_variables())),
+						  rec (new CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables()))),
 
-						rec(new CtcLinearRelax(ext_sys)),
-						rec (new CtcInteger (ext_sys.nb_var, ext_sys.get_integer_variables())),
-						rec(new CtcHC4(ext_sys,0.1)),
-						rec (new CtcInteger (ext_sys.nb_var, ext_sys.get_integer_variables())))),
-				 default_relax_ratio)));
+						  rec(new CtcLinearRelax(ext_sys)),
+						  rec (new CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables()))),
+						  rec(new CtcHC4(ext_sys,0.1)),
+						  rec (new CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables())))))),
+				 default_relax_ratio));
 	} else {
 		ctc_list.set_ref(2,rec(new CtcLinearRelax(ext_sys)));
 	}

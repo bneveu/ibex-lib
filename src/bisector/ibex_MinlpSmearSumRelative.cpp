@@ -29,7 +29,7 @@ namespace ibex {
     double max_magn = NEG_INFINITY;
     int var = -1;
     double* ctrjsum = new double[sys.f_ctrs.image_dim()];
-    BitSet b= sys.get_integer_variables();
+    BitSet& b= *(sys.get_integer_variables());
     for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
       ctrjsum[i]=0;
       // not an extended system or constraint is active or it is the objective 

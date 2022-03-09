@@ -173,7 +173,7 @@ Linearizer* OptimizerMinlpConfig::get_linear_relax() {
 }
 
 Ctc& OptimizerMinlpConfig::get_ctc() {
-  CtcInteger* integ= &rec(new CtcInteger(ext_sys->nb_var, ext_sys->get_integer_variables()));
+  CtcInteger* integ= &rec(new CtcInteger(ext_sys->nb_var, *(ext_sys->get_integer_variables())));
 	// the first contractor called
 	CtcHC4* hc4 = &rec(new CtcHC4(ext_sys->ctrs,0.01,true));
 	// hc4 inside acid and 3bcid : incremental propagation beginning with the shaved variable
