@@ -188,7 +188,7 @@ Ctc& DefaultOptimizerMinlpConfig::get_ctc() {
 					      rec (new CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables()))),
 					      rec (new CtcHC4 (ext_sys,0.01,true)),
 					      rec (new CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables()))))));
-	// second contractor on ext_sys : "Acid" with incremental HC4 (propag ratio=0.1)
+						// second contractor on ext_sys : "Acid" with incremental HC4 (propag ratio=0.1)
         ctc_list.set_ref(1, rec(new CtcCompo (rec (new CtcAcid (ext_sys,rec(new CtcHC4 (ext_sys,0.1,true)),true)),
 					      rec(new  CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables()))))));
 
@@ -202,7 +202,7 @@ Ctc& DefaultOptimizerMinlpConfig::get_ctc() {
 
 						  rec(new CtcLinearRelax(ext_sys)),
 						  rec (new CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables()))),
-						  rec(new CtcHC4(ext_sys,0.1)),
+						  rec(new CtcHC4(ext_sys,0.01,false)),
 						  rec (new CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables())))))),
 				 default_relax_ratio));
 	} else {
@@ -301,13 +301,12 @@ CellBufferOptim& DefaultOptimizerMinlpConfig::get_cell_buffer() {
 	const ExtendedSystem& ext_sys = get_ext_sys();
 
 //			  (CellBufferOptim&) rec(new CellDoubleHeap(get_ext_sys()))
-	return (CellBufferOptim&) rec(new CellHeap(get_ext_sys()));
-	/*
+//	return (CellBufferOptim&) rec(new CellHeap(get_ext_sys()));
 	return (CellBufferOptim&) rec (new  CellBeamSearch (
 			(CellHeap&) rec (new CellHeap (ext_sys)),
 			(CellHeap&) rec (new CellHeap (ext_sys)),
 			ext_sys), CELL_BUFFER_TAG);
-	*/
+
 }
 
 int DefaultOptimizerMinlpConfig::goal_var() {
