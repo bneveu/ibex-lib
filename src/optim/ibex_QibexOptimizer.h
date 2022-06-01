@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-using namespace std;
+//using namespace std;
 namespace ibex {
 
   class QibexOptimizer : public Optimizer {
@@ -41,7 +41,7 @@ namespace ibex {
        the best point v computed by the relaxation that may be a new loup point,
        the point w of the auxiliary variables (used for the bisection strategy)
        and the lower bound newlb*/
-    bool quadratic_relaxation_results(string & b, double& newlb, Vector & v, Vector& w);
+    bool quadratic_relaxation_results(std::string & b, double& newlb, Vector & v, Vector& w);
 
     /* the analysis of the relaxation gives the next variable to bisect ant its ratio
     and returns a pair made of the best point and  the new lower bound */
@@ -64,11 +64,11 @@ namespace ibex {
   private :
     int n_x;
     int n_y;
-    vector<int> associ;
-    vector<int> assocj;
-    vector<int> ref_diag_coefs;
-    vector<int> hessian_diag_coefs;
-    vector<vector<int>> ref_coefs;
+    std::vector<int> associ;
+    std::vector<int> assocj;
+    std::vector<int> ref_diag_coefs;
+    std::vector<int> hessian_diag_coefs;
+    std::vector<std::vector<int>> ref_coefs;
   };
 }
 #endif // __IBEX_QIBEXOPTIMIZER_H__
