@@ -96,8 +96,8 @@ int main(int argc, char** argv){
 	  buffer = new CellHeap   (ext_sys);
 	else if (strategy=="dh")
 	  buffer = new CellDoubleHeap  (ext_sys);
-	else if (strategy=="bfs")
-	  buffer = new CellDoubleHeap (ext_sys,0);
+//	else if (strategy=="bfs")
+	  //	  buffer = new CellDoubleHeap (ext_sys,0);
 	else if (strategy=="bs")
 	  buffer = new CellBeamSearch  (currentbuffer, futurebuffer, ext_sys, beamsize);
 
