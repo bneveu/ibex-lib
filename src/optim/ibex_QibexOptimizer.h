@@ -56,11 +56,14 @@ namespace ibex {
     double tolerance;
     // boolean to use the ibex loupfinder (the qibex loup finder is inside the relaxation)
     bool loupfinderp=true;
+    // boolean indicating if the relaxation is made rigourous (by default ; not rigourous)
+    bool rigor=false;
     bool update_loup(const IntervalVector& box, BoxProperties& prop);
     // checks if v is a new louppoint (after rounding it to integer in case of integer minlp variable) update the loup and louppoint  and returns the new ymax 
     double qibex_loupfinder(Vector& v);
     double compute_ymax();
     double compute_emptybuffer_uplo();
+    void quadratic_relaxation_call(const IntervalVector & box, double objlb);
   private :
     int n_x;
     int n_y;

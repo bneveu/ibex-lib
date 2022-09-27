@@ -1,5 +1,4 @@
-
-//                                  I B E X
+//                                  I B E X
 // File        : ibex_QibexOptimizer.cpp
 // Author      : Bertrand Neveu
 // Copyright   : IMT Atlantique (France)
@@ -25,7 +24,8 @@ namespace ibex {
 
   void QibexOptimizer::init(){
     int res0=system("rm results.txt");
-    int res=system("~/imagine4/RECHERCHE/ampl/ampl model_quad_relax_init.run");
+    int res=system("/certis/3/neveub/RECHERCHE/ampl/ampl model_quad_relax_init.run");
+    //    int res=system("~/RECHERCHE/ampl/ampl model_quad_relax_init.run");
     ifstream fic4 ("associ.txt");
     string a;
     int j;
@@ -50,7 +50,6 @@ namespace ibex {
     fic5 >> n_y;
     for (int i=0 ; i< n_y; i++)
       assocj.push_back(-1);
-
     
     fic5 >> a;
     fic5 >> a;
@@ -115,7 +114,7 @@ namespace ibex {
       return false;
   }
 
-  void QibexOptimizer::quadratic_relaxation_call(const IntervalVector & box){
+  void QibexOptimizer::quadratic_relaxation_call(const IntervalVector & box, double objlb){
     ofstream fic ("bound.ampl", ofstream::trunc);
     IntervalVector pt(n_x);
     for (int i=0; i< n_x; i++){
@@ -137,12 +136,19 @@ namespace ibex {
       fic << i+1 << " " << std::setprecision(9) << pt[i].lb() << endl;
     }
     fic << ";" << endl;
+    fic << "param objlb :=" << endl;
+    fic << objlb << ";" << endl;
     fic << "end ;";
     
     fic.close();
 
-    int res=system("~/imagine4/RECHERCHE/ampl/ampl model_quad_relax.run > amplout");
-
+    //    int res=system("~/imagine4/RECHERCHE/ampl/ampl model_quad_relax.run > amplout");
+    //    int res=system("/certis/3/neveub/RECHERCHE/ampl/ampl model_quad_relax.run > amplout");
+    int res;
+    if (rigor)
+      res=system("/certis/3/neveub/RECHERCHE/ampl/ampl model_quad_relax_rigueur.run > amplout");
+    else
+      res=system("/certis/3/neveub/RECHERCHE/ampl/ampl model_quad_relax.run > amplout");
   }
 
   bool QibexOptimizer::quadratic_relaxation_results(string& b, double& newlb, Vector & v, Vector& w){
@@ -221,6 +227,7 @@ namespace ibex {
 	    
 
 	}
+	// TO DO : add a tolerance ???
 	if (integerobj && newlb != NEG_INFINITY)
 	  if (newlb != std::floor(newlb))
 	    newlb= std::ceil(newlb);
@@ -345,7 +352,7 @@ void QibexOptimizer::qibex_contract_and_bound(Cell & c){
   double epsilonlb=0.0; // interest ??
   double ratio=0.45;
   double gap0=0.0;
-  quadratic_relaxation_call(qcp_box);
+  quadratic_relaxation_call(qcp_box,c.box[n].lb());
   pair<Vector,double> vecnewbounds  = qibex_relaxation (qcp_box,var_to_bisect, ratio, gap0);
   if (qcp_box.is_empty()) {c.box.set_empty(); return;}
   //  cout << " var_to_bisect " << var_to_bisect << endl;

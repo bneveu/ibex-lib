@@ -111,7 +111,7 @@ Timer timer;
 	else if (loupfind=="inhc4")
 	  //	  	  loupfinder= new LoupFinderInHC4 (norm_sys);
 	  loupfinder= new LoupFinderInHC4 (*sys);
-	else if (loupfind=="prob")
+	else if (loupfind=="prob" || loupfind=="no")
 	  //	  	   loupfinder= new LoupFinderProbing (norm_sys);
 	  loupfinder= new LoupFinderProbing (*sys);
 	  
@@ -277,8 +277,10 @@ Timer timer;
 	//	cout << " sys.box " << sys->box << endl;
 
 	// the trace 
-	o.trace=0;
-
+	o.trace=1;
+	// rigor mode
+	//	o.rigor=true;
+	if (loupfind=="no") o.loupfinderp=false;
 	// the allowed time for search
 
 	o.timeout=timelimit;

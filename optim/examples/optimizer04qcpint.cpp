@@ -203,7 +203,7 @@ Timer timer;
 	// hc4 followed by acidhc4 : the actual contractor used when filtering == "acidhc4" 
 	//CtcCompo hc4acidhc4 (hc4, acidhc4);
 	CtcCompo hc4acidhc4 (integ, hc4, integ, acidhc4, integ);
-      
+	//	CtcIdentity id (ext_sys.nb_var);
 
 	Ctc* ctc;
 	if (filtering == "hc4")
@@ -214,6 +214,9 @@ Timer timer;
 	else if 
 	  (filtering =="3bcidhc4")
 	  ctc= &hc43bcidhc4;
+	else if
+	   (filtering =="no")
+	  ctc=&integ;
 	else {cout << filtering <<  " is not an implemented  contraction  mode "  << endl; return -1;}
 
 	Linearizer* lr;
@@ -244,7 +247,7 @@ Timer timer;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn")
           {
 		cxn_poly = new CtcPolytopeHull(*lr);
-		cxn_compo =new CtcCompo(*cxn_poly, hc44xn);
+		cxn_compo =new CtcCompo(integ,*cxn_poly, integ, hc44xn, integ);
 		cxn = new CtcFixPoint (*cxn_compo, default_relax_ratio);
 		//	cxn =new CtcCompo(*cxn_poly, hc44xn);
 	  }
@@ -280,6 +283,8 @@ Timer timer;
 
 	// the trace 
 	o.trace=1;
+	// rigor mode
+	//	o.rigor=true;
         o.integerobj=true;
 	if (loupfind=="no") o.loupfinderp=false;
 	// the allowed time for search
