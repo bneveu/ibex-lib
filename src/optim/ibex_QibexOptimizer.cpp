@@ -1,10 +1,10 @@
-//                                  I B E X
+//                                  I B E X
 // File        : ibex_QibexOptimizer.cpp
 // Author      : Bertrand Neveu
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Sep 01, 2021
-// Last Update : Jan 06, 2022
+// Last Update : Oct 06, 2022
 //============================================================================
 
 #include "ibex_QibexOptimizer.h"
@@ -149,20 +149,28 @@ namespace ibex {
       res=system("/certis/3/neveub/RECHERCHE/ampl/ampl model_quad_relax_rigueur.run > amplout");
     else
       res=system("/certis/3/neveub/RECHERCHE/ampl/ampl model_quad_relax.run > amplout");
+      
   }
 
   bool QibexOptimizer::quadratic_relaxation_results(string& b, double& newlb, Vector & v, Vector& w){
     ifstream fic1 ("results.txt");
     if (fic1.good()){
       string a;
-      int j; 
+      int j;
+      double newobj;
       fic1 >> a; fic1 >>a; fic1 >> b; 
       //	  cout << " b " << b << endl;
       fic1 >> a;
       fic1>> a;
       fic1 >> newlb;
+      fic1 >> a; fic1 >>a; 
+      fic1 >> newobj;
+      cout.precision(12);
+      if (rigor && trace){
+      if (newlb < newobj && b=="solved")
+	cout << "CORRECTION " << newlb << " " << newobj <<  "  " << newobj-newlb << endl;
       //	  cout << " newlb " << newlb << endl;
-
+      }
       fic1 >> a;
       fic1>> a;
       fic1>> a;
@@ -207,6 +215,7 @@ namespace ibex {
 	  //	  cout << " v " << v << endl;
 	  //	  cout << "n_x " << n_x << " n_y " << n_y << " v " << v << endl;
 	  //	 cout << " w " << w << endl;
+	  
 	  var_to_bisect=-1;
 	  //	  if (b!= "failure")
 	  if  (b== "solved" || b== "'solved?'")
@@ -227,10 +236,25 @@ namespace ibex {
 	    
 
 	}
+	double epsinteger=1.e-4;
 	// TO DO : add a tolerance ???
-	if (integerobj && newlb != NEG_INFINITY)
-	  if (newlb != std::floor(newlb))
-	    newlb= std::ceil(newlb);
+	if (integerobj && newlb != NEG_INFINITY){
+	  
+	  if (rigor) {
+	    if (newlb != std::floor(newlb))
+		newlb= std::ceil(newlb);
+	  }
+	  
+	  else{
+	    if (newlb >= std::floor(newlb) + epsinteger)
+	      newlb= std::ceil(newlb);
+	    else
+	      newlb=std::floor(newlb) ;
+	  }
+	}
+      
+  	  
+  
 	
         pair<Vector,double> p(v,newlb);
 	//	cout << " newlb "<< newlb << " box " << box << endl;
@@ -331,7 +355,6 @@ namespace ibex {
 
 
 	ymax=compute_ymax();
-	//	buffer.contract(ymax);
       }
     }
     return ymax;
@@ -362,7 +385,10 @@ void QibexOptimizer::qibex_contract_and_bound(Cell & c){
   Vector v= vecnewbounds.first;
   //  double newlb=vecnewbounds.second-epsilonlb;
   double newlb=vecnewbounds.second;
-
+  if (trace){
+  if (newlb >  NEG_INFINITY && newlb <= c.box[n].lb())
+    cout << " relaxation not useful " << endl;
+  }
   Interval y0=y;
   double ymax=POS_INFINITY;
   if (newlb > NEG_INFINITY){
