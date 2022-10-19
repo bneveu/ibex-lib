@@ -25,7 +25,6 @@ namespace ibex {
   void QibexOptimizer::init(){
     int res0=system("rm results.txt");
     int res=system("/certis/3/neveub/RECHERCHE/ampl/ampl model_quad_relax_init.run");
-    //    int res=system("~/RECHERCHE/ampl/ampl model_quad_relax_init.run");
     ifstream fic4 ("associ.txt");
     string a;
     int j;
@@ -89,7 +88,7 @@ namespace ibex {
     }
   
     /*
-    res=system("~/imagine4/RECHERCHE/ampl/ampl model_quad_init.run");
+    res=system("/certis/3/neveub/RECHERCHE/ampl/ampl model_quad_init.run");
     ifstream fic7("diag_hessian.txt");
 
     fic7 >> a;
@@ -158,19 +157,35 @@ namespace ibex {
       string a;
       int j;
       double newobj;
-      fic1 >> a; fic1 >>a; fic1 >> b; 
-      //	  cout << " b " << b << endl;
+      int lbused =0;
       fic1 >> a;
-      fic1>> a;
+      fic1 >> a;
+      fic1 >> b; 
+      
+      fic1 >> a;
+      fic1 >> a;
       fic1 >> newlb;
-      fic1 >> a; fic1 >>a; 
+      
+      fic1 >> a;
+      fic1 >> a; 
       fic1 >> newobj;
+
+      fic1 >> a;
+      fic1 >> a;
+      fic1 >> lbused;
+      
+      //    cout << " b " << b << endl;
+      //    cout << " newlb " << newlb << endl;
+      //    cout << " newobj " << newobj << endl;
+      //    cout << "lbused " << lbused << " rigor " << rigor << endl;
       cout.precision(12);
-      if (rigor && trace){
-      if (newlb < newobj && b=="solved")
+      if (trace && lbused==0)
+	cout << " relaxation not useful " << endl;
+      if (rigor && lbused==0)
+	newlb=-1.e300;
+      if (trace && newlb < newobj && b=="solved" && rigor && lbused ==1)
 	cout << "CORRECTION " << newlb << " " << newobj <<  "  " << newobj-newlb << endl;
-      //	  cout << " newlb " << newlb << endl;
-      }
+      
       fic1 >> a;
       fic1>> a;
       fic1>> a;
@@ -215,9 +230,8 @@ namespace ibex {
 	  //	  cout << " v " << v << endl;
 	  //	  cout << "n_x " << n_x << " n_y " << n_y << " v " << v << endl;
 	  //	 cout << " w " << w << endl;
-	  
+	
 	  var_to_bisect=-1;
-	  //	  if (b!= "failure")
 	  if  (b== "solved" || b== "'solved?'")
 	    var_to_bisect=compute_var_to_bisect(box,  v,  w, gap0);
 	  if (var_to_bisect != -1)
@@ -228,16 +242,16 @@ namespace ibex {
 	    if (b=="infeasible")  //too strong for cplex (useful for ipopt ??)
 	    box.set_empty();
 	  */
+	 
 	  if  (b!= "solved")
 	    {
-	      //cout << b << "  " << newlb << endl;
-	      newlb = NEG_INFINITY;
-	    }
-	    
+             //cout << b << "  " << newlb << endl;
+             newlb = NEG_INFINITY;
+           }
 
 	}
-	double epsinteger=1.e-4;
-	// TO DO : add a tolerance ???
+
+
 	if (integerobj && newlb != NEG_INFINITY){
 	  
 	  if (rigor) {
@@ -246,13 +260,14 @@ namespace ibex {
 	  }
 	  
 	  else{
+	    double epsinteger=1.e-4;
 	    if (newlb >= std::floor(newlb) + epsinteger)
 	      newlb= std::ceil(newlb);
 	    else
 	      newlb=std::floor(newlb) ;
 	  }
 	}
-      
+
   	  
   
 	
@@ -372,9 +387,10 @@ void QibexOptimizer::qibex_contract_and_bound(Cell & c){
   IntervalVector qcp_box(n);
   read_ext_box(c.box,qcp_box);
   int var_to_bisect=-1;
-  double epsilonlb=0.0; // interest ??
+ 
   double ratio=0.45;
   double gap0=0.0;
+  //  cout << "oldlb " << c.box[n].lb() << endl;
   quadratic_relaxation_call(qcp_box,c.box[n].lb());
   pair<Vector,double> vecnewbounds  = qibex_relaxation (qcp_box,var_to_bisect, ratio, gap0);
   if (qcp_box.is_empty()) {c.box.set_empty(); return;}
@@ -383,24 +399,27 @@ void QibexOptimizer::qibex_contract_and_bound(Cell & c){
   c.ratio=ratio;
   
   Vector v= vecnewbounds.first;
-  //  double newlb=vecnewbounds.second-epsilonlb;
+ 
   double newlb=vecnewbounds.second;
   if (trace){
-  if (newlb >  NEG_INFINITY && newlb <= c.box[n].lb())
-    cout << " relaxation not useful " << endl;
+    //    cout << " newlb " << newlb << " oldlb " << c.box[n].lb() << endl;
+    //  if (newlb >  NEG_INFINITY && newlb <= c.box[n].lb())
+    //    cout << " relaxation not useful " << endl;
   }
   Interval y0=y;
   double ymax=POS_INFINITY;
   if (newlb > NEG_INFINITY){
     ymax=qibex_loupfinder(v);
     if (ymax < POS_INFINITY){
+      //      cout << " ymax " << ymax <<" newlb " << newlb << endl;
       if (newlb<= ymax){
 	y &= Interval(newlb,ymax);
 	//	buffer.contract(ymax);
       }
       else{
-	y &= Interval(newlb,newlb);
-      }
+	//	y &= Interval(newlb,newlb);}
+	c.box.set_empty(); return;}
+      
 	//  semble inutile (si le pt faisable est l'optimum, newlb=newub et l'arret de la branche est automatique 
 	/*
 	if (c.var_to_bisect==-1 && gap0 <= 1.e-10 && loup_finder.integer_check(v))
@@ -426,7 +445,7 @@ void QibexOptimizer::qibex_contract_and_bound(Cell & c){
     if (y.is_empty() ) {
       c.box.set_empty();
     }
-    else if (y.diam() < y0.diam()){
+    else if (recontract && y.diam() < y0.diam()){
       if (integerobj){
 	y=integer(y);
 	if (y.is_empty()){

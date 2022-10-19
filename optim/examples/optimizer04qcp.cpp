@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : optimizer04.cpp
+// File        : optimizer04qcp.cpp
 // Author      : Gilles Chabert  Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -77,15 +77,15 @@ Timer timer;
 	int nbinput=6;
 	int beamsize;
 	if (strategy=="bs" || strategy== "beamsearch") {beamsize=atoi(argv[7]); nbinput++;}
-	
-	double prec= atof(argv[nbinput+1]);
-	double goalprec= atof (argv[nbinput+2]);
-	double timelimit= atof(argv[nbinput+3]);
+	string recontraction= argv[nbinput+1];
+	double prec= atof(argv[nbinput+2]);
+	double goalprec= atof (argv[nbinput+3]);
+	double timelimit= atof(argv[nbinput+4]);
 	//	double eqeps= 1.e-6;
 	double eqeps= 1.e-8;
 	//	double tolerance=0.0;
 	double tolerance=1.e-4;
-	int randomseed = atoi(argv[nbinput+4]);
+	int randomseed = atoi(argv[nbinput+5]);
 	//	double initloup=atof(argv[nbinput+5]);
 	RNG::srand(randomseed);
 
@@ -279,7 +279,13 @@ Timer timer;
 	// the trace 
 	o.trace=1;
 	// rigor mode
-	//	o.rigor=true;
+	o.rigor=true;
+	// contraction afer relaxation
+	//	o.recontract=true;
+	if (recontraction=="r")
+	  o.recontract=true;
+	else
+	  o.recontract=false;
 	if (loupfind=="no") o.loupfinderp=false;
 	// the allowed time for search
 

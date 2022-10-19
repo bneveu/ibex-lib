@@ -135,14 +135,14 @@ Timer timer;
 	  buffer = new CellBeamSearch  (currentbuffer, futurebuffer, ext_sys, beamsize);
 	}
 	cout << "file " << argv[1] << endl;
-	/*
+
 
 	cout << " filtering " << filtering; 
         cout << " linearrelaxation " << linearrelaxation;
 	cout << " bisection " << bisection ;
 	cout << " strategy " << strategy ;
 	cout << " randomseed " << randomseed << endl;
-	*/
+
 
 	// Build the bisection heuristic
 	// --------------------------
@@ -284,7 +284,9 @@ Timer timer;
 	// the trace 
 	o.trace=1;
 	// rigor mode
-	//	o.rigor=true;
+	// o.rigor=false;
+	o.rigor=true;
+
         o.integerobj=true;
 	if (loupfind=="no") o.loupfinderp=false;
 	// the allowed time for search
