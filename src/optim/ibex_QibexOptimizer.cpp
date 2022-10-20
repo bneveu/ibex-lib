@@ -174,10 +174,10 @@ namespace ibex {
       fic1 >> a;
       fic1 >> lbused;
       
-      //    cout << " b " << b << endl;
-      //    cout << " newlb " << newlb << endl;
-      //    cout << " newobj " << newobj << endl;
-      //    cout << "lbused " << lbused << " rigor " << rigor << endl;
+      //        cout << " b " << b << endl;
+      //        cout << " newlb " << newlb << endl;
+      //        cout << " newobj " << newobj << endl;
+      //        cout << "lbused " << lbused << " rigor " << rigor << endl;
       cout.precision(12);
       if (trace && lbused==0)
 	cout << " relaxation not useful " << endl;
@@ -215,7 +215,7 @@ namespace ibex {
 	  
 
   
-  pair<Vector,double> QibexOptimizer::qibex_relaxation(IntervalVector & box, int& var_to_bisect, double& ratio, double& gap0){
+  tuple<Vector,Vector,double> QibexOptimizer::qibex_relaxation_analysis(IntervalVector & box, string & status){
 
 	double newlb = NEG_INFINITY;
 
@@ -224,33 +224,27 @@ namespace ibex {
 	Vector v (n_x);
 	
 	Vector w(n_y_max);
-	string b;
-	if (quadratic_relaxation_results(b, newlb, v, w)){
+	
+	if (quadratic_relaxation_results(status, newlb, v, w)){
 	  //cout << "b " << b << endl;
 	  //	  cout << " v " << v << endl;
 	  //	  cout << "n_x " << n_x << " n_y " << n_y << " v " << v << endl;
 	  //	 cout << " w " << w << endl;
 	
-	  var_to_bisect=-1;
-	  if  (b== "solved" || b== "'solved?'")
-	    var_to_bisect=compute_var_to_bisect(box,  v,  w, gap0);
-	  if (var_to_bisect != -1)
-	    ratio=compute_ratio(box, v, var_to_bisect);
-	  //	  cout << " var_to_bisect" << var_to_bisect << " ratio " << ratio << endl;
+	  
 	    
 	  /*
 	    if (b=="infeasible")  //too strong for cplex (useful for ipopt ??)
 	    box.set_empty();
 	  */
 	 
-	  if  (b!= "solved")
+	  if  (status!= "solved")
 	    {
              //cout << b << "  " << newlb << endl;
              newlb = NEG_INFINITY;
            }
 
 	}
-
 
 	if (integerobj && newlb != NEG_INFINITY){
 	  
@@ -268,13 +262,10 @@ namespace ibex {
 	  }
 	}
 
-  	  
-  
-	
-        pair<Vector,double> p(v,newlb);
+        tuple <Vector,Vector,double> triple(v,w,newlb);
 	//	cout << " newlb "<< newlb << " box " << box << endl;
 	//	cout << " v"<< p.first << endl;
-	return p;
+	return triple;
   }
     
   
@@ -290,7 +281,7 @@ namespace ibex {
     double epsbound=1.e-4;
     double gap=0.0;
     double width=0.0;
-    double minselect=0.0;
+    //    double minselect=0.0;
     int var=-1;
 
     for (int i =0; i < n_y; i++){
@@ -324,7 +315,7 @@ namespace ibex {
       //          cout << " cas produit " << endl;
 
       mingap=tolerance;
-      minselect=0.0;
+      //      minselect=0.0;
       for (int i =0; i < n_y; i++){
 	if (associ[i]!= assocj[i]){
 	  gap = fabs(w[i+n_x]-v[associ[i]-1]*v[assocj[i]-1]);
@@ -374,8 +365,24 @@ namespace ibex {
     }
     return ymax;
   }
+
+
+  void QibexOptimizer::qibex_bisection_choice (Cell& c, IntervalVector & qcp_box, Vector& v, Vector& w){
+   int var_to_bisect=-1;
+ 
+  double ratio=0.45;
+  double gap0=0.0;
+
+  var_to_bisect=compute_var_to_bisect(qcp_box,  v,  w, gap0);
+  if (var_to_bisect != -1)
+    ratio=compute_ratio(qcp_box, v, var_to_bisect);
+  //  cout << " var_to_bisect " << var_to_bisect << endl;
+  c.var_to_bisect=var_to_bisect;
+  c.ratio=ratio;
   
-void QibexOptimizer::qibex_contract_and_bound(Cell & c){
+  }
+
+  void QibexOptimizer::qibex_contract_and_bound(Cell & c){
    Interval& y=c.box[goal_var];
    if (integerobj){
     y=integer(y);
@@ -386,21 +393,33 @@ void QibexOptimizer::qibex_contract_and_bound(Cell & c){
    
   IntervalVector qcp_box(n);
   read_ext_box(c.box,qcp_box);
-  int var_to_bisect=-1;
+
+  double objlb= y.lb();
+
  
-  double ratio=0.45;
-  double gap0=0.0;
-  //  cout << "oldlb " << c.box[n].lb() << endl;
-  quadratic_relaxation_call(qcp_box,c.box[n].lb());
-  pair<Vector,double> vecnewbounds  = qibex_relaxation (qcp_box,var_to_bisect, ratio, gap0);
-  if (qcp_box.is_empty()) {c.box.set_empty(); return;}
-  //  cout << " var_to_bisect " << var_to_bisect << endl;
-  c.var_to_bisect=var_to_bisect;
-  c.ratio=ratio;
+  //  cout << "oldlb " << objlb << endl;
+  quadratic_relaxation_call(qcp_box,objlb);
   
-  Vector v= vecnewbounds.first;
+  string status;
+  
+  tuple <Vector,Vector,double> vecnewbounds  = qibex_relaxation_analysis (qcp_box,status);
+  int n_y_max=n_x+(n_x*(n_x+1))/2;
+
+  Vector v (n_x);
+	
+  Vector w(n_y_max);
+	
+
+  double newlb;
+  tie (v,w,newlb) = vecnewbounds;
+  
+  if (qcp_box.is_empty()) {c.box.set_empty(); return;}
+  if  (status== "solved" || status== "'solved?'")
+    qibex_bisection_choice(c, qcp_box, v,w );
+  
+  
  
-  double newlb=vecnewbounds.second;
+  
   if (trace){
     //    cout << " newlb " << newlb << " oldlb " << c.box[n].lb() << endl;
     //  if (newlb >  NEG_INFINITY && newlb <= c.box[n].lb())
@@ -411,7 +430,7 @@ void QibexOptimizer::qibex_contract_and_bound(Cell & c){
   if (newlb > NEG_INFINITY){
     ymax=qibex_loupfinder(v);
     if (ymax < POS_INFINITY){
-      //      cout << " ymax " << ymax <<" newlb " << newlb << endl;
+      //cout << " ymax " << ymax <<" newlb " << newlb << endl;
       if (newlb<= ymax){
 	y &= Interval(newlb,ymax);
 	//	buffer.contract(ymax);
@@ -439,6 +458,7 @@ void QibexOptimizer::qibex_contract_and_bound(Cell & c){
     else{
       y &= Interval(newlb,POS_INFINITY);
       c.prop.update(BoxEvent(c.box,BoxEvent::CONTRACT,BitSet::singleton(n+1,goal_var)));
+      //      cout << " y after newlb" << y << endl;
     }
     
 
