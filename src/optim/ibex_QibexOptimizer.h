@@ -33,7 +33,7 @@ namespace ibex {
     void qibex_contract_and_bound(Cell& c);
 
     /* the external call through ampl */
-    void quadratic_relaxation_call(const IntervalVector & box, double objlb);
+    void qibex_relaxation_call(const IntervalVector & box, double objlb);
 
     /* results of the quadratic convex relaxation 
        when using quadratic convex relaxation,  the external solver  returns 
@@ -41,7 +41,7 @@ namespace ibex {
        the best point v computed by the relaxation that may be a new loup point,
        the point w of the auxiliary variables (used for the bisection strategy)
        and the lower bound newlb*/
-    bool quadratic_relaxation_results(std::string & status, double& newlb, Vector & v, Vector& w);
+    bool qibex_relaxation_results(std::string & status, double& newlb, Vector & v, Vector& w);
 
     /* the convex quadratic relaxation   returns a triple made of the best point, the point of the auxiliary variables  and  the new lower bound */
     std::tuple<Vector,Vector,double> qibex_relaxation_analysis (IntervalVector & box, std::string& status);

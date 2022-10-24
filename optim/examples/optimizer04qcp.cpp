@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jul 12, 2012
-// Last Update : Jul 12, 2012
+// Last Update : Oct 21, 2022
 //============================================================================
 
 
@@ -56,19 +56,7 @@ Timer timer;
 	    sys->box[i] =  Interval(sys->box[i].lb(), 1.e8);
 	}
 	
-	  /*
-	  if (sys->box[i].lb() == -1.e8) 
-	    	    //	     sys->box[i]= Interval(NEG_INFINITY,sys->box[i].ub());
-	    //	    sys->box[i]= Interval(-1.e100,sys->box[i].ub());
-	    sys->box[i]= Interval(-10.,sys->box[i].ub());
-	  if (sys->box[i].ub() == 1.e8) 
-	    //      sys->box[i]= Interval(sys->box[i].lb(), POS_INFINITY);
-	    //	    sys->box[i]= Interval(sys->box[i].lb(), 1.e100);
-	    sys->box[i]= Interval(sys->box[i].lb(), 10.);
-	    }
-	  */
-
-
+	 
 	string filtering = argv[2];
 	string linearrelaxation= argv[3];
 	string bisection= argv[4];
@@ -78,15 +66,18 @@ Timer timer;
 	int beamsize;
 	if (strategy=="bs" || strategy== "beamsearch") {beamsize=atoi(argv[7]); nbinput++;}
 	string recontraction= argv[nbinput+1];
-	double prec= atof(argv[nbinput+2]);
-	double goalprec= atof (argv[nbinput+3]);
-	double timelimit= atof(argv[nbinput+4]);
+	string rigormode = argv[nbinput+2];
+	double prec= atof(argv[nbinput+3]);
+	double goalprec= atof (argv[nbinput+4]);
+	double timelimit= atof(argv[nbinput+5]);
 	//	double eqeps= 1.e-6;
 	double eqeps= 1.e-8;
 	//	double tolerance=0.0;
+	
 	double tolerance=1.e-4;
-	int randomseed = atoi(argv[nbinput+5]);
-	//	double initloup=atof(argv[nbinput+5]);
+	//double tolerance=1.e-8;
+	int randomseed = atoi(argv[nbinput+6]);
+	//	double initloup=atof(argv[nbinput+7]);
 	RNG::srand(randomseed);
 
 	// the extended system 
@@ -267,8 +258,8 @@ Timer timer;
 
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
 	//	double minwidth=1.0; // for bisection qibex heuristics
-	double minwidth=0.01; // for bisection qibex heuristics
-
+	//	double minwidth=0.01; // for bisection qibex heuristics
+	double minwidth=0.0001; // for bisection qibex heuristics
 	//	BitSet b = sys->active_ctrs(sys->box);
 	//	cout << " active constraints " << b << endl;
 	
@@ -279,9 +270,12 @@ Timer timer;
 	// the trace 
 	o.trace=1;
 	// rigor mode
-	o.rigor=true;
+	if (rigormode=="r")
+	  o.rigor=true;
+	else
+	  o.rigor=false;
+
 	// contraction afer relaxation
-	//	o.recontract=true;
 	if (recontraction=="r")
 	  o.recontract=true;
 	else

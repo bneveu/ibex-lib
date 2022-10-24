@@ -75,15 +75,17 @@ Timer timer;
 	int beamsize;
 	if (strategy=="bs" || strategy== "beamsearch") {beamsize=atoi(argv[7]); nbinput++;}
 	
-	double prec= atof(argv[nbinput+1]);
-	double goalprec= atof (argv[nbinput+2]);
-	double timelimit= atof(argv[nbinput+3]);
+	string recontraction= argv[nbinput+1];
+	string rigormode = argv[nbinput+2];
+	double prec= atof(argv[nbinput+3]);
+	double goalprec= atof (argv[nbinput+4]);
+	double timelimit= atof(argv[nbinput+5]);
 	//	double eqeps= 1.e-6;
 	double eqeps= 1.e-8;
 	//	double tolerance=0.0;
 	double tolerance=1.e-4;
-	int randomseed = atoi(argv[nbinput+4]);
-	//	double initloup=atof(argv[nbinput+5]);
+	int randomseed = atoi(argv[nbinput+6]);
+	//	double initloup=atof(argv[nbinput+7]);
 	RNG::srand(randomseed);
 
 	// the extended system 
@@ -283,10 +285,19 @@ Timer timer;
 
 	// the trace 
 	o.trace=1;
-	// rigor mode
-	// o.rigor=false;
-	o.rigor=true;
 
+	// rigor mode
+	if (rigormode=="r")
+	  o.rigor=true;
+	else
+	  o.rigor=false;
+
+       	// contraction afer relaxation
+	if (recontraction=="r")
+	  o.recontract=true;
+	else
+	  o.recontract=false;
+        //integer objective
         o.integerobj=true;
 	if (loupfind=="no") o.loupfinderp=false;
 	// the allowed time for search

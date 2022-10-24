@@ -4,7 +4,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Sep 01, 2021
-// Last Update : Oct 06, 2022
+// Last Update : Oct 24, 2022
 //============================================================================
 
 #include "ibex_QibexOptimizer.h"
@@ -113,7 +113,7 @@ namespace ibex {
       return false;
   }
 
-  void QibexOptimizer::quadratic_relaxation_call(const IntervalVector & box, double objlb){
+  void QibexOptimizer::qibex_relaxation_call(const IntervalVector & box, double objlb){
     ofstream fic ("bound.ampl", ofstream::trunc);
     IntervalVector pt(n_x);
     for (int i=0; i< n_x; i++){
@@ -151,7 +151,7 @@ namespace ibex {
       
   }
 
-  bool QibexOptimizer::quadratic_relaxation_results(string& b, double& newlb, Vector & v, Vector& w){
+  bool QibexOptimizer::qibex_relaxation_results(string& b, double& newlb, Vector & v, Vector& w){
     ifstream fic1 ("results.txt");
     if (fic1.good()){
       string a;
@@ -225,8 +225,8 @@ namespace ibex {
 	
 	Vector w(n_y_max);
 	
-	if (quadratic_relaxation_results(status, newlb, v, w)){
-	  //cout << "b " << b << endl;
+	if (qibex_relaxation_results(status, newlb, v, w)){
+	  //cout << "status " << status << endl;
 	  //	  cout << " v " << v << endl;
 	  //	  cout << "n_x " << n_x << " n_y " << n_y << " v " << v << endl;
 	  //	 cout << " w " << w << endl;
@@ -234,7 +234,7 @@ namespace ibex {
 	  
 	    
 	  /*
-	    if (b=="infeasible")  //too strong for cplex (useful for ipopt ??)
+	    if (status=="infeasible")  //too strong for cplex (useful for ipopt ??)
 	    box.set_empty();
 	  */
 	 
@@ -320,7 +320,6 @@ namespace ibex {
 	if (associ[i]!= assocj[i]){
 	  gap = fabs(w[i+n_x]-v[associ[i]-1]*v[assocj[i]-1]);
 	  //	  gap = fabs((w[i+n_x]-v[associ[i]-1]*v[assocj[i]-1])* ref_coefs[associ[i]-1][assocj[i]-1]);
-
 	if (gap > gap0) gap0=gap;
 	//	cout << "gap " << gap << " i " << i << " w[i] " << w[i] << " " << v[associ[i]-1] << " " << v[assocj[i]-1] << endl;
 	if (gap > mingap
@@ -396,9 +395,8 @@ namespace ibex {
 
   double objlb= y.lb();
 
- 
-  //  cout << "oldlb " << objlb << endl;
-  quadratic_relaxation_call(qcp_box,objlb);
+   //  cout << "oldlb " << objlb << endl;
+  qibex_relaxation_call(qcp_box,objlb);
   
   string status;
   
@@ -418,13 +416,6 @@ namespace ibex {
     qibex_bisection_choice(c, qcp_box, v,w );
   
   
- 
-  
-  if (trace){
-    //    cout << " newlb " << newlb << " oldlb " << c.box[n].lb() << endl;
-    //  if (newlb >  NEG_INFINITY && newlb <= c.box[n].lb())
-    //    cout << " relaxation not useful " << endl;
-  }
   Interval y0=y;
   double ymax=POS_INFINITY;
   if (newlb > NEG_INFINITY){
