@@ -146,10 +146,10 @@ int main(int argc, char** argv){
 	Bsc * bs;
 	OptimLargestFirst * bs1;
 
-	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection=="lsmearmg" || bisection=="lsmearss" || bisection=="lsmearmgss")
+	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection == "minlpsmearsumrel" ||  bisection == "minlpsmearsum" || bisection=="lsmearmg" || bisection=="lsmearss" || bisection=="lsmearmgss")
 	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),true,prec);
         else if
-	  (bisection=="lsmearnoobj" || bisection=="smearsumnoobj" || bisection=="smearmaxnoobj" || bisection=="smearsumrelnoobj" || bisection == "minlpsmearsumrelnoobj" || bisection=="smearmaxrelnoobj" || bisection=="lsmearmgnoobj" )
+	  (bisection=="lsmearnoobj" || bisection=="smearsumnoobj" || bisection=="smearmaxnoobj" || bisection=="smearsumrelnoobj" || bisection == "minlpsmearsumnoobj" ||  bisection == "minlpsmearsumrelnoobj" || bisection=="smearmaxrelnoobj" || bisection=="lsmearmgnoobj" )
 	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),false,prec);
 
 	  
@@ -160,6 +160,13 @@ int main(int argc, char** argv){
 	  bs= new OptimLargestFirst(ext_sys.goal_var(),true,prec);
 	else if (bisection== "largestfirstnoobj")
 	  bs= new OptimLargestFirst(ext_sys.goal_var(),false,prec);
+	else if (bisection== "minlplargestfirst")
+	  bs= new MinlpLargestFirst(ext_sys,ext_sys.goal_var(),true,prec);
+	else if (bisection== "minlplargestfirstnoobj")
+	  bs= new MinlpLargestFirst(ext_sys,ext_sys.goal_var(),false,prec);
+
+
+	
 	else if (bisection=="smearsum" || bisection== "smearsumnoobj")
 	  bs = new SmearSum(ext_sys,prec,*bs1);
 	else if (bisection=="smearmax" || bisection == "smearmaxnoobj")
@@ -168,6 +175,10 @@ int main(int argc, char** argv){
 	  bs = new SmearSumRelative(ext_sys,prec,*bs1);
 	else if (bisection=="minlpsmearsumrel" || bisection=="minlpsmearsumrelnoobj")
           bs = new MinlpSmearSumRelative(ext_sys,prec,*bs1);
+	else if (bisection=="minlpsmearsum" || bisection=="minlpsmearsumnoobj")
+          bs = new MinlpSmearSum(ext_sys,prec,*bs1);
+
+	
 	else if (bisection=="smearmaxrel" || bisection=="smearmaxrelnoobj")
 	  bs = new SmearMaxRelative(ext_sys,prec,*bs1);
 	else if  (bisection=="lsmear" || bisection=="lsmearnoobj"){
