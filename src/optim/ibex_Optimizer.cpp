@@ -208,12 +208,18 @@ void Optimizer::update_uplo_of_epsboxes(double ymin) {
 void Optimizer::handle_cell(Cell& c) {
         //  cout << " before contraction " << c.box << endl;
 	contract_and_bound(c);
-	//cout << " after contraction " << c.box << endl;
-	if (c.box.is_empty()) {
+	//	cout << " after contraction " << c.box << endl;
+	if (c.box.is_empty()) { // cout << "box empty " << endl;
 		delete &c;
 	}
 	else {
-	  if (integerobj) c.box[goal_var]=integer( c.box[goal_var]);
+	  
+	  if (integerobj) {
+	    //	    cout << " integerobj before " << c.box[goal_var] << endl;
+	    c.box[goal_var]=integer( c.box[goal_var]);
+	    //cout << " integerobj after " << c.box[goal_var] << endl;
+	    if (c.box[goal_var].is_empty()) {delete&c ; return;}
+	  }
 	  buffer.push(&c);
 	}
 }
@@ -232,12 +238,13 @@ void Optimizer::contract_and_bound(Cell& c) {
 	y &= Interval(NEG_INFINITY,ymax);
         if (integerobj) y=integer(y);
 	if (y.is_empty()) {
-		c.box.set_empty();
-		return;
-	} else {
-		c.prop.update(BoxEvent(c.box,BoxEvent::CONTRACT,BitSet::singleton(n+1,goal_var)));
+	  c.box.set_empty();
+	  return;
 	}
-	
+	else {
+	  c.prop.update(BoxEvent(c.box,BoxEvent::CONTRACT,BitSet::singleton(n+1,goal_var)));
+	}
+
 
 	/*================ contract x with f(x)=y and g(x)<=0 ================*/
 	//cout << " [contract]  x before=" << c.box << endl;

@@ -127,7 +127,7 @@ NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended,
 			const Function& fc=sys.ctrs[c].f;
 			CmpOp opc=sys.ctrs[c].op;
 
-			if (opc==EQ && eps>0) {
+			if ((opc==EQ || opc==LEQ) && eps>0) {
 				// check if the constraint is under the form f(x)=cst
 				//pair<const ExprNode*, const Domain*> p=sys.ctrs[i].....
 				//if (p.first!=NULL || eps>0) {
@@ -159,14 +159,15 @@ NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended,
 				const ExprNode& ctrl = ((*fu)-ExprConstant::new_(u)).simplify(simpl_level);
 				const ExprNode& ctru = (ExprConstant::new_(l)-(*fl)).simplify(simpl_level);
 				_ctrs.push_back(new NumConstraint(argsl,ExprCtr(ctrl,LEQ)));
-				_ctrs.push_back(new NumConstraint(argsu,ExprCtr(ctru,LEQ)));
+				if (opc==EQ) _ctrs.push_back(new NumConstraint(argsu,ExprCtr(ctru,LEQ)));
 
 				for (int i=0; i<fc.expr().dim.nb_rows(); i++) {
 					for (int j=0; j<fc.expr().dim.nb_cols(); j++) {
 						_f_ctr.push_back(&(f_cpy[k]-ExprConstant::new_(u[i][j])));
 						_ops.push_back(LEQ);
-						_f_ctr.push_back(&(ExprConstant::new_(l[i][j])-f_cpy[k]));
-						_ops.push_back(LEQ);
+						if (opc==EQ){
+						  _f_ctr.push_back(&(ExprConstant::new_(l[i][j])-f_cpy[k]));
+						  _ops.push_back(LEQ);}
 						k++;
 					}
 				}
