@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : optimizer04qcpint.cpp
-// Author      :  Bertrand Neveu
+// File        : optimizer04qcpeqint.cpp
+// Author      : Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jul 12, 2012
@@ -77,23 +77,24 @@ Timer timer;
 	
 	string recontraction= argv[nbinput+1];
 	string rigormode = argv[nbinput+2];
-	double prec= atof(argv[nbinput+3]);
-	double goalprec= atof (argv[nbinput+4]);
-	double timelimit= atof(argv[nbinput+5]);
+	double qibexwidth= atof(argv[nbinput+3]);
+	int integerobjective= atoi(argv[nbinput+4]);
+	double prec= atof(argv[nbinput+5]);
+	double goalprec= atof (argv[nbinput+6]);
+	double tolerance=atof(argv[nbinput+7]);
+	double timelimit= atof(argv[nbinput+8]);
 	//	double eqeps= 1.e-6;
-	double eqeps= 1.e-8;
-	//	double tolerance=0.0;
-	double tolerance=1.e-4;
-	int randomseed = atoi(argv[nbinput+6]);
-	//	double initloup=atof(argv[nbinput+7]);
+	double eqeps= tolerance;
+	int randomseed = atoi(argv[nbinput+9]);
+	//	double initloup=atof(argv[nbinput+10]);
 	RNG::srand(randomseed);
 
 	// the extended system 
 	ExtendedSystem ext_sys(*sys,eqeps);
-	//	NormalizedSystem norm_sys(*sys,eqeps);
+	NormalizedSystem norm_sys(*sys,eqeps);
 
 	ext_sys.tolerance=tolerance;
-	//	norm_sys.tolerance=tolerance;
+	norm_sys.tolerance=tolerance;
 	sys->tolerance=tolerance;
 	//	cout << "nor_sys" << norm_sys << endl;
 	BitSet b (ext_sys.nb_var);
@@ -104,23 +105,24 @@ Timer timer;
 	ext_sys.set_integer_variables(b);
 	ext_sys.minlp=true;
 	cout << " integer variables " << *(ext_sys.get_integer_variables()) << endl;
-	sys->minlp=true;
-	sys->set_integer_variables(b);
+	norm_sys.minlp=true;
+	norm_sys.set_integer_variables(b);
+
 	//	cout << "loupfind " << loupfind << endl;
 	LoupFinder* loupfinder;
 	if (loupfind=="xninhc4")
-	  //loupfinder= new LoupFinderDefault (norm_sys,true);
-	  loupfinder= new LoupFinderDefault (*sys,true);
+	  loupfinder= new LoupFinderDefault (norm_sys,true);
+	//loupfinder= new LoupFinderDefault (*sys,true);
 	else if (loupfind=="xn")
-	  //	  	  loupfinder= new LoupFinderDefault (norm_sys,false);
-	  loupfinder= new LoupFinderDefault (*sys,false);
+	  loupfinder= new LoupFinderDefault (norm_sys,false);
+	//loupfinder= new LoupFinderDefault (*sys,false);
 	  
 	else if (loupfind=="inhc4")
-	  //	  	  loupfinder= new LoupFinderInHC4 (norm_sys);
-	  loupfinder= new LoupFinderInHC4 (*sys);
+	  loupfinder= new LoupFinderInHC4 (norm_sys);
+	//loupfinder= new LoupFinderInHC4 (*sys);
 	else if (loupfind=="prob" || loupfind=="no")
-	  //	  	   loupfinder= new LoupFinderProbing (norm_sys);
-	  loupfinder= new LoupFinderProbing (*sys);
+	  loupfinder= new LoupFinderProbing (norm_sys);
+	//loupfinder= new LoupFinderProbing (*sys);
 	  
 	else 
 	  {cout << " loupfinder not found " << endl;  return(-1) ;}
@@ -152,10 +154,12 @@ Timer timer;
 	Bsc * bs;
 	OptimLargestFirst * bs1;
 
-	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection=="lsmearmg" || bisection=="lsmearss" || bisection=="lsmearmgss" || bisection=="qibexsmearsumrel")
-	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),true,prec,0.5);
-	if  (bisection=="lsmearnoobj" || bisection=="lsmearmgnoobj" || bisection=="smearsumrelnoobj"|| bisection=="smearsumnoobj" || bisection=="qibexsmearsumrelnoobj")
-	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),false,prec,0.5);
+	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection == "minlpsmearsumrel" ||  bisection == "minlpsmearsum" || bisection=="lsmearmg" || bisection=="lsmearss" || bisection=="lsmearmgss" || bisection=="qibexsmearsumrel" ||bisection=="qibexsmearsum" ||bisection=="qibexlargestfirst" )
+	  //	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),true,prec,0.5);
+	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),true,prec);
+	if  (bisection=="lsmearnoobj" || bisection=="lsmearmgnoobj" || bisection=="smearsumrelnoobj"|| bisection=="smearsumnoobj" || bisection == "minlpsmearsumnoobj" ||  bisection == "minlpsmearsumrelnoobj" || bisection=="qibexsmearsumrelnoobj" || bisection=="qibexsmearsumnoobj" || bisection == "qibexlargestfirstnoobj" )
+	  //	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),false,prec,0.5);
+	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),false,prec);
 	if (bisection=="roundrobin")
 	  bs = new RoundRobin (prec,0.5);
 	else if (bisection=="qibexroundrobin")
@@ -174,12 +178,20 @@ Timer timer;
 	  bs = new SmearMax(ext_sys,prec,*bs1);
 	else if (bisection=="smearsumrel" || bisection=="smearsumrelnoobj")
 	  bs = new SmearSumRelative(ext_sys,prec,*bs1);
+	else if (bisection=="minlpsmearsumrel" || bisection=="minlpsmearsumrelnoobj")
+          bs = new MinlpSmearSumRelative(ext_sys,prec,*bs1);
+	else if (bisection=="minlpsmearsum" || bisection=="minlpsmearsumnoobj")
+          bs = new MinlpSmearSum(ext_sys,prec,*bs1);
+
+	
 	else if (bisection=="smearmaxrel")
 	  bs = new SmearMaxRelative(ext_sys,prec,*bs1);
 	else if  (bisection=="lsmear" || bisection=="lsmearnoobj")
 	  bs = new LSmear(ext_sys,prec,*bs1,LSMEAR);
 	else if  (bisection=="qibexsmearsumrel" || bisection=="qibexsmearsumrelnoobj")
 	  bs = new QibexSmearSumRelative(ext_sys,prec,*bs1);
+	else if  (bisection=="qibexsmearsum" || bisection=="qibexsmearsumnoobj")
+	  bs = new QibexSmearSum(ext_sys,prec,*bs1);
 	else if (bisection=="lsmearmg"|| bisection=="lsmearmgnoobj" )
 	  bs = new LSmear(ext_sys,prec,*bs1);
 	else {cout << bisection << " is not an implemented  bisection mode "  << endl; return -1;}
@@ -189,7 +201,6 @@ Timer timer;
 	// the first contractor called
 	CtcHC4 hc4(ext_sys.ctrs,0.01,true);
 	CtcCompo hc4integ (integ, hc4, integ);
-	//	CtcHC4 hc4(ext_sys.ctrs,0.1,true);
 	// hc4 inside acid and 3bcid : incremental propagation beginning with the shaved variable
 	CtcHC4 hc44cid(ext_sys.ctrs,0.1,true);
 	// hc4 inside xnewton loop 
@@ -203,9 +214,8 @@ Timer timer;
 	// The ACID contractor (component of the contractor  when filtering == "acidhc4")
 	CtcAcid acidhc4(ext_sys,hc44cid,true);
 	// hc4 followed by acidhc4 : the actual contractor used when filtering == "acidhc4" 
-	//CtcCompo hc4acidhc4 (hc4, acidhc4);
 	CtcCompo hc4acidhc4 (integ, hc4, integ, acidhc4, integ);
-	//	CtcIdentity id (ext_sys.nb_var);
+
 
 	Ctc* ctc;
 	if (filtering == "hc4")
@@ -258,7 +268,7 @@ Timer timer;
 	    cout << " xnart " << endl;
 	    cxn_poly = new CtcPolytopeHull(*lr);
 	    cxn_poly1 = new CtcPolytopeHull(*lr1);
-	    cxn_compo =new CtcCompo(*cxn_poly1, *cxn_poly, hc44xn);
+	    cxn_compo =new CtcCompo(integ,*cxn_poly1, *cxn_poly, hc44xn, integ);
 	    //	    cxn = new CtcFixPoint (*cxn_compo, default_relax_ratio);
 	    
 	    cxn =new CtcCompo(*cxn_poly1, *cxn_poly, hc44xn);
@@ -267,7 +277,7 @@ Timer timer;
 	//  the actual contractor  ctc + linear relaxation 
 	Ctc* ctcxn;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn" || linearrelaxation=="xnart") 
-          ctcxn= new CtcCompo  (*ctc, *cxn); 
+          ctcxn= new CtcCompo  (*ctc, *cxn,integ); 
 	
 	else
 	  ctcxn = ctc;
@@ -275,16 +285,13 @@ Timer timer;
 
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
 	//	double minwidth=1.0; // for bisection qibex heuristics
-	double minwidth=10; // for bisection qibex heuristics
+	//	double minwidth=10; // for bisection qibex heuristics
+	double minwidth=0.9; // for bisection qibex heuristics
 
 
-	
 	QibexOptimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),minwidth,tolerance,prec,goalprec,goalprec);
 
 	//	cout << " sys.box " << sys->box << endl;
-
-	// the trace 
-	o.trace=1;
 
 	// rigor mode
 	if (rigormode=="r")
@@ -297,11 +304,18 @@ Timer timer;
 	  o.recontract=true;
 	else
 	  o.recontract=false;
-        //integer objective
-        o.integerobj=true;
-	if (loupfind=="no") o.loupfinderp=false;
-	// the allowed time for search
 
+	if (loupfind=="no") o.loupfinderp=false;
+
+        //integer objective
+	o.integerobj=integerobjective;
+
+
+       	cout << " sys.box " << sys->box << endl;
+	
+	// the trace 
+	o.trace=1;
+	// the allowed time for search
 	o.timeout=timelimit;
 	cout << " timelimit " << timelimit << endl;
 	cout.precision(16);
@@ -325,7 +339,7 @@ Timer timer;
 	*/
 	delete bs;
 
-	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection=="lsmearmg" || bisection=="qibexsmearsumrel"  || bisection=="lsmearnoobj" || bisection=="lsmearmgnoobj" || bisection=="smearsumrelnoobj"|| bisection=="smearsumnoobj" || bisection=="qibexsmearsumrelnoobj")
+	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection=="lsmearmg" ||bisection =="minlpsmearsumrel" || bisection=="qibexsmearsumrel"  || bisection=="lsmearnoobj" || bisection=="lsmearmgnoobj" || bisection=="smearsumrelnoobj"|| bisection=="smearsumnoobj" || bisection == "minlpsmearsumrelnoobj"|| bisection=="qibexsmearsumrelnoobj" || bisection == "qibexsmearsumnoobj" || bisection== "qibexlargestfirstnoobj")
 	  delete bs1;
 	
 
@@ -342,7 +356,7 @@ Timer timer;
 	  delete cxn_poly1;
 	}
 	delete sys;
-
+	
 	
 	}
 

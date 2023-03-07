@@ -51,17 +51,6 @@ int main(int argc, char** argv){
 	    sys->box[i] =  Interval(sys->box[i].lb(), 1.e8);
 	}
 
-	  /*
-	  if (sys->box[i].lb() == -1.e8) 
-	    	    //	     sys->box[i]= Interval(NEG_INFINITY,sys->box[i].ub());
-	    //	    sys->box[i]= Interval(-1.e100,sys->box[i].ub());
-	    sys->box[i]= Interval(-10.,sys->box[i].ub());
-	  if (sys->box[i].ub() == 1.e8) 
-	    //      sys->box[i]= Interval(sys->box[i].lb(), POS_INFINITY);
-	    //	    sys->box[i]= Interval(sys->box[i].lb(), 1.e100);
-	    sys->box[i]= Interval(sys->box[i].lb(), 10.);
-	    }
-	  */
 
 	
         string integerfile = argv[2];
