@@ -249,8 +249,10 @@ namespace ibex {
 	Vector w(n_y_max);
 	
 	if (qibex_relaxation_results(status, newlb, v, w)){
+	  if (trace){
 	   cout << "status " << status << endl;
 	   cout << " nb cells " << nb_cells << endl;
+	  }
 	  //	  cout << " v " << v << endl;
 	  //	  cout << "n_x " << n_x << " n_y " << n_y << " v " << v << endl;
 	  //	 cout << " w " << w << endl;
@@ -286,8 +288,6 @@ namespace ibex {
 	}
 
         tuple <Vector,Vector,double> triple(v,w,newlb);
-	//	cout << " newlb "<< newlb << " box " << box << endl;
-	//	cout << " v"<< p.first << endl;
 	return triple;
   }
     
@@ -404,19 +404,18 @@ namespace ibex {
 	c.box.set_empty(); return;
       }
     }
-   
     IntervalVector qcp_box(n);
     read_ext_box(c.box,qcp_box);
 
     double objlb= y.lb();
-
+    if (objlb < -1.e300) objlb=-1.e300;
     //  cout << "c.box " << c.box << endl;
-    //  cout << "oldlb " << objlb << endl;
+    cout << "objlb " << objlb << endl;
     qibex_relaxation_call(qcp_box,objlb);
   
     string status;
   
-    tuple <Vector,Vector,double> vecnewbounds  = qibex_relaxation_analysis (qcp_box,status);
+  
     int n_y_max=n_x+(n_x*(n_x+1))/2;
 
     Vector v (n_x);
@@ -425,7 +424,8 @@ namespace ibex {
 	
 
     double newlb;
-    tie (v,w,newlb) = vecnewbounds;
+  
+    tie (v,w,newlb) = qibex_relaxation_analysis (qcp_box,status);
   
     if (qcp_box.is_empty()) {c.box.set_empty(); return;}
     if  (status== "solved" || status== "'solved?'")
@@ -485,6 +485,12 @@ namespace ibex {
     }
   }
 
+  void QibexOptimizer:: contract(Cell & c)
+  {Optimizer::contract(c);
+    if (c.box.is_empty()) return;
+    qibex_contract_and_bound(c);
+  }
+  
   double QibexOptimizer::compute_ymax(){
      if (integerobj)
        return loup-1;

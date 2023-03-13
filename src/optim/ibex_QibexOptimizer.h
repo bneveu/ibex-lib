@@ -29,6 +29,7 @@ namespace ibex {
 		   double abs_eps_f=OptimizerConfig::default_abs_eps_f);
 
     void init();
+    void contract(Cell & c);
     /* when using quadratic convex relaxation, contracts the objective and may return a new loup  */
     void qibex_contract_and_bound(Cell& c);
 

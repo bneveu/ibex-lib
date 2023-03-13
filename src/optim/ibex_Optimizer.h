@@ -361,6 +361,16 @@ protected:
 	void contract_and_bound(Cell& c);
 
 	/**
+	 * \brief Contract : call the contractor 
+         * 
+         * <ul>
+	 * <li> contract with the contractor ctc,
+	 * <\ul>
+         * virtual : can be redefined if other contractors are called (for example in qibex)
+	 */
+        virtual  void contract(Cell& c);
+  
+	/**
 	 * \brief Update the entailed constraint for the current box
 	 *
 	 * \return false if unsatisfiability is detected, true otherwise.
@@ -413,8 +423,6 @@ protected:
 	 */
 	void read_ext_box(const IntervalVector& ext_box, IntervalVector& box);
 
-
-        virtual void qibex_contract_and_bound(Cell& c);
 
 	Optimizer(const Optimizer&); // forbidden
 

@@ -206,7 +206,7 @@ void Optimizer::update_uplo_of_epsboxes(double ymin) {
 }
 
 void Optimizer::handle_cell(Cell& c) {
-  //        cout << " before contraction " << c.box << endl;
+         //     cout << " before contraction " << c.box << endl;
 	contract_and_bound(c);
 	//	cout << " after contraction " << c.box << endl;
 	if (c.box.is_empty()) { // cout << "box empty " << endl;
@@ -245,25 +245,8 @@ void Optimizer::contract_and_bound(Cell& c) {
 	  c.prop.update(BoxEvent(c.box,BoxEvent::CONTRACT,BitSet::singleton(n+1,goal_var)));
 	}
 
+        contract(c);
 
-	/*================ contract x with f(x)=y and g(x)<=0 ================*/
-	//cout << " [contract]  x before=" << c.box << endl;
-	//cout << " [contract]  y before=" << y << endl;
-
-	ContractContext context(c.prop);
-	if (c.bisected_var!=-1) {
-		context.impact.clear();
-		context.impact.add(c.bisected_var);
-		context.impact.add(goal_var);
-	}
-	//       	cout << " before ctc contract " << c.box << endl;
-	ctc.contract(c.box, context);
-	//	cout << " after ctc contract " << c.box << endl;
-	//cout << c.prop << endl;
-	if (c.box.is_empty()) return;
-	//	cout << " avant qibex " << endl;
-	qibex_contract_and_bound(c);
-	//	cout << " apres qibex " << endl;
 	if (c.box.is_empty()) return;
 	
 	//cout << " [contract]  x after=" << c.box << endl;
@@ -313,14 +296,35 @@ void Optimizer::contract_and_bound(Cell& c) {
 
 	// ** important: ** must be done after upper-bounding
 	//kkt.contract(tmp_box);
-
+	
 	if (tmp_box.is_empty()) {
 		c.box.set_empty();
-	} else {
-		// the current extended box in the cell is updated
-		write_ext_box(tmp_box,c.box);
+		
+	}/*
+	else {
+	      the current extended box in the cell is updated     POURQUOI BN ???
+	  		write_ext_box(tmp_box,c.box);
 	}
+	*/
 }
+
+
+void  Optimizer::contract(Cell & c){
+  	/*================ contract x with f(x)=y and g(x)<=0 ================*/
+	//cout << " [contract]  x before=" << c.box << endl;
+	//cout << " [contract]  y before=" << y << endl;
+
+	ContractContext context(c.prop);
+	if (c.bisected_var!=-1) {
+		context.impact.clear();
+		context.impact.add(c.bisected_var);
+		context.impact.add(goal_var);
+	}
+	//	cout << " before ctc contract " << c.box << endl;
+	ctc.contract(c.box, context);
+	//        cout << " after ctc contract " << c.box << endl;
+	//cout << c.prop << endl;
+  }
 
 Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
 	start(init_box, obj_init_bound);
@@ -451,8 +455,6 @@ void Optimizer::start(const CovOptimData& data, double obj_init_bound) {
 
 
 
-  // virtual function to implement specific work to do in some optimizer subclasses.
-  void Optimizer::qibex_contract_and_bound(Cell & c){;}
 
 
 Optimizer::Status Optimizer::optimize() {
