@@ -30,12 +30,13 @@ int main(int argc, char** argv){
 	try {
 Timer timer;
 	timer.start();
-	if (argc<9) {
-		cerr << "usage: optimizer04 filename filtering linear_relaxation bisection upperbounding strategy [beamsize] prec goal_prec timelimit randomseed"  << endl;
+	if (argc<16) {
+		cerr << "usage: optimizer04 filename integerfile filtering linear_relaxation bisection upperbounding strategy [beamsize] recontract rigor qibexwidth integerobj prec goal_prec tolerance timelimit randomseed"  << endl;
 		exit(1);
 	}
 
 	System * sys;
+	NormalizedSystem * norm_sys;
 	#ifdef __IBEX_AMPL_INTERFACE_H__
 	std::size_t found = string(argv[1]).find(".nl");
 	if (found!=std::string::npos){
@@ -57,15 +58,15 @@ Timer timer;
 	}
 	
 	string integerfile = argv[2];
-	ifstream fic(integerfile);
+	ifstream ficint(integerfile);
 	int nbint;
-	fic >> nbint;
+	ficint >> nbint;
 	vector<int> l;
 	int k;
 	for (int i=0;i<nbint; i++){
-	  fic >> k;
+	  ficint >> k;
 	  l.push_back(k);}
-
+        ficint.close();
 	string filtering = argv[3];
 	string linearrelaxation= argv[4];
 	string bisection= argv[5];
@@ -91,10 +92,20 @@ Timer timer;
 
 	// the extended system 
 	ExtendedSystem ext_sys(*sys,eqeps);
-	NormalizedSystem norm_sys(*sys,eqeps);
+	// no need of normalized system if all constraints are LEQ
+	int leq=0;
+	for (int j=0; j < sys->nb_ctr; j++){
+	  if (sys->ops[j] == LEQ)
+	    leq++;
+	}
+	if (leq==sys->nb_ctr)  cout << "only leq " << endl;
+	if (leq==sys->nb_ctr)
+	  norm_sys=(NormalizedSystem*)sys;
+	else
+	  norm_sys= new NormalizedSystem (*sys,eqeps);
 
 	ext_sys.tolerance=tolerance;
-	norm_sys.tolerance=tolerance;
+	norm_sys->tolerance=tolerance;
 	sys->tolerance=tolerance;
 	//	cout << "nor_sys" << norm_sys << endl;
 	BitSet b (ext_sys.nb_var);
@@ -105,24 +116,20 @@ Timer timer;
 	ext_sys.set_integer_variables(b);
 	ext_sys.minlp=true;
 	cout << " integer variables " << *(ext_sys.get_integer_variables()) << endl;
-	norm_sys.minlp=true;
-	norm_sys.set_integer_variables(b);
+	norm_sys->minlp=true;
+	norm_sys->set_integer_variables(b);
 
 	//	cout << "loupfind " << loupfind << endl;
 	LoupFinder* loupfinder;
 	if (loupfind=="xninhc4")
-	  loupfinder= new LoupFinderDefault (norm_sys,true);
-	//loupfinder= new LoupFinderDefault (*sys,true);
+	  loupfinder= new LoupFinderDefault (*norm_sys,true);
 	else if (loupfind=="xn")
-	  loupfinder= new LoupFinderDefault (norm_sys,false);
-	//loupfinder= new LoupFinderDefault (*sys,false);
+	  loupfinder= new LoupFinderDefault (*norm_sys,false);
 	  
 	else if (loupfind=="inhc4")
-	  loupfinder= new LoupFinderInHC4 (norm_sys);
-	//loupfinder= new LoupFinderInHC4 (*sys);
+	  loupfinder= new LoupFinderInHC4 (*norm_sys);
 	else if (loupfind=="prob" || loupfind=="no")
-	  loupfinder= new LoupFinderProbing (norm_sys);
-	//loupfinder= new LoupFinderProbing (*sys);
+	  loupfinder= new LoupFinderProbing (*norm_sys);
 	  
 	else 
 	  {cout << " loupfinder not found " << endl;  return(-1) ;}
@@ -155,10 +162,8 @@ Timer timer;
 	OptimLargestFirst * bs1;
 
 	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection == "minlpsmearsumrel" ||  bisection == "minlpsmearsum" || bisection=="lsmearmg" || bisection=="lsmearss" || bisection=="lsmearmgss" || bisection=="qibexsmearsumrel" ||bisection=="qibexsmearsum" ||bisection=="qibexlargestfirst" )
-	  //	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),true,prec,0.5);
 	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),true,prec);
 	if  (bisection=="lsmearnoobj" || bisection=="lsmearmgnoobj" || bisection=="smearsumrelnoobj"|| bisection=="smearsumnoobj" || bisection == "minlpsmearsumnoobj" ||  bisection == "minlpsmearsumrelnoobj" || bisection=="qibexsmearsumrelnoobj" || bisection=="qibexsmearsumnoobj" || bisection == "qibexlargestfirstnoobj" )
-	  //	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),false,prec,0.5);
 	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),false,prec);
 	if (bisection=="roundrobin")
 	  bs = new RoundRobin (prec,0.5);
@@ -282,24 +287,34 @@ Timer timer;
 	else
 	  ctcxn = ctc;
 
-
+	IntervalVector boxn (sys->nb_var);
+	IntervalVector gradient(sys->nb_var);
+	IntervalVector gradient1(sys->nb_var);
+	for (int i=0; i < sys->nb_var; i++)
+	  boxn[i]=Interval(0.0,0.0);
+	gradient=  sys->goal->gradient(boxn);
+	ofstream fic("diag_hessian.txt");
+	for (int i=0; i < sys->nb_var; i++){
+	  boxn[i]=Interval(1.0,1.0);
+	  gradient1=sys->goal->gradient(boxn);
+	  fic << ((gradient1[i]-gradient[i])/2).mid() << " " ;
+	  boxn[i]=Interval(0.0,0.0);
+	}
+	fic.close();
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
-	//	double minwidth=1.0; // for bisection qibex heuristics
-	//	double minwidth=10; // for bisection qibex heuristics
-	double minwidth=0.9; // for bisection qibex heuristics
+	QibexOptimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),qibexwidth,tolerance,prec,goalprec,goalprec);
 
+	cout << " sys.box " << sys->box << endl;
 
-	QibexOptimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),minwidth,tolerance,prec,goalprec,goalprec);
-
-	//	cout << " sys.box " << sys->box << endl;
-
+	// the trace 
+	o.trace=1;
 	// rigor mode
 	if (rigormode=="r")
 	  o.rigor=true;
 	else
 	  o.rigor=false;
 
-       	// contraction afer relaxation
+       	// contraction after relaxation
 	if (recontraction=="r")
 	  o.recontract=true;
 	else
@@ -310,11 +325,6 @@ Timer timer;
         //integer objective
 	o.integerobj=integerobjective;
 
-
-       	cout << " sys.box " << sys->box << endl;
-	
-	// the trace 
-	o.trace=1;
 	// the allowed time for search
 	o.timeout=timelimit;
 	cout << " timelimit " << timelimit << endl;
@@ -327,6 +337,7 @@ Timer timer;
 	timer.stop();
 	double time = timer.get_time();
 	cout << " presolve time " << time << endl;
+	
 	o.optimize(sys->box);
 	//	std::cerr.rdbuf(OldBuf);
 
@@ -339,7 +350,7 @@ Timer timer;
 	*/
 	delete bs;
 
-	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection=="lsmearmg" ||bisection =="minlpsmearsumrel" || bisection=="qibexsmearsumrel"  || bisection=="lsmearnoobj" || bisection=="lsmearmgnoobj" || bisection=="smearsumrelnoobj"|| bisection=="smearsumnoobj" || bisection == "minlpsmearsumrelnoobj"|| bisection=="qibexsmearsumrelnoobj" || bisection == "qibexsmearsumnoobj" || bisection== "qibexlargestfirstnoobj")
+	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection=="lsmearmg" || bisection =="minlpsmearsumrel" || bisection =="minlpsmearsum" || bisection=="qibexsmearsumrel" || bisection=="lsmearnoobj" || bisection=="lsmearmgnoobj" || bisection=="smearsumrelnoobj"|| bisection=="smearsumnoobj"|| bisection =="minlpsmearsumnoobj"|| bisection == "minlpsmearsumrelnoobj"|| bisection=="qibexsmearsumrelnoobj" || bisection == "qibexsmearsumnoobj" || bisection== "qibexlargestfirstnoobj")
 	  delete bs1;
 	
 
@@ -356,7 +367,7 @@ Timer timer;
 	  delete cxn_poly1;
 	}
 	delete sys;
-	
+	if (leq <sys->nb_ctr) delete norm_sys;
 	
 	}
 

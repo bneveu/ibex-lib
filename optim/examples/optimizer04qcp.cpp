@@ -30,8 +30,8 @@ int main(int argc, char** argv){
 	try {
 Timer timer;
 	timer.start();
-	if (argc<9) {
-		cerr << "usage: optimizer04 filename filtering linear_relaxation bisection upperbounding strategy [beamsize] prec goal_prec timelimit randomseed"  << endl;
+	if (argc<14) {
+		cerr << "usage: optimizer04 filename filtering linear_relaxation bisection upperbounding strategy [beamsize] recontract rigor qibexwidth prec goal_prec tolerance timelimit randomseed"  << endl;
 		exit(1);
 	}
 
@@ -98,22 +98,18 @@ Timer timer;
 	sys->tolerance=tolerance;
 	//	cout << "nor_sys" << norm_sys << endl;
 
-
 	//	cout << "loupfind " << loupfind << endl;
 	LoupFinder* loupfinder;
 	if (loupfind=="xninhc4")
 	  loupfinder= new LoupFinderDefault (*norm_sys,true);
-	  //  loupfinder= new LoupFinderDefault (*sys,true);
 	else if (loupfind=="xn")
 	  loupfinder= new LoupFinderDefault (*norm_sys,false);
-	  //loupfinder= new LoupFinderDefault (*sys,false);
 	  
 	else if (loupfind=="inhc4")
-	  	  	  loupfinder= new LoupFinderInHC4 (*norm_sys);
-	//loupfinder= new LoupFinderInHC4 (*sys);
+	  loupfinder= new LoupFinderInHC4 (*norm_sys);
+
 	else if (loupfind=="prob" || loupfind=="no")
-	  	  	   loupfinder= new LoupFinderProbing (*norm_sys);
-	//loupfinder= new LoupFinderProbing (*sys);
+	  loupfinder= new LoupFinderProbing (*norm_sys);
 	  
 	else 
 	  {cout << " loupfinder not found " << endl;  return(-1) ;}
@@ -184,7 +180,7 @@ Timer timer;
 	else {cout << bisection << " is not an implemented  bisection mode "  << endl; return -1;}
 
 	// The contractors
-
+        CtcIdentity ident(ext_sys.nb_var);
 	// the first contractor called
 	CtcHC4 hc4(ext_sys.ctrs,0.01,true);
 	//	CtcHC4 hc4(ext_sys.ctrs,0.1,true);
@@ -214,6 +210,8 @@ Timer timer;
 	else if 
 	  (filtering =="3bcidhc4")
 	  ctc= &hc43bcidhc4;
+	else if (filtering=="no")
+	  ctc=&ident;
 	else {cout << filtering <<  " is not an implemented  contraction  mode "  << endl; return -1;}
 
 	Linearizer* lr;
@@ -266,12 +264,8 @@ Timer timer;
 	
 	else
 	  ctcxn = ctc;
-	/*
-	Ctc* ctckkt = new CtcKhunTucker(norm_sys, true);
-	ctcxn = new CtcCompo (*ctcxn , *ctckkt);
-	*/
+	
 
-	// the optimizer : the same precision goalprec is used as relative and absolute precision
 
 	IntervalVector boxn (sys->nb_var);
 	IntervalVector gradient(sys->nb_var);
@@ -287,9 +281,10 @@ Timer timer;
 	  boxn[i]=Interval(0.0,0.0);
 	}
 	fic.close();
+	// the optimizer : the same precision goalprec is used as relative and absolute precision
 	QibexOptimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),qibexwidth,tolerance,prec,goalprec,goalprec);
 
-	//	cout << " sys.box " << sys->box << endl;
+	cout << " sys.box " << sys->box << endl;
 
 	// the trace 
 	o.trace=1;
@@ -299,11 +294,12 @@ Timer timer;
 	else
 	  o.rigor=false;
 
-	// contraction afer relaxation
+	// contraction after relaxation
 	if (recontraction=="r")
 	  o.recontract=true;
 	else
 	  o.recontract=false;
+	
 	if (loupfind=="no") o.loupfinderp=false;
 	// the allowed time for search
 
