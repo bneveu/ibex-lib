@@ -1,0 +1,382 @@
+reset;
+option show_stats 1;
+option prestats 1;
+option display 1;
+
+#option solver "/libre/neveu/ibex-lib/ampl/ampl.linux-intel64/ipopt";
+option solver "/libre/neveu/ibex-lib/ampl/ampl.linux-intel64/gurobi";
+#option solver "/libre/neveu/cplex/cplex/bin/x86-64_linux/cplexamp";
+#options ipopt_options "nlp_scaling_method=none mu_init=1e-2 max_iter=500";
+#options ipopt_options  "print_level=0 output_file=toto.txt";
+option solver_msg 0;
+option cplex_options "threads=1";
+options gurobi_options "threads=1";
+
+#option cplex_options 'reqconvex=1 timelimit=3600 mipdisplay=1 timing=1 mipinterval=1000 ' ;
+
+#option solver ipopt;
+#options ipopt_options "nlp_scaling_method=none mu_init=1e-2 max_iter=500";
+
+model model_quad_relax.mod
+data data.ampl
+data bound.ampl;
+data vp_cert.ampl;
+data prec.ampl;
+let is_integer:=0;
+
+if (vp_cert < 0 and vp_cert < -lambda) then
+let lambda := -vp_cert;
+
+
+solve;
+
+####################################################
+########  Compute the gradient of the lagrangian function ##############
+####################################################
+
+
+param size_g;
+#########  pure continuous case #############
+let size_g:= n+m+p+4*n_y+1; # + 1 for the constant term
+
+############## if variables are integer additional constrants cor5 ########
+param nb_diag_y;
+let nb_diag_y:=0;
+if (  is_integer==1) then{
+   for{s in n-n_y+1..n : assoc_prod[s-n+n_y,1] == assoc_prod[s-n+n_y,2]}{
+   let nb_diag_y:=nb_diag_y+1;
+   }
+   let size_g:= size_g+nb_diag_y;
+}
+
+param G{i in 1..size_g,s in 1..size_g} default 0;
+
+param cpt_y;
+param cpt_mc5;
+let cpt_mc5:=1;
+for {i in 1..size_g}
+{
+
+	   ##### gradient for x_i #######
+	   if (i<= n -n_y) then
+	   {
+		
+		let G[i,1] := c[i];
+	   	for {s in 2..size_g}
+		{
+			######  objective function ##########
+			if (s<= n -n_y+1) then
+			{
+			let G[i,s] := Q[i,s-1]*2;
+			}
+
+			###### equality constraints #########
+			if (s>= n+2 and s <=n+m+1) then
+			{
+			 let G[i,s] :=  A[s-n-1,i];
+			}
+			
+			###### inequality constraints #########
+			if (s>= n+m+2 and s <=n+m+p+1) then
+			{
+			 let G[i,s] := D[s-n-m-1,i];
+			}
+
+			########  MC1 ############
+			if (s>= n+m+p+2 and s <=n+m+p+n_y+1 and assoc_prod[s-n-m-p-1,1] == i) then
+			{
+			 let G[i,s] :=G[i,s]-ub[assoc_prod[s-n-m-p-1,2]] ;
+			}
+			if (s>= n+m+p+2 and s <=n+m+p+n_y+1 and assoc_prod[s-n-m-p-1,2] == i) then
+			{
+			 let G[i,s] :=G[i,s]-lb[assoc_prod[s-n-m-p-1,1]] ;
+			}
+			
+			########  MC2 ############
+			if (s>= n+m+p+n_y+2 and s <=n+m+p+2*n_y+1 and assoc_prod[s-n-m-p-n_y-1,1] == i) then
+			{
+			 let G[i,s] :=G[i,s]-lb[assoc_prod[s-n-m-p-n_y-1,2]] ;
+			}
+			if (s>= n+m+p+n_y+2 and s <=n+m+p+2*n_y+1 and assoc_prod[s-n-m-p-n_y-1,2] == i) then
+			{
+			 let G[i,s] :=G[i,s]-ub[assoc_prod[s-n-m-p-n_y-1,1]] ;
+			}
+
+			########  MC3 ############
+			if (s>= n+m+p+2*n_y+2 and s <=n+m+p+3*n_y+1 and assoc_prod[s-n-m-p-2*n_y-1,1] == i) then
+			{
+			 let G[i,s] :=G[i,s]+ub[assoc_prod[s-n-m-p-2*n_y-1,2]] ;
+			}
+			if (s>= n+m+p+2*n_y+2 and s <=n+m+p+3*n_y+1 and assoc_prod[s-n-m-p-2*n_y-1,2] == i) then
+			{
+			 let G[i,s] :=G[i,s]+ub[assoc_prod[s-n-m-p-2*n_y-1,1]] ;
+			}
+
+			########  MC4 ############
+			if (s>= n+m+p+3*n_y+2 and s <=n+m+p+4*n_y+1 and assoc_prod[s-n-m-p-3*n_y-1,1] == i) then
+			{
+			 let G[i,s] :=G[i,s]+lb[assoc_prod[s-n-m-p-3*n_y-1,2]] ;
+			}
+			if (s>= n+m+p+3*n_y+2 and s <=n+m+p+4*n_y+1 and assoc_prod[s-n-m-p-3*n_y-1,2] == i) then
+			{
+			 let G[i,s] :=G[i,s]+lb[assoc_prod[s-n-m-p-3*n_y-1,1]] ;
+			}
+
+			
+			#######  MC5 ############
+			if (s>= n+m+p+4*n_y+2 and (s -(n+m+p+4*n_y+1) == i)) then
+			{
+			 let G[i,s] :=G[i,s]+1;
+			}
+		}
+	    }
+
+	    ##### gradient for X_ij #######
+	   if (i>= n -n_y+1 and i <=n) then	
+	   {
+	  	let G[i,1] := c[i];
+	   	for {s in 2..n+m+p+1}
+		{
+			
+
+			###### equality constraints #########
+			if (s>= n+2 and s <=n+m+1) then
+			{
+			 let G[i,s] :=  A[s-n-1,i];
+			}
+			
+			###### inequality constraints #########
+			if (s>= n+m+2 and s <=n+m+p+1) then
+			{
+			 let G[i,s] := D[s-n-m-1,i];
+			}
+		}
+
+		########  MC1-MC4############
+		let cpt_y:=n+p+m+1;
+		let G[i,cpt_y +i-(n-n_y)] := 1;
+		let G[i,cpt_y+i-(n-n_y)+n_y] := 1;
+		let G[i,cpt_y+i-(n-n_y)+2*n_y] := -1;
+		let G[i,cpt_y+i-(n-n_y)+3*n_y] := -1;
+		########  MC5############
+		if (is_integer ==1 and assoc_prod[i-(n-n_y),1] == assoc_prod[i-(n-n_y),2]) then
+		{
+		let cpt_mc5:=cpt_mc5+1;
+		let G[i, (n+m+p+4*n_y) + cpt_mc5] := -1;
+		}
+		 
+	  }
+ 	   ##### gradient for mu^eg #######
+	   if (i>= n+1 and i <=n+m) then	
+	   {
+	   let G[i,1] := -b[i-n];
+	   for {s in 1..n}
+		{
+		 let G[i,s+1] :=  A[i-n,s];	
+		}
+	   }
+ 	   ##### gradient for mu^ineg #######
+	   if (i>= n +m+1 and i <=n+m+p) then	
+	   {
+ 	   let G[i,1] := -e[i-n-m];	
+	   for {s in 1..n}
+		{
+		 let G[i,s+1] :=  D[i-n-m,s];	
+		}
+	   }
+          ##### gradient for nu^1 #######
+	  if (i>= n+m+p+1 and i <=n+m+p+n_y) then	
+	  {
+	    let G[i,1] := ub[assoc_prod[i-n-m-p,2]]*lb[assoc_prod[i-n-m-p,1]] ;
+	         for {s in 2..n-n_y+1}
+		{
+		if (assoc_prod[i-n-m-p,1] == s-1) then
+			{
+			
+			let G[i,s] :=G[i,s]-ub[assoc_prod[i-n-m-p,2]] ;
+			}
+			if ( assoc_prod[i-n-m-p,2] == s-1) then
+			{
+			 let G[i,s] :=G[i,s]-lb[assoc_prod[i-n-m-p,1]] ;
+			}
+		}
+			let G[i,i-m-p-n_y+1] := 1;
+	  }
+	   ##### gradient for nu^2 #######
+	    if (i>= n+m+p+n_y+1 and i <=n+m+p+2*n_y) then	
+	    {
+ let G[i,1] := ub[assoc_prod[i-n-m-p-n_y,1]]*lb[assoc_prod[i-n-m-p-n_y,2]] ;
+	         for {s in 2..n-n_y+1}
+		{
+		if (assoc_prod[i-n-m-p-n_y,1] == s-1) then
+			{
+			
+			let G[i,s] :=G[i,s]-lb[assoc_prod[i-n-m-p-n_y,2]] ;
+			}
+			if ( assoc_prod[i-n-m-p-n_y,2] == s-1) then
+			{
+			 let G[i,s] :=G[i,s]-ub[assoc_prod[i-n-m-p-n_y,1]] ;
+			}
+		}
+			let G[i,i-m-p-2*n_y+1] := 1;
+	    }
+	  #   ##### gradient for nu^3 #######
+	  if (i>= n+m+p+2*n_y+1 and i <=n+m+p+3*n_y) then	
+	    {
+ 
+ 	    let G[i,1] := -ub[assoc_prod[i-n-m-p-2*n_y,1]]*ub[assoc_prod[i-n-m-p-2*n_y,2]] ;
+	         for {s in 2..n-n_y+1}
+		{
+		if (assoc_prod[i-n-m-p-2*n_y,1] == s-1) then
+			{
+			
+			let G[i,s] :=G[i,s]+ub[assoc_prod[i-n-m-p-2*n_y,2]] ;
+			}
+			if ( assoc_prod[i-n-m-p-2*n_y,2] == s-1) then
+			{
+			 let G[i,s] :=G[i,s]+ub[assoc_prod[i-n-m-p-2*n_y,1]] ;
+			}
+		}
+			let G[i,i-m-p-3*n_y+1] := -1;
+	    }
+	  
+	  #   ##### gradient for nu^4 #######
+	  if (i>= n+m+p+3*n_y+1 and i <=n+m+p+4*n_y) then	
+	   {
+ 	   let G[i,1] := -lb[assoc_prod[i-n-m-p-3*n_y,1]]*lb[assoc_prod[i-n-m-p-3*n_y,2]] ;
+	         for {s in 2..n-n_y+1}
+		{
+		if (assoc_prod[i-n-m-p-3*n_y,1] == s-1) then
+			{
+			
+			let G[i,s] :=G[i,s]+lb[assoc_prod[i-n-m-p-3*n_y,2]] ;
+			}
+			if ( assoc_prod[i-n-m-p-3*n_y,2] == s-1) then
+			{
+			 let G[i,s] :=G[i,s]+lb[assoc_prod[i-n-m-p-3*n_y,1]] ;
+			}
+		}
+			let G[i,i-m-p-4*n_y+1] := -1;
+	    }
+	   
+	 ##### gradient for nu^5 (if integer variables) #######
+	  let cpt_mc5:=1;
+	 if (is_integer ==1 and i>= n+m+p+4*n_y+1 and i<= size_g-1) then	
+	   {
+	    for {s in 1.. n-n_y }
+	     {
+	     # printf "bb it %d val %d \n	",s, i - (n+m+p+4*n_y);
+		if (i -(n+m+p+4*n_y) == s) then{
+	       	let G[i,s+1] := 1;
+	   	}
+	     }
+	      for {s in n-n_y+1..n}{
+	      	#  printf "it %d val %d ",s, i - (n+m+p+4*n_y);
+      	      	    if(assoc_prod[s-(n-n_y),1] == (i - (n+m+p+4*n_y)) and  assoc_prod[s-(n-n_y),2] == (i -(n+m+p+4*n_y))) then{
+	   	    	  let G[i,s+1] := -1;
+	   		  }
+	     }
+	   
+		
+	}
+}
+
+
+ param eval_grad{i in 1..size_g} default 0;
+param variables{i in 1..size_g} default 0;
+for {i in 1..size_g}{
+     if (i<= n) then{
+     let  variables[i]:=x[i] ;
+     }
+     if (i>= n+1 and i <=n+m) then{
+       let  variables[i]:=abs(eq_lin[i-n].dual);
+      }
+       if (i>= n +m+1 and i <=n+m+p) then	
+	   {
+	    let  variables[i]:=abs(ineq_lin[i-n-m].dual);
+	   }
+if (i>= n+m+p+1 and i <=n+m+p+n_y) then	
+	  {
+	   let  variables[i]:=abs(cor1[i-n-m-p+ (n -n_y)].dual);
+	  }
+  if (i>= n+m+p+n_y+1 and i <=n+m+p+2*n_y) then	
+	    {
+	     let  variables[i]:=abs(cor2[i-n-m-p-n_y+ (n -n_y)].dual);
+	    }
+  if (i>= n+m+p+2*n_y+1 and i <=n+m+p+3*n_y) then	
+	    {
+	     let  variables[i]:=abs(cor3[i-n-m-p-2*n_y+ (n -n_y)].dual);
+	    }
+  if (i>= n+m+p+3*n_y+1 and i <=n+m+p+4*n_y) then	
+	   {
+	    let  variables[i]:=abs(cor4[i-n-m-p-3*n_y + (n -n_y)].dual);
+	   }
+#  if (i>= n+m+p+4*n_y+1 and is_integer==1 and assoc_prod[i-n-m-p-4*n_y ,1] == assoc_prod[i-n-m-p-4*n_y ,2]) then	
+#	   {
+#	    let  variables[i]:=abs(cor5[i-n-m-p-4*n_y + (n-n_y)].dual);
+#	   }	   
+}
+
+for {i in 1..size_g}{
+   let  eval_grad[i]:=G[i,1];
+   let  eval_grad[i]:= eval_grad[i] + sum{j in 2..size_g} G[i,j]*variables[j-1];
+ }
+
+
+
+param lbused default 0;
+param rig_bound;
+
+
+
+let rig_bound :=obj;
+
+
+param ub_new{i in 1..n};
+param lb_new{i in 1..n};
+if ((solve_result == "solved" || solve_result == "solved?") && obj > objlb - prec* abs(objlb)) then {
+let lbused :=1;
+for {i in 1..n}{
+if (i<= n - n_y) then
+{
+ let ub_new[i] := ub[i];
+ let lb_new[i] := lb[i];
+}
+else
+{
+	let ub_new[i] := max(ub[assoc_prod[i-(n-n_y),1]]*ub[assoc_prod[i-(n-n_y),2]], ub[assoc_prod[i-(n-n_y),1]]*lb[assoc_prod[i-(n-n_y),2]], lb[assoc_prod[i-(n-n_y),1]]*ub[assoc_prod[i-(n-n_y),2]],lb[assoc_prod[i-(n-n_y),1]]*lb[assoc_prod[i-(n-n_y),2]]);
+ 	let lb_new[i] :=  min(ub[assoc_prod[i-(n-n_y),1]]*ub[assoc_prod[i-(n-n_y),2]], ub[assoc_prod[i-(n-n_y),1]]*lb[assoc_prod[i-(n-n_y),2]], lb[assoc_prod[i-(n-n_y),1]]*ub[assoc_prod[i-(n-n_y),2]],lb[assoc_prod[i-(n-n_y),1]]*lb[assoc_prod[i-(n-n_y),2]]);
+}
+}
+
+for {i in 1..n}{
+   if (eval_grad[i] < 0) then
+   {
+    let  rig_bound:=  rig_bound  + (ub_new[i] - x[i])*eval_grad[i];
+   }
+   else
+   {
+   let  rig_bound:=   rig_bound + (lb_new[i] - x[i])*eval_grad[i];	
+   }
+}
+}
+#display n;
+#display vp;
+#display x;
+#display obj  > sol_cplex.sol;
+#display _total_solve_time > sol_cplex.sol;
+#display rig_bound  > sol_cplex.sol;
+#display rig_bound > lower_bound.txt;
+#display vp_cert;
+#display lambda;
+
+
+
+option display_precision 9;
+display solve_result > results.txt;
+display rig_bound > results.txt;
+display obj > results.txt;
+display lbused > results.txt;
+
+display {i in 1..n-n_y} x[i] > results.txt;
+display {i in n-n_y+1..n} x[i] > results.txt;

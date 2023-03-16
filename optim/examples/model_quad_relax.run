@@ -1,0 +1,39 @@
+reset;
+option show_stats 1;
+option prestats 1;
+option display 1;
+option presolve 0;
+param lbused default 1;
+
+#option solver "/libre/neveu/ibex-lib/ampl/ampl.linux-intel64/ipopt";
+option solver "/libre/neveu/ibex-lib/ampl/ampl.linux-intel64/gurobi";
+#option solver "/libre/neveu/cplex12.9/cplex/bin/x86-64_linux/cplexamp";
+#option solver "/libre/neveu/cplex/cplex/bin/x86-64_linux/cplexamp";
+#options ipopt_options "nlp_scaling_method=none mu_init=1e-2 max_iter=500";
+#options ipopt_options  "print_level=0 output_file=toto.txt";
+options gurobi_options "threads=1";
+options cplex_options "threads=1";
+option solver_msg 0;
+
+model model_quad_relax.mod
+data data.ampl
+data vp.ampl;
+data vp_cert.ampl;
+data bound.ampl;
+if (vp_cert < 0 and vp_cert < -lambda) then
+let lambda := -vp_cert;
+
+
+solve > toto.txt ;
+option display_precision 9;
+display solve_result > results.txt;
+display obj > results.txt;
+display obj > results.txt;
+display lbused > results.txt;
+
+display {i in 1..n-n_y} x[i] > results.txt;
+display {i in n-n_y+1..n} x[i] > results.txt;
+
+
+
+
