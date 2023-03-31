@@ -29,7 +29,9 @@ namespace ibex {
 		   double abs_eps_f=OptimizerConfig::default_abs_eps_f);
 
     void init();
+    /* redefinition of contract calling Optimizer:contract and qibex_contract_and_bound */
     void contract(Cell & c);
+        
     /* when using quadratic convex relaxation, contracts the objective and may return a new loup  */
     void qibex_contract_and_bound(Cell& c);
 
@@ -37,8 +39,8 @@ namespace ibex {
     void qibex_relaxation_call(const IntervalVector & box, double objlb);
 
     /* results of the quadratic convex relaxation 
-       when using quadratic convex relaxation,  the external solver  returns 
-       the status of the relaxation returned by the solver (solved, solved?, infeasible, unbounded)
+       returns true when using quadratic convex relaxation :  the external solver  returns 
+       the status of the relaxation  (solved, solved?, infeasible, unbounded)
        the best point v computed by the relaxation that may be a new loup point,
        the point w of the auxiliary variables (used for the bisection strategy)
        and the lower bound newlb*/
@@ -69,7 +71,8 @@ namespace ibex {
     double compute_ymax();
     // redefining of compute_emptybuffer to tka into account the integerobj indicator
     double compute_emptybuffer_uplo();
-
+    double ampltime;
+    double solvertime;
   private :
     int n_x;
     int n_y;
@@ -78,6 +81,7 @@ namespace ibex {
     std::vector<int> ref_diag_coefs;
     std::vector<int> hessian_diag_coefs;
     std::vector<std::vector<int>> ref_coefs;
+    
   };
 }
 #endif // __IBEX_QIBEXOPTIMIZER_H__

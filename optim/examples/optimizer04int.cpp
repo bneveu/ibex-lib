@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : optimizer04int.cpp
-// Author      :  Bertrand Neveu
+// Author      : Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jul 12, 2012
@@ -26,8 +26,8 @@ int main(int argc, char** argv){
 	// --------------------------
 	try {
 
-	if (argc<8) {
-		cerr << "usage: optimizer04 filename filtering linear_relaxation bisection strategy [beamsize] prec goal_prec timelimit randomseed"  << endl;
+	if (argc<9) {
+		cerr << "usage: optimizer04 filename filtering linear_relaxation bisection upperbounding strategy [beamsize] integerobj prec goal_prec timelimit randomseed"  << endl;
 		exit(1);
 	}
 
@@ -51,7 +51,6 @@ int main(int argc, char** argv){
 	    sys->box[i] =  Interval(sys->box[i].lb(), 1.e8);
 	}
 
-
 	
         string integerfile = argv[2];
 	ifstream fic(integerfile);
@@ -70,10 +69,11 @@ int main(int argc, char** argv){
 	int nbinput=7;
 	int beamsize;
 	if (strategy=="bs" || strategy== "beamsearch") {beamsize=atoi(argv[6]); nbinput++;}
-	
-	double prec= atof(argv[nbinput+1]);
-	double goalprec= atof (argv[nbinput+2]);
-	double timelimit= atof(argv[nbinput+3]);
+
+	int integerobjective= atoi(argv[nbinput+1]);
+	double prec= atof(argv[nbinput+2]);
+	double goalprec= atof (argv[nbinput+3]);
+	double timelimit= atof(argv[nbinput+4]);
 	//	double eqeps= 1.e-6;
 	double eqeps= 1.e-8;
 	int randomseed = atoi(argv[nbinput+4]);
@@ -82,7 +82,7 @@ int main(int argc, char** argv){
 
 	// the extended system 
 	ExtendedSystem ext_sys(*sys,eqeps);
-	NormalizedSystem norm_sys(*sys,eqeps);
+        NormalizedSystem norm_sys(*sys,eqeps);
 
 	BitSet b (ext_sys.nb_var);
 	for (int i=0; i<l.size();i++)
@@ -91,6 +91,9 @@ int main(int argc, char** argv){
 	//	sys->set_integer_variables(b);
 	ext_sys.set_integer_variables(b);
 	ext_sys.minlp=true;
+	ext_sys.tolerance=eqeps;
+	norm_sys.tolerance=eqeps;
+	sys->tolerance=eqeps;
 	cout << " integer variables " << *(ext_sys.get_integer_variables()) << endl;
 
 	norm_sys.minlp=true;
@@ -114,9 +117,7 @@ int main(int argc, char** argv){
 	  buffer = new CellHeap   (ext_sys);
 	else if (strategy=="dh")
 	  buffer = new CellDoubleHeap  (ext_sys);
-	else if (strategy=="bfs")
-	  buffer = new CellDoubleHeap (ext_sys,0);
-	else if (strategy=="bs")
+       	else if (strategy=="bs")
 	  buffer = new CellBeamSearch  (currentbuffer, futurebuffer, ext_sys, beamsize);
 
 	cout << "file " << argv[1] << endl;
@@ -240,7 +241,7 @@ int main(int argc, char** argv){
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn")
           {
 		cxn_poly = new CtcPolytopeHull(*lr);
-		cxn_compo =new CtcCompo(*cxn_poly, hc44xn);
+		cxn_compo =new CtcCompo(integ,*cxn_poly,integ, hc44xn,integ);
 		cxn = new CtcFixPoint (*cxn_compo, default_relax_ratio);
 		//cxn =new CtcCompo(*cxn_poly, hc44xn);
 	  }
@@ -249,7 +250,6 @@ int main(int argc, char** argv){
 	    cout << " xnart " << endl;
 	    cxn_poly = new CtcPolytopeHull(*lr);
 	    cxn_poly1 = new CtcPolytopeHull(*lr1);
-
 	    cxn_compo =new CtcCompo(integ, *cxn_poly1, *cxn_poly, hc44xn, integ);
 	    //	    cxn = new CtcFixPoint (*cxn_compo, default_relax_ratio);
 	    
@@ -276,6 +276,8 @@ int main(int argc, char** argv){
 	// the trace 
 	o.trace=1;
 
+	//integer objective
+	o.integerobj=integerobjective;
 	// the allowed time for search
 	o.timeout=timelimit;
 	cout.precision(16);
@@ -288,7 +290,7 @@ int main(int argc, char** argv){
 
 	// printing the results     
 	o.report();
-        cout << o.get_time() << "  " << o.get_nb_cells() << endl;
+        cout << o.get_time() << "  " << o.get_nb_cells()+1 << endl;
 
 	//	if (filtering == "acidhc4"  )
 	//cout    << " nbcidvar " <<  acidhc4.nbvar_stat() << endl;

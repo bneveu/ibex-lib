@@ -23,6 +23,8 @@ namespace ibex {
 				 int goal_var, double minwidth, double tolerance, double eps_x, double rel_eps_f, double abs_eps_f) : Optimizer (n,ctc,bsc,finder,buffer,goal_var,eps_x,rel_eps_f,abs_eps_f), minwidth(minwidth), tolerance(tolerance) {init();}
 
   void QibexOptimizer::init(){
+    ampltime=0;
+    solvertime=0;
     int res0=system("rm results.txt");
     int res=system("/libre/neveu/ampl/ampl model_quad_relax_init.run");
     ifstream fic4 ("associ.txt");
@@ -115,11 +117,13 @@ namespace ibex {
    fic7 >>  hessian_diag_coefs[i];
  }
  fic7.close();
+ /*
  cout << " hessian diag coefs " ;
  for (int i=0; i < n_x; i++){
    cout <<  hessian_diag_coefs[i] << " " ;
  }
  cout << endl;
+ */
  /*
     IntervalVector gradient1(n_x);
     IntervalVector boxn(n_x);
@@ -182,6 +186,7 @@ namespace ibex {
       int j;
       double newobj;
       int lbused =0;
+      double otime=0;
       fic1 >> a;
       fic1 >> a;
       fic1 >> status; 
@@ -197,6 +202,19 @@ namespace ibex {
       fic1 >> a;
       fic1 >> a;
       fic1 >> lbused;
+
+      fic1 >> a;
+      fic1 >> a;
+      fic1 >> otime;
+      solvertime +=otime;
+
+      fic1 >> a;
+      fic1 >> a;
+      fic1 >> otime;
+      ampltime +=otime;
+
+      
+      
       
       //      cout << " status " << status << endl;
       //      cout << " newlb " << newlb << endl;
@@ -410,7 +428,7 @@ namespace ibex {
     double objlb= y.lb();
     if (objlb < -1.e300) objlb=-1.e300;
     //  cout << "c.box " << c.box << endl;
-    cout << "objlb " << objlb << endl;
+    //    cout << "objlb " << objlb << endl;
     qibex_relaxation_call(qcp_box,objlb);
   
     string status;

@@ -98,7 +98,7 @@ Timer timer;
 	  if (sys->ops[j] == LEQ)
 	    leq++;
 	}
-	if (leq==sys->nb_ctr)  cout << "only leq " << endl;
+	//	if (leq==sys->nb_ctr)  cout << "only leq " << endl;
 	if (leq==sys->nb_ctr)
 	  norm_sys=(NormalizedSystem*)sys;
 	else
@@ -115,7 +115,7 @@ Timer timer;
 	//	sys->set_integer_variables(b);
 	ext_sys.set_integer_variables(b);
 	ext_sys.minlp=true;
-	cout << " integer variables " << *(ext_sys.get_integer_variables()) << endl;
+	//	cout << " integer variables " << *(ext_sys.get_integer_variables()) << endl;
 	norm_sys->minlp=true;
 	norm_sys->set_integer_variables(b);
 
@@ -148,11 +148,11 @@ Timer timer;
 	cout << "file " << argv[1] << endl;
 
 
-	cout << " filtering " << filtering; 
-        cout << " linearrelaxation " << linearrelaxation;
-	cout << " bisection " << bisection ;
-	cout << " strategy " << strategy ;
-	cout << " randomseed " << randomseed << endl;
+	//	cout << " filtering " << filtering; 
+	//      cout << " linearrelaxation " << linearrelaxation;
+	//	cout << " bisection " << bisection ;
+	//	cout << " strategy " << strategy ;
+	//	cout << " randomseed " << randomseed << endl;
 
 
 	// Build the bisection heuristic
@@ -270,7 +270,7 @@ Timer timer;
 	  }
 	else if  (linearrelaxation=="xnart")
 	  {
-	    cout << " xnart " << endl;
+	    //	    cout << " xnart " << endl;
 	    cxn_poly = new CtcPolytopeHull(*lr);
 	    cxn_poly1 = new CtcPolytopeHull(*lr1);
 	    cxn_compo =new CtcCompo(integ,*cxn_poly1, *cxn_poly, hc44xn, integ);
@@ -304,7 +304,7 @@ Timer timer;
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
 	QibexOptimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),qibexwidth,tolerance,prec,goalprec,goalprec);
 
-	cout << " sys.box " << sys->box << endl;
+	//	cout << " sys.box " << sys->box << endl;
 
 	// the trace 
 	o.trace=1;
@@ -327,7 +327,7 @@ Timer timer;
 
 	// the allowed time for search
 	o.timeout=timelimit;
-	cout << " timelimit " << timelimit << endl;
+	//	cout << " timelimit " << timelimit << endl;
 	cout.precision(16);
 
 	// the search itself 
@@ -344,6 +344,7 @@ Timer timer;
 	// printing the results     
 	o.report();
         cout << o.get_time() << "  " << o.get_nb_cells()+1 << endl;
+	cout << "external solver time " << o.solvertime << " ampl time " << o.ampltime << endl;
 	/*
 	if (filtering == "acidhc4"  )
 	cout    << " nbcidvar " <<  acidhc4.nbvar_stat() << endl;

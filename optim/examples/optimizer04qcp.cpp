@@ -87,7 +87,7 @@ Timer timer;
 	  if (sys->ops[j] == LEQ)
 	    leq++;
 	}
-	if (leq==sys->nb_ctr)  cout << "only leq " << endl;
+	//	if (leq==sys->nb_ctr)  cout << "only leq " << endl;
 	if (leq==sys->nb_ctr)
 	  norm_sys=(NormalizedSystem*)sys;
 	else
@@ -284,7 +284,7 @@ Timer timer;
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
 	QibexOptimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),qibexwidth,tolerance,prec,goalprec,goalprec);
 
-	cout << " sys.box " << sys->box << endl;
+	//	cout << " sys.box " << sys->box << endl;
 
 	// the trace 
 	o.trace=1;
@@ -321,6 +321,7 @@ Timer timer;
 	// printing the results     
 	o.report();
         cout << o.get_time() << "  " << o.get_nb_cells()+1 << endl;
+	cout << "external solver time " << o.solvertime << " ampl time " << o.ampltime << endl;
 	/*
 	if (filtering == "acidhc4"  )
 	cout    << " nbcidvar " <<  acidhc4.nbvar_stat() << endl;

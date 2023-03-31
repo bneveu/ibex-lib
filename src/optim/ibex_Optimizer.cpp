@@ -86,7 +86,10 @@ Optimizer::~Optimizer() {
 // compute the value ymax (decreasing the loup with the precision)
 // the heap and the current box are contracted with y <= ymax
 double Optimizer::compute_ymax() {
-	if (anticipated_upper_bounding) {
+  //       if (integerobj)
+  //	 return (loup-1);
+  //       else
+      if (anticipated_upper_bounding) {
 		//double ymax = loup - rel_eps_f*fabs(loup); ---> wrong :the relative precision must be correct for ymax (not loup)
 		double ymax = loup>0 ?
 				1/(1+rel_eps_f)*loup
@@ -141,10 +144,10 @@ bool Optimizer::update_loup(const IntervalVector& box, BoxProperties& prop) {
 //}
 
 void Optimizer::update_uplo() {
-	double new_uplo=POS_INFINITY;
+        double new_uplo=POS_INFINITY;
 	//	cout << " buffer empty "  << buffer.empty() << " uplo " << uplo << endl;
 	if (! buffer.empty()) {
-		new_uplo= buffer.minimum();
+ 		new_uplo= buffer.minimum();
 		//		cout << " new_uplo " << new_uplo << endl;
 		if (new_uplo > loup && uplo_of_epsboxes > loup) {
 		        cout << " loup = " << loup << " new_uplo=" << new_uplo <<  " uplo_of_epsboxes=" << uplo_of_epsboxes << endl;
@@ -168,15 +171,15 @@ void Optimizer::update_uplo() {
 	}
 	else if (buffer.empty() && loup != POS_INFINITY) {
 		// empty buffer : new uplo is set to ymax (loup - precision) if a loup has been found
-	  new_uplo=compute_emptybuffer_uplo();
+                new_uplo=compute_emptybuffer_uplo();
 
 		//	        cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
 		//              cout << "uplo of epsboxes" << uplo_of_epsboxes << endl;
 		double m = (new_uplo < uplo_of_epsboxes) ? new_uplo :  uplo_of_epsboxes;
-		
+		double olduplo=uplo;
 		if (uplo < m) uplo = m; // warning: hides the field "m" of the class
-		if (trace)
-					cout << "\033[33m uplo= " << uplo << "\033[0m" << endl;
+		if (integerobj) uplo=std::ceil(uplo);
+		if (trace && uplo > olduplo) cout << "\033[33m uplo= " << uplo << "\033[0m" << endl;
 		// note: we always have uplo <= uplo_of_epsboxes but we may have uplo > new_uplo, because
 		// ymax is strictly lower than the loup.
 	}
@@ -215,7 +218,7 @@ void Optimizer::handle_cell(Cell& c) {
 	else {
 	  
 	  if (integerobj) {
-	    //	    cout << " integerobj before " << c.box[goal_var] << endl;
+	    //cout << " integerobj before " << c.box[goal_var] << endl;
 	    c.box[goal_var]=integer( c.box[goal_var]);
 	    //cout << " integerobj after " << c.box[goal_var] << endl;
 	    if (c.box[goal_var].is_empty()) {delete&c ; return;}
@@ -364,7 +367,7 @@ Optimizer::Status Optimizer::optimize(const char* cov_file, double obj_init_boun
 
 	write_ext_box(init_box, root->box);
 	root->box[goal_var]=Interval(uplo,loup);
-        cout << "root->box[goal_var]" <<  root->box[goal_var] << endl; 
+	//        cout << "root->box[goal_var]" <<  root->box[goal_var] << endl; 
 	// add data required by the bisector
 	bsc.add_property(init_box, root->prop);
 
