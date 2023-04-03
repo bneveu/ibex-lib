@@ -26,7 +26,7 @@ namespace ibex {
     ampltime=0;
     solvertime=0;
     int res0=system("rm results.txt");
-    int res=system("/libre/neveu/ampl/ampl model_quad_relax_init.run");
+    int res=system (qibex_ampl_init_run.c_str());
     ifstream fic4 ("associ.txt");
     string a;
     int j;
@@ -173,9 +173,9 @@ namespace ibex {
 
     int res;
     if (rigor)
-      res=system("/libre/neveu/ampl/ampl model_quad_relax_rigueur.run > amplout");
+      res=system(qibex_ampl_run.c_str()); 
     else
-      res=system("/libre/neveu/ampl/ampl model_quad_relax.run > amplout");
+      res=system(qibex_ampl_rigor_run.c_str());
       
   }
 
