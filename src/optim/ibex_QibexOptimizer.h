@@ -67,10 +67,7 @@ namespace ibex {
     bool update_loup(const IntervalVector& box, BoxProperties& prop);
     // checks if v is a new louppoint (after rounding it to integer in case of integer minlp variable) update the loup and louppoint  and returns the new ymax 
     double qibex_loupfinder(Vector& v);
-    // redefining of compute_ymax to tka into account the integerobj indicator
-    double compute_ymax();
-    // redefining of compute_emptybuffer to tka into account the integerobj indicator
-    double compute_emptybuffer_uplo();
+    // statistics from Ampl
     double ampltime;
     double solvertime;
   private :

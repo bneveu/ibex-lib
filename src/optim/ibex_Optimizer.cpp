@@ -86,9 +86,9 @@ Optimizer::~Optimizer() {
 // compute the value ymax (decreasing the loup with the precision)
 // the heap and the current box are contracted with y <= ymax
 double Optimizer::compute_ymax() {
-  //       if (integerobj)
-  //	 return (loup-1);
-  //       else
+      if (integerobj)
+  	 return (loup-1);
+      else
       if (anticipated_upper_bounding) {
 		//double ymax = loup - rel_eps_f*fabs(loup); ---> wrong :the relative precision must be correct for ymax (not loup)
 		double ymax = loup>0 ?
@@ -187,7 +187,10 @@ void Optimizer::update_uplo() {
 }
 
 double Optimizer::compute_emptybuffer_uplo(){
-   return compute_ymax()+1.e-15; // not new_uplo=loup, because constraint y <= ymax was enforced
+  if (integerobj)
+    return loup;
+  else
+    return compute_ymax()+1.e-15; // not new_uplo=loup, because constraint y <= ymax was enforced
   }
 
   

@@ -508,21 +508,6 @@ namespace ibex {
     if (c.box.is_empty()) return;
     qibex_contract_and_bound(c);
   }
-  
-  double QibexOptimizer::compute_ymax(){
-     if (integerobj)
-       return loup-1;
-     else
-       return Optimizer::compute_ymax();
-   }
-  
-  double QibexOptimizer::compute_emptybuffer_uplo(){
-     if (integerobj)
-       return loup;
-     else
-       return Optimizer::compute_emptybuffer_uplo();
-   }
-
 
 } // end namespace ibex
 
