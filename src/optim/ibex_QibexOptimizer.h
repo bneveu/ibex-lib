@@ -81,6 +81,7 @@ namespace ibex {
     std::string qibex_ampl_init_run = "/libre/neveu/ampl/ampl model_quad_relax_init.run > amplout";
     std::string qibex_ampl_run = "/libre/neveu/ampl/ampl model_quad_relax.run > amplout";
     std::string qibex_ampl_rigor_run = "/libre/neveu/ampl/ampl model_quad_relax_rigueur.run > amplout";
+    void check_timeout();
   };
 }
 #endif // __IBEX_QIBEXOPTIMIZER_H__

@@ -31,7 +31,7 @@ int main(int argc, char** argv){
 Timer timer;
 	timer.start();
 	if (argc<16) {
-		cerr << "usage: optimizer04 filename integerfile filtering linear_relaxation bisection upperbounding strategy [beamsize] recontract rigor qibexwidth integerobj prec goal_prec tolerance timelimit randomseed"  << endl;
+		cerr << "usage: optimizer04qcpint filename integerfile filtering linear_relaxation bisection upperbounding strategy [beamsize] recontract rigor qibexwidth integerobj prec goal_prec tolerance timelimit randomseed"  << endl;
 		exit(1);
 	}
 
@@ -119,7 +119,7 @@ Timer timer;
 	norm_sys->minlp=true;
 	norm_sys->set_integer_variables(b);
 
-	//	cout << "loupfind " << loupfind << endl;
+
 	LoupFinder* loupfinder;
 	if (loupfind=="xninhc4")
 	  loupfinder= new LoupFinderDefault (*norm_sys,true);
@@ -151,6 +151,7 @@ Timer timer;
 	//	cout << " filtering " << filtering; 
 	//      cout << " linearrelaxation " << linearrelaxation;
 	//	cout << " bisection " << bisection ;
+	//	cout << "loupfind " << loupfind << endl;
 	//	cout << " strategy " << strategy ;
 	//	cout << " randomseed " << randomseed << endl;
 

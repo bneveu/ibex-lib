@@ -12,7 +12,7 @@
 #include <float.h>
 #include <stdlib.h>
 #include <iomanip>
-
+#include "ibex_Timer.h"
 
 using namespace std;
 
@@ -173,9 +173,9 @@ namespace ibex {
 
     int res;
     if (rigor)
-      res=system(qibex_ampl_run.c_str()); 
+      res=system(qibex_ampl_rigor_run.c_str()); 
     else
-      res=system(qibex_ampl_rigor_run.c_str());
+      res=system(qibex_ampl_run.c_str());
       
   }
 
@@ -419,7 +419,7 @@ namespace ibex {
     if (integerobj){
       y=integer(y);
       if (y.is_empty()){
-	c.box.set_empty(); return;
+	c.box.set_empty(); check_timeout(); return;
       }
     }
     IntervalVector qcp_box(n);
@@ -445,7 +445,7 @@ namespace ibex {
   
     tie (v,w,newlb) = qibex_relaxation_analysis (qcp_box,status);
   
-    if (qcp_box.is_empty()) {c.box.set_empty(); return;}
+    if (qcp_box.is_empty()) {c.box.set_empty(); check_timeout(); return;}
     if  (status== "solved" || status== "'solved?'")
       qibex_bisection_choice(c, qcp_box, v,w );
   
@@ -462,7 +462,7 @@ namespace ibex {
 	}
 	else{
 	//	y &= Interval(newlb,newlb);}
-	  c.box.set_empty(); return;}
+	  c.box.set_empty(); check_timeout(); return;}
       
 	//  semble inutile (si le pt faisable est l'optimum, newlb=newub et l'arret de la branche est automatique 
 	/*
@@ -494,15 +494,21 @@ namespace ibex {
 	if (integerobj){
 	  y=integer(y);
 	  if (y.is_empty()){
-	    c.box.set_empty(); return;}
+	    c.box.set_empty(); check_timeout() ;return;}
 	  if (y.lb()==y.ub()){
-	    c.box.set_empty(); return;}
+	    c.box.set_empty(); check_timeout();return;}
 	}
 	ctc.contract(c.box);
       }
     }
+    check_timeout();
   }
 
+  void QibexOptimizer::check_timeout(){
+    if (timeout>0 && time + solvertime + ampltime > timeout)
+      throw TimeOutException();
+  }
+  
   void QibexOptimizer:: contract(Cell & c)
   {Optimizer::contract(c);
     if (c.box.is_empty()) return;
