@@ -18,9 +18,12 @@
 #include "ibex_Domain.h"
 #include "ibex_Exception.h"
 #include "ibex_String.h"
+#include "ibex_BitSet.h"
 
 #include <stdio.h>
 #include <sstream>
+#include <fstream>
+
 
 #ifndef _WIN32 // MinGW does not support mutex
 #include <mutex>
@@ -383,6 +386,15 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
     integer_variables=new BitSet(integer_vars);
   }
 
+  void System::set_integer_variables(const vector<int> & integer_vars){
+    if (integer_vars.size() >0){
+      minlp=true;      
+      integer_variables= new BitSet (nb_var);
+      for (int i=0; i<integer_vars.size();i++)
+	integer_variables->add(integer_vars[i]);
+    }
+  }
+
   BitSet* System::get_integer_variables() const {
     return integer_variables;
   }
@@ -420,7 +432,84 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
 	}
 	assert(v==nb_var);
 	return var_names;
+  }
+
+  
+
+  vector<int> System::find_integer_variables (char* filename) {
+  ifstream fic (filename);
+    string a;
+    int nbvar;
+    for (int i=0; i<7 ;i++){
+      fic >> a;
+    }
+
+  fic >> nbvar;
+  //  cout << " nbvar " << nbvar << endl;
+  for (int i=0; i<10 ;i++){
+    fic >> a;
+    //    cout << "  " << a ;
+  }
+  for (int i=0; i<6 ;i++){
+    fic >> a;
+    //    cout << "  " << a ;
+  }
+  for (int i=0; i<7 ;i++){
+    fic >> a;
+    //    cout << "  " << a ;
+  }
+  int nlvarc;
+  int nlvaro;
+  int nlvarb;
+  fic >> nlvarc;
+  fic >> nlvaro;
+  fic >> nlvarb;
+  //  cout << " nlvarc " << nlvarc << " nlvaro " <<  nlvaro << " nlvarb " << nlvarb << endl;
+  for (int i=0; i<7 ;i++){
+    fic >> a;
+    //    cout << "  " << a ;
+  }
+  for (int i=0; i<11 ;i++){
+    fic >> a;
+    //    cout << "  " << a ;
+  }
+  int lbin ;
+  int lint ;
+  int nlbd;
+  int nlcd;
+  int nlod;
+  fic >> lbin;
+  fic >> lint;
+  fic >> nlbd;
+  fic >> nlcd;
+  fic >> nlod;
+  //  cout << "lbin " << lbin << " lint " << lint << " nlbd " << nlbd << " nlcd " << nlcd << " nlod " << nlod << endl;
+  // the integer variables are found among the variables by using the variable ordering of the nl files described in
+  //Hooking your solver to ampl by David M Gay
+  
+  
+  fic.close ();
+  vector<int> integers;
+  for (int i=nlvarb-nlbd;i<nlvarb;i++)
+    {//cout << i << " " << endl;
+    integers.push_back(i);
+    }
+  for (int i=nlvarc-nlcd;i< nlvarc; i++)
+    {//cout << i << " " << endl;
+    integers.push_back(i);
+    }
+  for (int i=nlvaro-nlod;i< nlvaro; i++)
+    {//cout << i << " " << endl;
+    integers.push_back(i);
+    }
+  for (int  i= nbvar-lbin-lint; i< nbvar; i++)
+    {//cout << i << " " << endl;
+    integers.push_back(i);
+    }
+  return integers;
+  
 }
 
+          
 
 } // end namespace ibex

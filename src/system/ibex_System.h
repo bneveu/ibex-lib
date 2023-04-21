@@ -291,6 +291,8 @@ public:
 	 */
         void set_integer_variables(const BitSet & is_int);
 
+        void set_integer_variables(const std::vector<int> & intvariables);
+
         BitSet* get_integer_variables() const;
 
         bool is_integer(int i) const;
@@ -301,6 +303,10 @@ public:
         /** the tolerance for checking an inequality (by default no tolerance)*/
         double tolerance =0.0;
 
+         /**  \brief Find the integer variables in the .nl file
+	 */
+        std::vector<int> find_integer_variables (char* filename);
+        
 
 protected:
 	/** Uninitialized system */
@@ -318,6 +324,8 @@ protected:
         bool is_inactive( Interval& gx, CmpOp op) const ;
   
         bool  is_ineffective( Interval& gx, CmpOp op) const;
+
+  
 private:
 	friend class parser::P_SysGenerator;
 	friend class NumConstraint; // NumConstraint requires to build a temporary system for parsing a string

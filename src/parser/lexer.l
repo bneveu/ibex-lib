@@ -77,6 +77,7 @@ using namespace ibex::parser;
 "integer"                        { return TK_INTEGER; }
 "chi"                            { return TK_CHI; }
 "in"                             { return TK_IN;  }
+"int"                            { return TK_INT;  }
 "inf"                            { return TK_INF; }
 "mid"                            { return TK_MID; }
 "sup"                            { return TK_SUP; }

@@ -17,7 +17,6 @@ option solver_msg 0;
 
 model model_quad_relax.mod
 data data.ampl
-data vp.ampl;
 data vp_cert.ampl;
 data bound.ampl;
 if (vp_cert < 0 and vp_cert < -lambda) then

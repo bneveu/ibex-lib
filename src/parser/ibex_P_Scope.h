@@ -70,6 +70,9 @@ public:
 	/** Add a variable symbol. */
 	void add_var(const char* id, const Dim* dim, const Domain& d);
 
+  	/** Add an integer variable symbol. */
+	void add_int_var(const char* id, const Dim* dim, const Domain& d);
+
 	/** Add an (uninitialized) iterator. */
 	void add_iterator(const char* id);
 
@@ -118,6 +121,9 @@ public:
 	/** All the variable symbols (in declaration order). */
 	Array<const ExprSymbol> var_symbols() const;
 
+  	/** All the variable integer indicator (in declaration order). */
+	Array<int> var_integers() const;
+  
 	/* Return the value of the iterator */
 	int get_iter_value(const char* id) const;
 

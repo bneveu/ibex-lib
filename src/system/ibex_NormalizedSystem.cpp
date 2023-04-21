@@ -58,7 +58,9 @@ CmpOp norm(CmpOp op) {
 } // end namespace
 
 NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended, int simpl_level) : original_sys_id(sys.id) {
-
+        minlp=sys.minlp;
+	if (minlp)
+	  set_integer_variables(*(sys.get_integer_variables()));
 	int nb_arg;
 	int k=0; // index of components of sys.f_ctrs
 
