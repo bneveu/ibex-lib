@@ -74,7 +74,7 @@ Timer timer;
 	string strategy= argv[7];
 	int nbinput=7;
 	int beamsize;
-	if (strategy=="bs" || strategy== "beamsearch") {beamsize=atoi(argv[7]); nbinput++;}
+	if (strategy=="bs" || strategy== "beamsearch") {beamsize=atoi(argv[8]); nbinput++;}
 	
 	string recontraction= argv[nbinput+1];
 	string rigormode = argv[nbinput+2];
