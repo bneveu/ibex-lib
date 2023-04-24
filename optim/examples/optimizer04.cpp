@@ -75,7 +75,7 @@ int main(int argc, char** argv){
 	string strategy= argv[6];
 	int nbinput=6;
 	int beamsize;
-	if (strategy=="bs" || strategy== "beamsearch") {beamsize=atoi(argv[6]); nbinput++;}
+	if (strategy=="bs" || strategy== "beamsearch") {beamsize=atoi(argv[7]); nbinput++;}
 
 	int integerobjective= atoi(argv[nbinput+1]);
 	double prec= atof(argv[nbinput+2]);
