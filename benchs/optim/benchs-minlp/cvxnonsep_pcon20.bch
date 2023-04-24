@@ -1,14 +1,14 @@
 variables
-i1 in [0,5];
-i2 in [0,5];
-i3 in [0,5];
-i4 in [0,5];
-i5 in [0,5];
-i6 in [0,5];
-i7 in [0,5];
-i8 in [0,5];
-i9 in [0,5];
-i10 in [0,5];
+i1 integer in [0,5];
+i2 integer in [0,5];
+i3 integer in [0,5];
+i4 integer in [0,5];
+i5 integer in [0,5];
+i6 integer in [0,5];
+i7 integer in [0,5];
+i8 integer in [0,5];
+i9 integer in [0,5];
+i10 integer in [0,5];
 x11 in [0,5];
 x12 in [0,5];
 x13 in [0,5];
@@ -34,15 +34,5 @@ constraints
             ) + 2^(x15 + x16) + 2^(x16 + x17) + 2^(x17 + x18) + 2^(x18 + x19) + 2
             ^(x19 + x20))^2 <= 57600;
 
-integer(i1);
-integer(i2);
-integer(i3);
-integer(i4);
-integer(i5);
-integer(i6);
-integer(i7);
-integer(i8);
-integer(i9);
-integer(i10);
 
 end

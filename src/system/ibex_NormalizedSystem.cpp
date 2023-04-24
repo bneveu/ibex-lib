@@ -59,8 +59,7 @@ CmpOp norm(CmpOp op) {
 
 NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended, int simpl_level) : original_sys_id(sys.id) {
         minlp=sys.minlp;
-	if (minlp)
-	  set_integer_variables(*(sys.get_integer_variables()));
+	set_integer_variables(*(sys.get_integer_variables()));
 	int nb_arg;
 	int k=0; // index of components of sys.f_ctrs
 
@@ -75,6 +74,13 @@ NormalizedSystem::NormalizedSystem(const System& sys, double eps, bool extended,
 		box.resize(nb_var);
 		box.put(0,sys.box);
 		box[nb_var-1]=sys.goal->eval(sys.box);
+		BitSet b0=*(sys.get_integer_variables());
+		BitSet b1(nb_var);
+		for(int i=0; i< nb_var-1; i++){
+		  if (b0[i]) b1.add(i);
+		}
+		set_integer_variables(b1);
+		
 	} else {
 		nb_arg = sys.args.size();
 		args.resize(nb_arg);

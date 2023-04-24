@@ -383,13 +383,15 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
   }
   
   void System::set_integer_variables(const BitSet & integer_vars){
+    if (integer_variables) delete integer_variables;
     integer_variables=new BitSet(integer_vars);
   }
 
   void System::set_integer_variables(const vector<int> & integer_vars){
+    if (integer_variables) delete integer_variables;
+    integer_variables= new BitSet (nb_var);
     if (integer_vars.size() >0){
       minlp=true;      
-      integer_variables= new BitSet (nb_var);
       for (int i=0; i<integer_vars.size();i++)
 	integer_variables->add(integer_vars[i]);
     }

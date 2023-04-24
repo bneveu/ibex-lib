@@ -1,10 +1,10 @@
 variables
 
- i1 in [1,10];
- i2 in [1,100];
+ i1 integer in [1,10];
+ i2 integer in [1,100];
  x3 in [-1.e8,1.e8];
  x4 in [-1.e8,1.e8];
- i5 in [1,100];
+ i5 integer in [1,100];
  x6 in [-1.e8,1.e8];
  x7 in [-1.e8,1.e8];
  x8 in [-1.e8,1.e8];
@@ -20,9 +20,7 @@ minimize
 x13^2 + x14^2;
 
 constraints
-integer(i1);
-integer(i2);
-integer(i5);
+
 - 12*i1 + i2 = 0;
 
  -12.566370616/i2 + x3 = 0;

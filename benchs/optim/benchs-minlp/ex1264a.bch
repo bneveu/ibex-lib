@@ -1,57 +1,33 @@
 variables
-i1 in [0,5];
-i2 in [0,5];
-i3 in [0,5];
-i4 in [0,5];
-i5 in [0,5];
-i6 in [0,5];
-i7 in [0,5];
-i8 in [0,5];
-i9 in [0,5];
-i10 in [0,5];
-i11 in [0,5];
-i12 in [0,5];
-i13 in [0,5];
-i14 in [0,5];
-i15 in [0,5];
-i16 in [0,5];
-b17 in [0,1];
-b18 in [0,1];
-b19 in [0,1];
-b20 in [0,1];
-i21 in [0,15];
-i22 in [0,12];
-i23 in [0,9];
-i24 in [0,6];
+i1 integer in [0,5];
+i2 integer in [0,5];
+i3 integer in [0,5];
+i4 integer in [0,5];
+i5 integer in [0,5];
+i6 integer in [0,5];
+i7 integer in [0,5];
+i8 integer in [0,5];
+i9 integer in [0,5];
+i10 integer in [0,5];
+i11 integer in [0,5];
+i12 integer in [0,5];
+i13 integer in [0,5];
+i14 integer in [0,5];
+i15 integer in [0,5];
+i16 integer in [0,5];
+b17 integer in [0,1];
+b18 integer in [0,1];
+b19 integer in [0,1];
+b20 integer in [0,1];
+i21 integer in [0,15];
+i22 integer in [0,12];
+i23 integer in [0,9];
+i24 integer in [0,6];
 
 minimize
 0.1*b17 + 0.2*b18 + 0.3*b19 + 0.4*b20 + i21 + i22 + i23 + i24;
 
 constraints
-integer(i1);
-integer(i2);
-integer(i3);
-integer(i4);
-integer(i5);
-integer(i6);
-integer(i7);
-integer(i8);
-integer(i9);
-integer(i10);
-integer(i11);
-integer(i12);
-integer(i13);
-integer(i14);
-integer(i15);
-integer(i16);
-integer(b17);
-integer(b18);
-integer(b19);
-integer(b20);
-integer(i21);
-integer(i22);
-integer(i23);
-integer(i24);
 
 
 

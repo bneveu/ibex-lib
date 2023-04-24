@@ -5,32 +5,21 @@ x3 in [0.00178571428571429,0.02];
 i4 in [1,100];
 x5 in [1.0,1.e8];
 x6 in [-1.e8,1.e8];
-b7 in [0,1];
-b8 in [0,1];
-b9 in [0,1];
-b10 in [0,1];
-b11 in [0,1];
-b12 in [0,1];
-b13 in [0,1];
-b14 in [0,1];
-b15 in [0,1];
-b16 in [0,1];
-b17 in [0,1];
+b7 integer in [0,1];
+b8 integer in [0,1];
+b9 integer in [0,1];
+b10 integer in [0,1];
+b11 integer in [0,1];
+b12 integer in [0,1];
+b13 integer in [0,1];
+b14 integer in [0,1];
+b15 integer in [0,1];
+b16 integer in [0,1];
+b17 integer in [0,1];
 minimize
 (1.570796327 + 0.7853981635*i4)*x1*x2^2;
 constraints
-integer(i4);
-integer(b7);
-integer(b7);
-integer(b9);
-integer(b10);
-integer(b11);
-integer(b12);
-integer(b13);
-integer(b14);
-integer(b15);
-integer(b16);
-integer(b17);
+
 
 
 

@@ -1,0 +1,128 @@
+variables
+b1 integer in [0,1];
+b2 integer in [0,1];
+b3 integer in [0,1];
+b4 integer in [0,1];
+b5 integer in [0,1];
+b6 integer in [0,1];
+i7 integer in [0,16];
+i8 integer in [0,16];
+i9 integer in [0,16];
+i10 integer in [0,16];
+i11 integer in [0,16];
+i12 integer in [0,16];
+i13 integer in [0,5];
+i14 integer in [0,5];
+i15 integer in [0,5];
+i16 integer in [0,5];
+i17 integer in [0,5];
+i18 integer in [0,5];
+i19 integer in [0,5];
+i20 integer in [0,5];
+i21 integer in [0,5];
+i22 integer in [0,5];
+i23 integer in [0,5];
+i24 integer in [0,5];
+i25 integer in [0,5];
+i26 integer in [0,5];
+i27 integer in [0,5];
+i28 integer in [0,5];
+i29 integer in [0,5];
+i30 integer in [0,5];
+i31 integer in [0,5];
+i32 integer in [0,5];
+i33 integer in [0,5];
+i34 integer in [0,5];
+i35 integer in [0,5];
+i36 integer in [0,5];
+i37 integer in [0,5];
+i38 integer in [0,5];
+i39 integer in [0,5];
+i40 integer in [0,5];
+i41 integer in [0,5];
+i42 integer in [0,5];
+i43 integer in [0,5];
+i44 integer in [0,5];
+i45 integer in [0,5];
+i46 integer in [0,5];
+i47 integer in [0,5];
+i48 integer in [0,5];
+
+minimize    0.1*b1 + 0.2*b2 + 0.3*b3 + 0.4*b4 + 0.5*b5 + 0.6*b6 + i7 + i8
+     + i9 + i10 + i11 + i12;
+
+constraints
+    330*i13 + 360*i19 + 380*i25 + 430*i31 + 490*i37 + 530*i43 <= 2200;
+
+    330*i14 + 360*i20 + 380*i26 + 430*i32 + 490*i38 + 530*i44 <= 2200;
+
+    330*i15 + 360*i21 + 380*i27 + 430*i33 + 490*i39 + 530*i45 <= 2200;
+
+    330*i16 + 360*i22 + 380*i28 + 430*i34 + 490*i40 + 530*i46 <= 2200;
+
+    330*i17 + 360*i23 + 380*i29 + 430*i35 + 490*i41 + 530*i47 <= 2200;
+
+    330*i18 + 360*i24 + 380*i30 + 430*i36 + 490*i42 + 530*i48 <= 2200;
+
+  - 330*i13 - 360*i19 - 380*i25 - 430*i31 - 490*i37 - 530*i43 <= -2100;
+
+  - 330*i14 - 360*i20 - 380*i26 - 430*i32 - 490*i38 - 530*i44 <= -2100;
+
+  - 330*i15 - 360*i21 - 380*i27 - 430*i33 - 490*i39 - 530*i45 <= -2100;
+
+  - 330*i16 - 360*i22 - 380*i28 - 430*i34 - 490*i40 - 530*i46 <= -2100;
+
+  - 330*i17 - 360*i23 - 380*i29 - 430*i35 - 490*i41 - 530*i47 <= -2100;
+
+  - 330*i18 - 360*i24 - 380*i30 - 430*i36 - 490*i42 - 530*i48 <= -2100;
+
+    i13 + i19 + i25 + i31 + i37 + i43 <= 5;
+
+    i14 + i20 + i26 + i32 + i38 + i44 <= 5;
+
+    i15 + i21 + i27 + i33 + i39 + i45 <= 5;
+
+    i16 + i22 + i28 + i34 + i40 + i46 <= 5;
+
+    i17 + i23 + i29 + i35 + i41 + i47 <= 5;
+
+    i18 + i24 + i30 + i36 + i42 + i48 <= 5;
+
+    b1 - i7 <= 0;
+
+    b2 - i8 <= 0;
+
+    b3 - i9 <= 0;
+
+    b4 - i10 <= 0;
+
+    b5 - i11 <= 0;
+
+    b6 - i12 <= 0;
+
+  - 16*b1 + i7 <= 0;
+
+  - 16*b2 + i8 <= 0;
+
+  - 16*b3 + i9 <= 0;
+
+  - 16*b4 + i10 <= 0;
+
+  - 16*b5 + i11 <= 0;
+
+  - 16*b6 + i12 <= 0;
+
+ -(i7*i13 + i8*i14 + i9*i15 + i10*i16 + i11*i17 + i12*i18) <= -8;
+
+ -(i7*i19 + i8*i20 + i9*i21 + i10*i22 + i11*i23 + i12*i24) <= -16;
+
+ -(i7*i25 + i8*i26 + i9*i27 + i10*i28 + i11*i29 + i12*i30) <= -12;
+
+ -(i7*i31 + i8*i32 + i9*i33 + i10*i34 + i11*i35 + i12*i36) <= -7;
+
+ -(i7*i37 + i8*i38 + i9*i39 + i10*i40 + i11*i41 + i12*i42) <= -14;
+
+ -(i7*i43 + i8*i44 + i9*i45 + i10*i46 + i11*i47 + i12*i48) <= -16;
+
+  
+end

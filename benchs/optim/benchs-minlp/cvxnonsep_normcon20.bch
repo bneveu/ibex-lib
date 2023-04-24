@@ -1,14 +1,14 @@
 variables
-i1 in [0,5];
-i2 in [0,5];
-i3 in [0,5];
-i4 in [0,5];
-i5 in [0,5];
-i6 in [0,5];
-i7 in [0,5];
-i8 in [0,5];
-i9 in [0,5];
-i10 in [0,5];
+i1 integer in [0,5];
+i2 integer in [0,5];
+i3 integer in [0,5];
+i4 integer in [0,5];
+i5 integer in [0,5];
+i6 integer in  [0,5];
+i7 integer in [0,5];
+i8 integer in [0,5];
+i9 integer in [0,5];
+i10 integer in [0,5];
 x11 in [0,5];
 x12 in [0,5];
 x13 in [0,5];
@@ -33,15 +33,4 @@ sqrt(0.0001 + i1^2 + i2^2 + i3^2 + i4^2 + i5^2 + i6^2 + i7^2 + i8^2 + i9^2
      + i10^2 + x11^2 + x12^2 + x13^2 + x14^2 + x15^2 + x16^2 + x17^2 + x18^2 + 
     x19^2 + x20^2) <= 10;
     	  
-integer(i1);
-integer(i2);
-integer(i3);
-integer(i4);
-integer(i5);
-integer(i6);
-integer(i7);
-integer(i8);
-integer(i9);
-integer(i10);
-
 end

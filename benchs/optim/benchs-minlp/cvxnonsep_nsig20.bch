@@ -1,13 +1,13 @@
 variables
-i1 in [1,10];
-i2 in [1,10];
-i3 in [1,10];
-i4 in [1,10];
-i5 in [1,10];
-i6 in [1,10];
-i7 in [1,10];
-i8 in [1,10];
-i9 in [1,10];
+i1 integer in [1,10];
+i2 integer in [1,10];
+i3 integer in [1,10];
+i4 integer in [1,10];
+i5 integer in [1,10];
+i6 integer in [1,10];
+i7 integer in [1,10];
+i8 integer in [1,10];
+i9 integer in [1,10];
 i10 in [0.00001,10];
 x11 in [0.00001,10];
 x12 in [0.00001,10];

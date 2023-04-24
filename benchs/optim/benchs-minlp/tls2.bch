@@ -1,42 +1,42 @@
 variables
-b1 in [0,1];
-b2 in [0,1];
-i3 in [1,100];
-i4 in [1,100];
-x5 in [1, 1.e8];
-x6 in [1, 1.e8];
-x7 in [1, 1.e8];
-x8 in [1, 1.e8];
-b9 in [0,1];
-b10 in [0,1];
-b11 in [0,1];
-b12 in [0,1];
-b13 in [0,1];
-b14 in [0,1];
-b15 in [0,1];
-b16 in [0,1];
-b17 in [0,1];
-b18 in [0,1];
-b19 in [0,1];
-b20 in [0,1];
-b21 in [0,1];
-b22 in [0,1];
-b23 in [0,1];
-b24 in [0,1];
-b25 in [0,1];
-b26 in [0,1];
-b27 in [0,1];
-b28 in [0,1];
-b29 in [0,1];
+b1 integer in [0,1];
+b2 integer in [0,1];
+i3 integer in [1,100];
+i4 integer in [1,100];
+x5 integer in [1, 1.e8];
+x6 integer in [1, 1.e8];
+x7 integer in [1, 1.e8];
+x8 integer in [1, 1.e8];
+b9 integer in [0,1];
+b10 integer in [0,1];
+b11 integer in [0,1];
+b12 integer in [0,1];
+b13 integer in [0,1];
+b14 integer in [0,1];
+b15 integer in [0,1];
+b16 integer in [0,1];
+b17 integer in [0,1];
+b18 integer in [0,1];
+b19 integer in [0,1];
+b20 integer in [0,1];
+b21 integer in [0,1];
+b22 integer in [0,1];
+b23 integer in [0,1];
+b24 integer in [0,1];
+b25 integer in [0,1];
+b26 integer in [0,1];
+b27 integer in [0,1];
+b28 integer in [0,1];
+b29 integer in [0,1];
 
-b30 in [0,1];
-b31 in [0,1];
-b32 in [0,1];
-b33 in [0,1];
-b34 in [0,1];
-b35 in [0,1];
-b36 in [0,1];
-b37 in [0,1];
+b30 integer in [0,1];
+b31 integer in [0,1];
+b32 integer in [0,1];
+b33 integer in [0,1];
+b34 integer in [0,1];
+b35 integer in [0,1];
+b36 integer in [0,1];
+b37 integer in [0,1];
 
 minimize
  0.1*b1 + 0.2*b2 + b9 + 2*b10 + 3*b11 + 4*b12 + 5*b13 + 6*b14
@@ -100,39 +100,5 @@ constraints
       + 7*b15 + 8*b16 + b17 + 2*b18 + 3*b19 + 4*b20 + 5*b21 + 6*b22 + 7*b23
       + b32 + 2*b33 + 3*b34 + b35 + 2*b36 + 3*b37 <= -9;
 
-sin(pi*b1)=0;
-sin(pi*b2)=0;
-sin(pi*i3)=0;
-sin(pi*i4)=0;
-
-sin(pi*b9)=0;
-sin(pi*b10)=0;
-sin(pi*b11)=0;
-sin(pi*b12)=0;
-sin(pi*b13)=0;
-sin(pi*b14)=0;
-sin(pi*b15)=0;
-sin(pi*b16)=0;
-sin(pi*b17)=0;
-sin(pi*b18)=0;
-sin(pi*b19)=0;
-sin(pi*b20)=0;
-sin(pi*b21)=0;
-sin(pi*b22)=0;
-sin(pi*b23)=0;
-sin(pi*b24)=0;
-sin(pi*b25)=0;
-sin(pi*b26)=0;
-sin(pi*b27)=0;
-sin(pi*b28)=0;
-sin(pi*b29)=0;
-sin(pi*b30)=0;
-sin(pi*b31)=0;
-sin(pi*b32)=0;
-sin(pi*b33)=0;
-sin(pi*b34)=0;
-sin(pi*b35)=0;
-sin(pi*b36)=0;
-sin(pi*b37)=0;
 
 end

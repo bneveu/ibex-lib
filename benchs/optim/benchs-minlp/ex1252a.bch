@@ -14,15 +14,15 @@ x12 in [0,350];
 x13 in [0,1];
 x14 in [0,1];
 x15 in [0,1];
-i16 in [0,3];
-i17 in [0,3];
-i18 in [0,3];
-i19 in [0,3];
-i20 in [0,3];
-i21 in [0,3];
-b22 in [0,1];
-b23 in [0,1];
-b24 in [0,1];
+i16 integer in [0,3];
+i17 integer in [0,3];
+i18 integer in [0,3];
+i19 integer in [0,3];
+i20 integer in [0,3];
+i21 integer in [0,3];
+b22 integer in [0,1];
+b23 integer in [0,1];
+b24 integer in [0,1];
 
 minimize
 ((6329.03 + 1800*x1)*i16*i19*b22 + (2489.31 + 1800*x2)*i17*i20*b23 + (
@@ -75,16 +75,5 @@ i18 - 3*b24 <= 0;
 i19 - 3*b22 <= 0;
 i20 - 3*b23 <= 0;
  i21 - 3*b24 <= 0;
-integer(i16);
-integer(i17);
-integer(i18);
-integer(i19);
-integer(i20);
-integer(i21);
-integer(b22);
-integer(b23);
-integer(b24);
-
-
 
 end
