@@ -1,5 +1,5 @@
 variables
-i1  integer in [0,5];
+i1 integer in [0,5];
 i2 integer in [0,5];
 i3 integer in [0,5];
 i4 integer in [0,5];
@@ -28,6 +28,7 @@ minimize
 0.1*b17 + 0.2*b18 + 0.3*b19 + 0.4*b20 + i21 + i22 + i23 + i24;
 
 constraints
+
 
 
 i21*i1 + i22*i2 + i23*i3 + i24*i4 >= 15;

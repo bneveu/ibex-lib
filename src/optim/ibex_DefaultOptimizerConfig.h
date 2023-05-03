@@ -14,7 +14,7 @@
 #include "ibex_OptimizerConfig.h"
 #include "ibex_OptimMemory.h"
 #include "ibex_ExtendedSystem.h"
-
+#include <string>
 namespace ibex {
 
 /**
@@ -42,7 +42,8 @@ public:
 	 */
 	DefaultOptimizerConfig(	const System& sys, double rel_eps_f, double abs_eps_f,
 							double eps_h, bool rigor, bool inHC4, bool kkt,
-							double random_seed, const Vector& eps_x);
+				bool integerobj,
+							int random_seed, const Vector& eps_x);
 
 	/**
 	 * \brief Delete this.
@@ -87,6 +88,8 @@ public:
 	 */
 	void set_kkt(bool kkt);
 
+        void set_bisector(std::string& bisector);
+  
 	/**
 	 * \brief Set random seed
 	 *
@@ -96,7 +99,7 @@ public:
 	 *
 	 * Set by default to #default_random_seed.
 	 */
-	void set_random_seed(double random_seed);
+	void set_random_seed(int random_seed);
 
 	/** \see #set_eps_h(). */
 	double get_eps_h();
@@ -110,11 +113,13 @@ public:
 	/** \see #set_kkt(). */
 	bool with_kkt();
 
+  
 	/** \see #set_random_seed(). */
-	double get_random_seed();
+	int get_random_seed();
 
-	/** Default random seed: 1.0. */
-	static constexpr double default_random_seed = 1.0;
+        std::string get_bisector();
+	/** Default random seed: 1 */
+	static constexpr int default_random_seed = 1;
 
 	/** Default rigor mode: false (disabled). */
 	static constexpr bool default_rigor = false;
@@ -126,7 +131,7 @@ public:
 	static constexpr double default_relax_ratio = 0.2;
 
 	/** Default ratio for choosing bisection point. */
-	static constexpr double default_bisect_ratio = 0.5;
+	static constexpr double default_bisect_ratio = 0.45;
 
 protected:
 
@@ -162,7 +167,8 @@ protected:
 	bool rigor;
 	bool inHC4;
 	bool kkt;
-	double random_seed;
+	int random_seed;
+        std::string bisector;
 };
 
 
@@ -174,7 +180,10 @@ inline bool DefaultOptimizerConfig::with_inHC4() { return inHC4; }
 
 inline bool DefaultOptimizerConfig::with_kkt() { return kkt; }
 
-inline double DefaultOptimizerConfig::get_random_seed() { return random_seed; }
+
+inline int DefaultOptimizerConfig::get_random_seed() { return random_seed; }
+
+inline std::string DefaultOptimizerConfig::get_bisector() { return bisector; }
 
 } /* namespace ibex */
 

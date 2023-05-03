@@ -128,7 +128,7 @@ public:
 	int get_random_seed();
 
         std::string get_bisector();
-	/** Default random seed: 1.0. */
+	/** Default random seed: 1 */
 	static constexpr int default_random_seed = 1;
 
 	/** Default rigor mode: false (disabled). */

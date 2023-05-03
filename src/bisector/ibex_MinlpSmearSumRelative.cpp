@@ -20,7 +20,9 @@ namespace ibex {
   MinlpSmearSumRelative::MinlpSmearSumRelative(System& sys,  double prec,   LargestFirst& lf, bool gb) : SmearFunction(sys,prec, lf,gb)  {
 }
 
-  MinlpSmearSumRelative::MinlpSmearSumRelative(System& sys,const Vector& prec,LargestFirst& lf) : SmearFunction (sys,prec, lf)  {
+
+
+  MinlpSmearSumRelative::MinlpSmearSumRelative(System& sys,const Vector& prec,LargestFirst& lf, bool gb) : SmearFunction (sys,prec, lf, gb)  {
 }
 
 
@@ -30,12 +32,13 @@ namespace ibex {
     int var = -1;
     double* ctrjsum = new double[sys.f_ctrs.image_dim()];
     BitSet& b= *(sys.get_integer_variables());
+    //    cout << "integers " << b <<  " nbvars " << nbvars << endl;
     for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
       ctrjsum[i]=0;
       // not an extended system or constraint is active or it is the objective 
       if (constraint_to_consider(i, box))
 	for (int j=0; j<nbvars ; j++) {
-	  if (b[j] ||  (goal_to_bisect && j== goal_var())){
+	  if ( (j!= goal_var() && b[j]) ||  (goal_to_bisect && j== goal_var())){
 
 	    ctrjsum[i]+= J[i][j].mag() * box[j].diam();
 	    //	    cout << " j " << j << " " << ctrjsum[i] << endl;
@@ -62,7 +65,7 @@ namespace ibex {
 
     if (var==-1)
       {
-	double max_magn = NEG_INFINITY;
+        max_magn = NEG_INFINITY;
 	for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
 	  ctrjsum[i]=0;
       // not an extended system or constraint is active or it is the objective 

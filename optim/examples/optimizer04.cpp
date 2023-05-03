@@ -81,8 +81,7 @@ int main(int argc, char** argv){
 	double prec= atof(argv[nbinput+2]);
 	double goalprec= atof (argv[nbinput+3]);
 	double timelimit= atof(argv[nbinput+4]);
-	//	double eqeps= 1.e-6;
-	double eqeps= 1.e-8;
+
 	int randomseed = atoi(argv[nbinput+5]);
 	//	double initloup=atof(argv[nbinput+5]);
 	RNG::srand(randomseed);
@@ -135,10 +134,10 @@ int main(int argc, char** argv){
 	Bsc * bs;
 	OptimLargestFirst * bs1;
 
-	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection == "minlpsmearsumrel" ||  bisection == "minlpsmearsum" || bisection=="lsmearmg" || bisection=="lsmearss" || bisection=="lsmearmgss")
+	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection == "minlpsmearsumrel" ||  bisection == "minlpsmearsum" || bisection=="lsmearmg" || bisection=="lsmearss" || bisection=="lsmearmgss" || bisection== "minlplsmear" || bisection== "minlplsmearmg")
 	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),true,prec);
         else if
-	  (bisection=="lsmearnoobj" || bisection=="smearsumnoobj" || bisection=="smearmaxnoobj" || bisection=="smearsumrelnoobj" || bisection == "minlpsmearsumnoobj" ||  bisection == "minlpsmearsumrelnoobj" || bisection=="smearmaxrelnoobj" || bisection=="lsmearmgnoobj" )
+	  (bisection=="lsmearnoobj" || bisection=="smearsumnoobj" || bisection=="smearmaxnoobj" || bisection=="smearsumrelnoobj" || bisection == "minlpsmearsumnoobj" ||  bisection == "minlpsmearsumrelnoobj" || bisection=="smearmaxrelnoobj" || bisection=="lsmearmgnoobj" || bisection == "minlplsmearmgnoobj" || bisection == "minlplsmearnoobj" )
 	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),false,prec);
 
 	  
@@ -174,6 +173,13 @@ int main(int argc, char** argv){
 	else if (bisection=="lsmearmg"|| bisection=="lsmearmgnoobj"){
 	  bs = new LSmear(ext_sys,prec,*bs1);
 	  }
+	else if  (bisection=="minlplsmear" || bisection=="minlplsmearnoobj"){
+	  bs = new MinlpLSmear(ext_sys,prec,*bs1,MINLPLSMEAR);
+	  }
+	else if (bisection=="minlplsmearmg"|| bisection=="minlplsmearmgnoobj"){
+	  bs = new MinlpLSmear(ext_sys,prec,*bs1);
+	  }
+	
 	else {cout << bisection << " is not an implemented  bisection mode "  << endl; return -1;}
 
 	// The contractor

@@ -64,6 +64,7 @@ Optimizer::Optimizer(OptimizerConfig& config) :
 		ctc         (config.get_ctc()),
 		bsc         (config.get_bsc()),
 		loup_finder (config.get_loup_finder()),
+		integerobj  (config.with_integerobj()),
 		buffer      (config.get_cell_buffer()),
 		eps_x       (config.get_eps_x()),
 		rel_eps_f   (config.get_rel_eps_f()),
@@ -212,7 +213,7 @@ void Optimizer::update_uplo_of_epsboxes(double ymin) {
 }
 
 void Optimizer::handle_cell(Cell& c) {
-         //     cout << " before contraction " << c.box << endl;
+  //  cout << " before contraction " << c.box << endl;
 	contract_and_bound(c);
 	//	cout << " after contraction " << c.box << endl;
 	if (c.box.is_empty()) { // cout << "box empty " << endl;
@@ -234,7 +235,7 @@ void Optimizer::contract_and_bound(Cell& c) {
 
 	/*======================== contract y with y<=loup ========================*/
 	Interval& y=c.box[goal_var];
-	//        cout << " box before contract " << c.box << endl;
+	//	cout << " box before contract " << c.box << endl;
 	double ymax;
 	if (loup==POS_INFINITY) ymax = POS_INFINITY;
 	// ymax is slightly increased to favour subboxes of the loup
@@ -255,8 +256,8 @@ void Optimizer::contract_and_bound(Cell& c) {
 
 	if (c.box.is_empty()) return;
 	
-	//cout << " [contract]  x after=" << c.box << endl;
-	//cout << " [contract]  y after=" << y << endl;
+	//	cout << " [contract]  x after=" << c.box << endl;
+	//	cout << " [contract]  y after=" << y << endl;
 	/*====================================================================*/
 
 	/*========================= update loup =============================*/
@@ -293,7 +294,7 @@ void Optimizer::contract_and_bound(Cell& c) {
 	// - the width of the box is less than the precision given to the optimizer ("prec" for the original variables
 	//   and "goal_abs_prec" for the goal variable)
 	// - the extended box has no bisectable domains (if prec=0 or <1 ulp)
-	if (((tmp_box.diam()-eps_x).max()<=0 && y.diam() <=abs_eps_f) || !c.box.is_bisectable()) {
+	if (((tmp_box.diam().max()-eps_x.max())<=0 && y.diam() <=abs_eps_f) || !c.box.is_bisectable()) {
 	  //	  cout << tmp_box.max_diam() << "  box  " << c.box << endl;
 		update_uplo_of_epsboxes(y.lb());
 		c.box.set_empty();
@@ -370,7 +371,7 @@ Optimizer::Status Optimizer::optimize(const char* cov_file, double obj_init_boun
 
 	write_ext_box(init_box, root->box);
 	root->box[goal_var]=Interval(uplo,loup);
-	//        cout << "root->box[goal_var]" <<  root->box[goal_var] << endl; 
+	cout << "root->box[goal_var]" <<  root->box[goal_var] << endl; 
 	// add data required by the bisector
 	bsc.add_property(init_box, root->prop);
 
@@ -424,9 +425,9 @@ void Optimizer::start(const CovOptimData& data, double obj_init_bound) {
 			box = data[i];
 		else {
 			write_ext_box(data[i], box);
-			cout << " init box " << box << endl;
+			//			cout << " init box " << box << endl;
 			box[goal_var] = Interval(uplo,loup);
-			cout << " contracted box " << box << endl;
+			//			cout << " contracted box " << box << endl;
 			ctc.contract(box);
 			if (box.is_empty()) continue;
 		}

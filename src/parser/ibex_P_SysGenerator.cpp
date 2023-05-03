@@ -89,12 +89,12 @@ void P_SysGenerator::generate(P_Source& source, System& sys, int simpl_level) {
 	Array<int> var_integers=scopes.var_integers();
         for (unsigned int i=0;i< var_integers.size(); i++)
 	  if (var_integers[i]) sys.minlp=true;
+	BitSet* integer_vars= new BitSet(sys.nb_var);
 	if (sys.minlp){
-	  BitSet* integer_vars= new BitSet(sys.nb_var);
 	  for (unsigned int i=0;i< var_integers.size(); i++)
 	    if (var_integers[i]) integer_vars->add(i);
-	  sys.set_integer_variables(*integer_vars);
 	}
+	sys.set_integer_variables(*integer_vars);
 	
 	//==================== *** cleanup *** ====================
 	for (IBEX_NODE_MAP(bool)::const_iterator it=garbage.begin(); it!=garbage.end(); it++) {

@@ -44,7 +44,8 @@ public:
          * TODO . reintroduce param ratio . It is now set to its default value 0.45
 
 	 */
-  MinlpSmearSum(System& sys,const Vector& prec,LargestFirst& lf);
+
+   MinlpSmearSum(System& sys,  const Vector & prec,   LargestFirst& lf, bool gb=true);
 
 	/**
 	 * \brief Return next variable to be bisected.

@@ -115,6 +115,10 @@ public:
 	 */
 	void set_anticipated_upper_bounding(bool antipated_upper_bounding);
 
+  void set_integerobj(bool _integerobj);
+
+        
+  
 	/** see #set_rel_eps_f(). */
 	double get_rel_eps_f() const;
 
@@ -131,6 +135,8 @@ public:
 	/** see #set_timeout(). */
 	double get_timeout() const;
 
+        bool with_integerobj() const;
+  
 	/** see #set_extended_cov(). */
 	bool with_extended_cov() const;
 
@@ -187,6 +193,7 @@ protected:
 	double timeout;
 	bool extended_COV;
 	bool anticipated_UB;
+  bool integerobj;
 };
 
   inline OptimizerConfig::OptimizerConfig(): eps_x(1) {
@@ -207,6 +214,10 @@ inline void OptimizerConfig::set_abs_eps_f(double _abs_eps_f)     { abs_eps_f = 
 inline void OptimizerConfig::set_eps_x(const Vector& _eps_x)      { eps_x = _eps_x; }
 inline void OptimizerConfig::set_trace(int _trace)                { trace = _trace; }
 
+  inline void  OptimizerConfig::set_integerobj (bool _integerobj) {integerobj= _integerobj;}
+
+
+
 inline void OptimizerConfig::set_timeout(double _timeout)         { timeout = _timeout; }
 
 inline void OptimizerConfig::set_extended_cov(bool _extended_COV) { extended_COV = _extended_COV; }
@@ -219,6 +230,7 @@ inline double OptimizerConfig::get_abs_eps_f() const                 { return ab
 inline const Vector& OptimizerConfig::get_eps_x() const              { return eps_x; }
   //inline double OptimizerConfig::get_eps_x() const                     { return eps_x; }
 
+    inline bool  OptimizerConfig::with_integerobj () const {return integerobj;}
 inline int OptimizerConfig::get_trace() const                        { return trace; }
 
 inline double OptimizerConfig::get_timeout() const                   { return timeout; }

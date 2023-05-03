@@ -42,7 +42,8 @@ public:
 	 * \param lf : a largest first bisector to be used when the Smear based heuristic could not choose any variable        * \param gb : boolean indicating if the goal variable can be bisected : default true.
          * TODO . reintroduce param ratio . It is now set to its default value 0.45
 	 */
-  MinlpSmearSumRelative(System& sys,const Vector& prec,LargestFirst& lf);
+
+  MinlpSmearSumRelative(System& sys,const Vector& prec,LargestFirst& lf, bool gb=true);
 
 	/**
 	 * \brief Return next variable to be bisected.

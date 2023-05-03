@@ -54,13 +54,14 @@ int main(int argc, char** argv) {
 	args::ValueFlag<string> output_file(parser, "filename", "COV output file. The file will contain the "
 			"optimization data in the COV (binary) format. See --format", {'o',"output"});
 	args::Flag rigor(parser, "rigor", "Activate rigor mode (certify feasibility of equalities).", {"rigor"});
+	args::Flag integerobj(parser, "integerobj", " Integer objective. ", {"integerobj"});
 	args::Flag kkt(parser, "kkt", "Activate contractor based on Kuhn-Tucker conditions.", {"kkt"});
 	args::Flag output_no_obj(parser, "output-no-obj", "Generate a COV with domains of variables only (not objective values).", {"output-no-obj"});
 	args::Flag trace(parser, "trace", "Activate trace. Updates of loup/uplo are printed while minimizing.", {"trace"});
 	args::Flag format(parser, "format", "Give a description of the COV format used by IbexOpt", {"format"});
 	args::ValueFlag<string> no_split_arg(parser, "vars","Prevent some variables to be bisected, separated by '+'.\nExample: --no-split=x+y",{"no-split"});
 	args::Flag quiet(parser, "quiet", "Print no report on the standard output.",{'q',"quiet"});
-
+	args::ValueFlag<string> bisector(parser, "bisector", "bisection policy",{"bisector"});
 	args::Positional<std::string> filename(parser, "filename", "The name of the MINIBEX file.");
 
 	try
@@ -190,9 +191,14 @@ int main(int argc, char** argv) {
 			if (!quiet)
 				cout << "  rigor mode:\t\tON\t(feasibility of equalities certified)" << endl;
 		}
+		if (integerobj) {
+			config.set_integerobj(integerobj.Get());
+			if (!quiet)
+				cout << "  Integer objective " << endl;
+		}
 
 		if (kkt) {
-			config.set_kkt(kkt.Get());
+		  config.set_kkt(kkt.Get());
 			if (!quiet)
 				cout << "  KKT contractor:\tON" << endl;
 		}
@@ -217,7 +223,10 @@ int main(int argc, char** argv) {
 				cout << "  input COV file:\t" << input_file.Get().c_str() << "\n";
 			}
 		}
-
+		if (bisector){
+		  cout << "  bisector: " << bisector.Get() << endl;
+		  config.set_bisector(bisector.Get());
+		}
 		if (output_file) {
 			output_cov_file = output_file.Get();
 		} else {
@@ -281,6 +290,7 @@ int main(int argc, char** argv) {
 		if (!quiet) {
 			cout << "*******************************************************" << endl << endl;
 		}
+
 
 		// Build the default optimizer
 		Optimizer o(config);
