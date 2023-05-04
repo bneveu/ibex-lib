@@ -101,12 +101,12 @@ inline LSmear::LSmear(ExtendedSystem& sys,  double prec, double ratio, lsmear_mo
 		  mylinearsolver = new LPSolver(sys.nb_var);
 }
 
-  inline LSmear::LSmear(ExtendedSystem& sys, double prec, OptimLargestFirst& lf, lsmear_mode lsmode) : SmearSumRelative(sys,prec,lf),
+  inline LSmear::LSmear(ExtendedSystem& sys, double prec, OptimLargestFirst& lf, lsmear_mode lsmode) : SmearSumRelative(sys,prec,lf,lf.choose_obj),
 		lsmode(lsmode) {
 	mylinearsolver = new LPSolver(sys.nb_var);
 }
 
-inline LSmear::LSmear(ExtendedSystem& sys, const Vector& prec, OptimLargestFirst& lf, lsmear_mode lsmode) : SmearSumRelative(sys,prec,lf),
+  inline LSmear::LSmear(ExtendedSystem& sys, const Vector& prec, OptimLargestFirst& lf, lsmear_mode lsmode) : SmearSumRelative(sys,prec,lf,lf.choose_obj),
 		lsmode(lsmode) {
 	mylinearsolver = new LPSolver(sys.nb_var);
 }

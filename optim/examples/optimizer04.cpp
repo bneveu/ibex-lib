@@ -173,23 +173,31 @@ int main(int argc, char** argv){
           bs = new MinlpSmearSum(ext_sys,prec,*bs1,true);
 	else if  (bisection=="minlpsmearsumnoobj")
 	  bs = new MinlpSmearSum(ext_sys,prec,*bs1,false);
-
-	/*
-	else if (bisection=="smearmaxrel" || bisection=="smearmaxrelnoobj")
-	  bs = new SmearMaxRelative(ext_sys,prec,*bs1);
+	
+	
+	else if (bisection=="smearmaxrel") 
+	  bs = new SmearMaxRelative(ext_sys,prec,*bs1,true);
+	else if (bisection=="smearmaxrelnoobj")
+	  bs = new SmearMaxRelative(ext_sys,prec,*bs1,false);
+	
 	else if  (bisection=="lsmear" || bisection=="lsmearnoobj"){
 	  bs = new LSmear(ext_sys,prec,*bs1,LSMEAR);
 	  }
 	else if (bisection=="lsmearmg"|| bisection=="lsmearmgnoobj"){
 	  bs = new LSmear(ext_sys,prec,*bs1);
 	  }
-	else if  (bisection=="minlplsmear" || bisection=="minlplsmearnoobj"){
-	  bs = new MinlpLSmear(ext_sys,prec,*bs1,MINLPLSMEAR);
-	  }
-	else if (bisection=="minlplsmearmg"|| bisection=="minlplsmearmgnoobj"){
-	  bs = new MinlpLSmear(ext_sys,prec,*bs1, );
-	  }
-	*/
+
+
+	
+	else if (bisection=="minlplsmearmg")
+	  bs = new MinlpLSmear(ext_sys,prec,*bs1,true );
+        else if  (bisection=="minlplsmearmgnoobj")
+	  bs = new MinlpLSmear(ext_sys,prec,*bs1,false );
+	else if  (bisection=="minlplsmear")
+	  bs = new MinlpLSmear(ext_sys,prec,*bs1,true ,MINLPLSMEAR);
+	else if  (bisection=="minlplsmearnoobj")
+	  bs = new MinlpLSmear(ext_sys,prec,*bs1,false ,MINLPLSMEAR);
+	  
 	else {cout << bisection << " is not an implemented  bisection mode "  << endl; return -1;}
 
 	// The contractor
