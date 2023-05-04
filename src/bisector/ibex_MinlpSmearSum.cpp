@@ -29,9 +29,11 @@ namespace ibex {
     double max_magn = NEG_INFINITY;
     int var = -1;
     BitSet& b= *(sys.get_integer_variables());
-    //    cout << "integer variables "  << b << nbvars << " goal_to_bisect " << goal_to_bisect << endl;
+
     for (int j=0; j<nbvars; j++) {
-      if ((!too_small(box,j))&& (goal_to_bisect || (j!= goal_var())&& b[j])) { 
+      
+      if ((!too_small(box,j))&&  (j!= goal_var() && b[j])) {
+
 	double sum_smear=0;
 	for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
 	  if (constraint_to_consider (i, box))
@@ -43,6 +45,7 @@ namespace ibex {
 	}
       }
     }
+    //    cout << " var " << var << endl;
     if (var==-1)  // no integer variable was chosen
       {
 	max_magn = NEG_INFINITY;
