@@ -86,13 +86,20 @@ void P_SysGenerator::generate(P_Source& source, System& sys, int simpl_level) {
 	//================= set the domains =====================
 	sys.box.resize(sys.nb_var);
 	load(sys.box, scopes.var_domains());
+	//================= set the integer variables  =====================
 	Array<int> var_integers=scopes.var_integers();
         for (unsigned int i=0;i< var_integers.size(); i++)
 	  if (var_integers[i]) sys.minlp=true;
 	BitSet* integer_vars= new BitSet(sys.nb_var);
 	if (sys.minlp){
-	  for (unsigned int i=0;i< var_integers.size(); i++)
-	    if (var_integers[i]) integer_vars->add(i);
+	  int varindex=0;
+	  for (unsigned int i=0;i< var_integers.size(); i++){
+            int varsize = scopes.var_domains()[i].dim.size();
+	    for (unsigned int j=0 ; j< varsize; j++){
+	      if (var_integers[i]) integer_vars->add(j+varindex);
+	    }
+	    varindex+=varsize;
+	  }
 	}
 	sys.set_integer_variables(*integer_vars);
 	
