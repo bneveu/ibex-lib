@@ -168,31 +168,29 @@ Ctc& DefaultOptimizerConfig::get_ctc() {
 	// first contractor on ext_sys : incremental HC4 (propag ratio=0.01)
 	//	ctc_list.set_ref(0, rec(new CtcHC4 (ext_sys,0.01,true)));
 	ctc_list.set_ref(0, rec(new CtcCompo (
-					      rec (new CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables()))),
+					      rec (new CtcInteger (ext_sys)),
 					      rec (new CtcHC4 (ext_sys,0.01,true)),
-					      rec (new CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables())))
+					      rec (new CtcInteger (ext_sys))
 					      )));
 	
 
 					      
 	// second contractor on ext_sys : "Acid" with incremental HC4 (propag ratio=0.1)
-	ctc_list.set_ref(1, rec(new CtcCompo (rec (new CtcAcid (ext_sys,rec(new CtcHC4 (ext_sys,0.1,true))))
-					      ,rec(new  CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables())))
-					      )));
+	ctc_list.set_ref(1, rec(new CtcCompo (rec (new CtcAcid (ext_sys,rec(new CtcHC4 (ext_sys,0.1,true)))),
+					      rec(new  CtcInteger (ext_sys)))));
 	// the last contractor is "XNewton"
 
 	if (ext_sys.nb_ctr > 1) {
 	  ctc_list.set_ref(2,rec(new CtcFixPoint
-				(rec(new CtcCompo(
-						  rec (new CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables()))),
-
-						  rec(new CtcLinearRelax(ext_sys)),
-						  rec (new CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables()))),
-						  rec(new CtcHC4(ext_sys,0.01,false)),
-
-						  rec (new CtcInteger (ext_sys.nb_var, *(ext_sys.get_integer_variables()))))),
-				 default_relax_ratio)));
-} else {
+				 (rec(new CtcCompo(
+						   rec (new CtcInteger (ext_sys)),
+						   rec(new CtcLinearRelax(ext_sys)),
+						   rec (new CtcInteger (ext_sys)),
+						   rec(new CtcHC4(ext_sys,0.01,false)),
+						   rec (new CtcInteger (ext_sys)))),
+				  default_relax_ratio)));
+	}
+	else {
 	  ctc_list.set_ref(2,rec(new CtcLinearRelax(ext_sys)));
 	}
 	if (kkt) {
@@ -345,7 +343,7 @@ Bsc& DefaultOptimizerConfig::get_bsc() {
 
   
 LoupFinder& DefaultOptimizerConfig::get_loup_finder() {
-	if (found(LOUP_FINDER_TAG)) // in practice, get_loup_finder() is only called once by Optimizer.
+        if (found(LOUP_FINDER_TAG)) // in practice, get_loup_finder() is only called once by Optimizer.
 			return get<LoupFinder>(LOUP_FINDER_TAG);
 
 	const NormalizedSystem& norm_sys = get_norm_sys();

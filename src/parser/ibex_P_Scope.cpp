@@ -329,10 +329,10 @@ Array<const ExprSymbol> P_Scope::var_symbols() const {
 }
 
   Array<int> P_Scope::var_integers() const {
-	Array<int> x(vars.size());
+	Array<int> integers(vars.size());
 	for (unsigned int i=0; i<vars.size(); i++)
-		x.set_ref(i,vars[i]->integ);
-	return x;
+		integers.set_ref(i,vars[i]->integ);
+	return integers;
 }
 
 

@@ -25,6 +25,12 @@ CtcInteger::CtcInteger(int nb_var, const BitSet& is_int) : Ctc(nb_var), is_int(i
 	output = new BitSet(is_int);
 }
 
+
+  CtcInteger::CtcInteger( const System& sys) : Ctc(sys.nb_var), is_int(*(sys.get_integer_variables())) {
+	input = new BitSet(is_int);
+	output = new BitSet(is_int);
+}
+
 void CtcInteger::contract(IntervalVector& box) {
 	ContractContext context(box);
 	contract(box,context);

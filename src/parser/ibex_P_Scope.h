@@ -121,7 +121,7 @@ public:
 	/** All the variable symbols (in declaration order). */
 	Array<const ExprSymbol> var_symbols() const;
 
-  	/** All the variable integer indicator (in declaration order). */
+  	/** All the variable integer indicators (in declaration order). */
 	Array<int> var_integers() const;
   
 	/* Return the value of the iterator */
