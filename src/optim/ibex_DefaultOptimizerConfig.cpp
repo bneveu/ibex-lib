@@ -54,7 +54,7 @@ DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys) : sys(sys), kk
 	set_rigor(default_rigor);
 	set_inHC4(default_inHC4);
 	// by defaut, we apply KKT for unconstrained problems
-	set_kkt(sys.nb_ctr==0);
+	set_kkt(sys.nb_ctr==0 && sys.minlp==false);
 	set_random_seed(default_random_seed);
 }
 

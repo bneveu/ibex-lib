@@ -285,10 +285,11 @@ int main(int argc, char** argv){
 	
 	else
 	  ctcxn = ctc;
-	/*
-	Ctc* ctckkt = new CtcKhunTucker(norm_sys, true);
-	ctcxn = new CtcCompo (*ctcxn , *ctckkt);
-	*/
+	if (sys->nb_ctr==0 && sys->minlp==false){  // CtcKuhnTucker for unconstrained continuous problems
+	  Ctc* ctckkt = new CtcKuhnTucker(norm_sys, true);
+	  ctcxn = new CtcCompo (*ctcxn , *ctckkt, integ);
+	}
+
 
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
 	Optimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),prec,goalprec,goalprec);

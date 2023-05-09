@@ -469,6 +469,9 @@ protected:
 
 	/** Result. */
 	CovOptimData* cov;
+
+       /** tolerance for an integer objective */
+       double integerobj_tolerance = 1.e-8;
 };
 
 inline Optimizer::Status Optimizer::get_status() const { return status; }
