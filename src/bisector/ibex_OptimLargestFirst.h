@@ -53,7 +53,10 @@ public:
 	 * called by Bsc::bisect(...)
 	 */
 	BisectionPoint choose_var(const Cell& cell);
-
+	/** 
+	 * \brief Boolean indicating whether the objective variable can be bisected.
+	 */
+	bool choose_obj;
 
 protected:	
 
@@ -62,10 +65,7 @@ protected:
 	 */
 	const int goal_var;
          
-	/** 
-	 * \brief Boolean indicating whether the objective variable can be bisected.
-	 */
-	bool choose_obj;
+
 	 
 	  
 };

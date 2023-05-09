@@ -1,22 +1,15 @@
 variables
-i1 in [3,6];
-i2 in [4,10];
-i3 in [4,10];
-i4 in [7,15];
-i5 in [1,2];
-i6 in [3,4];
-i7 in [2,5];
+i1 integer in [3,6];
+i2 integer in [4,10];
+i3 integer in [4,10];
+i4 integer in [7,15];
+i5 integer in [1,2];
+i6 integer in [3,4];
+i7 integer in [2,5];
 x8 in [-1.e100,1.e100];
 minimize
 x8;
 constraints
-integer(i1);
-integer(i2);
-integer(i3);
-integer(i4);
-integer(i5);
-integer(i6);
-integer(i7);
 
 
 

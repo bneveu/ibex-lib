@@ -3,10 +3,10 @@ x1 in [0.3,0.6];
 x2 in [0.4,1];
 x3 in [0.4,1];
 x4 in [0.7,1.5];
-i5 in [10,20];
-i6 in [30,40];
-i7 in [20,50];
-x8 in [-1.e8,1.e8];
+i5 integer in [10,20];
+i6 integer in [30,40];
+i7 integer in [20,50];
+x8 integer in [-1.e8,1.e8];
 
 minimize x8;
 

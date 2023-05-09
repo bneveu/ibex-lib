@@ -51,6 +51,7 @@ public:
 			bool rigor=false,
 			bool inHC4=DefaultOptimizerConfig::default_inHC4,
 		    bool kkt=false,
+		     bool integerobj=false,
 			double random_seed=DefaultOptimizerConfig::default_random_seed,
     		double eps_x=OptimizerConfig::default_eps_x);
 };
@@ -61,10 +62,11 @@ inline DefaultOptimizer::DefaultOptimizer(const System& sys,
 		double eps_h,
 		bool rigor,
 		bool inHC4,
-	    bool kkt,
+                bool kkt,
+                bool integerobj,
 		double random_seed,
 		double eps_x) :
-				DefaultOptimizerConfig(sys,rel_eps_f,abs_eps_f,eps_h,rigor,inHC4,kkt,random_seed,eps_x),
+  DefaultOptimizerConfig(sys,rel_eps_f,abs_eps_f,eps_h,rigor,inHC4,kkt,integerobj,random_seed,eps_x),
 				Optimizer((DefaultOptimizerConfig&) *this) {
 }
 

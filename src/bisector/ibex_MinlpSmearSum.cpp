@@ -19,9 +19,9 @@ namespace ibex {
  
   MinlpSmearSum::MinlpSmearSum(System& sys,  double prec,   LargestFirst& lf, bool gb) : SmearFunction(sys,prec, lf,gb)  {
 }
-
-  MinlpSmearSum::MinlpSmearSum(System& sys,const Vector& prec,LargestFirst& lf) : SmearFunction (sys,prec, lf)  {
+    MinlpSmearSum::MinlpSmearSum(System& sys,  const Vector & prec,   LargestFirst& lf, bool gb) : SmearFunction(sys,prec, lf,gb)  {
 }
+
 
 
 
@@ -29,8 +29,11 @@ namespace ibex {
     double max_magn = NEG_INFINITY;
     int var = -1;
     BitSet& b= *(sys.get_integer_variables());
+
     for (int j=0; j<nbvars; j++) {
-      if ((!too_small(box,j))&& (goal_to_bisect || j!= goal_var())&& b[j]) { 
+      
+      if ((!too_small(box,j))&&  (j!= goal_var() && b[j])) {
+
 	double sum_smear=0;
 	for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
 	  if (constraint_to_consider (i, box))
@@ -42,10 +45,10 @@ namespace ibex {
 	}
       }
     }
-   
+    //    cout << " var " << var << endl;
     if (var==-1)  // no integer variable was chosen
       {
-	double max_magn = NEG_INFINITY;
+	max_magn = NEG_INFINITY;
 	for (int j=0; j<nbvars; j++) {
 	  if ((!too_small(box,j))&& (goal_to_bisect || j!= goal_var())) { // && (box[j].mag() <1 ||  box[j].diam()/ box[j].mag() >= prec(j))) {
 	    double sum_smear=0;

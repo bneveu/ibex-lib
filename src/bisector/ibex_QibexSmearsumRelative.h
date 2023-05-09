@@ -1,9 +1,9 @@
 //============================================================================
 //                                  I B E X
-// File        : ibex_LSmear.h
-// Author      : Ignacio Araya
+// File        : ibex_QibexSmearSumRelative.h
+// Author      : Bertrand Neveu
 // License     : See the LICENSE file
-// Last update : May, 25 2017
+// Last update : May, 25 2021
 //============================================================================
 
 #ifndef __IBEX_QIBEXSMEARSUMREL__

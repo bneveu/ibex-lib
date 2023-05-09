@@ -1,9 +1,9 @@
 variables
-i1 in [0,200];
-i2 in [0,200];
-i3 in [0,200];
-i4 in [0,200];
-i5 in [0,200];
+i1 integer in [0,200];
+i2 integer in [0,200];
+i3 integer in [0,200];
+i4 integer in [0,200];
+i5 integer in [0,200];
 x6 in [0,92];
 x7 in [90,110];
 x8 in [20,25];
@@ -18,9 +18,5 @@ constraints
 
  -(0.0047026*i3*i5 + 0.0012547*i1*i3 + 0.0019085*i3*i4) + x8 = 9.300961;
 
-integer(i1);
-integer(i2);
-integer(i3);
-integer(i4);
-integer(i5);
+
 end

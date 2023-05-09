@@ -1,8 +1,8 @@
 variables
-i1 in [12,60];
-i2 in [12,60];
-i3 in [12,60];
-i4 in [12,60];
+i1 integer in [12,60];
+i2 integer in [12,60];
+i3 integer in [12,60];
+i4 integer in [12,60];
 x6 in [0,1.e8];
 x7 in [0,1.e8];
 
@@ -11,10 +11,7 @@ minimize
 x6+x7;
 
 constraints
-integer(i1);
-integer(i2);
-integer(i3);
-integer(i4);
+
 -1000000*i1*i2/(i3*i4) - x6 + x7 + 144279.32477276 =0;
 
 end

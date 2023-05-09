@@ -1,36 +1,36 @@
 variables
-i1 in [0,10];
-i2 in [0,10];
-i3 in [0,10];
-i4 in [0,10];
-i5 in [0,10];
-i6 in [0,10];
-i7 in [0,10];
-i8 in [0,10];
-i9 in [0,10];
-i10 in [0,10];
-i11 in [0,10];
-i12 in [0,10];
-i13 in [0,10];
-i14 in [0,10];
-i15 in [0,10];
-i16 in [0,10];
-i17 in [0,10];
-i18 in [0,10];
-i19 in [0,10];
-i20 in [0,10];
-i21 in [0,10];
-i22 in [0,10];
-i23 in [0,10];
-i24 in [0,10];
-i25 in [0,10];
-i26 in [0,10];
-i27 in [0,10];
-i28 in [0,10];
-i29 in [0,10];
-i30 in [0,10];
+i1 integer in [0,10];
+i2 integer in [0,10];
+i3 integer in [0,10];
+i4 integer in [0,10];
+i5 integer in [0,10];
+i6 integer in [0,10];
+i7 integer in [0,10];
+i8 integer in [0,10];
+i9 integer in [0,10];
+i10 integer in [0,10];
+i11 integer in [0,10];
+i12 integer in [0,10];
+i13 integer in [0,10];
+i14 integer in [0,10];
+i15 integer in [0,10];
+i16 integer in [0,10];
+i17 integer in [0,10];
+i18 integer in [0,10];
+i19 integer in [0,10];
+i20 integer in [0,10];
+i21 integer in [0,10];
+i22 integer in [0,10];
+i23 integer in [0,10];
+i24 integer in [0,10];
+i25 integer in [0,10];
+i26 integer in [0,10];
+i27 integer in [0,10];
+i28 integer in [0,10];
+i29 integer in [0,10];
+i30 integer in [0,10];
 
-x31 in [-10,10];
+x31  in [-10,10];
 
 minimize
 x31;
@@ -189,35 +189,5 @@ constraints
      + 21.9*i14 + 11.85*i15 + 37.4*i16 + 4.75*i17 + 44.44*i18 + 80.5*i19
      + 49.46*i20 + 67.02*i21 + 59.25*i22 + 71.5*i23 + 48.8*i24 + 73.22*i25
      + 101.9*i26 + 20.06*i27 + 36.33*i28 + 41.31*i29 + 53.09*i30 <= 1100;
-sin(pi*i1)=0;
-sin(pi*i2)=0;
-sin(pi*i3)=0;
-sin(pi*i4)=0;
-sin(pi*i5)=0;
-sin(pi*i6)=0;
-sin(pi*i7)=0;
-sin(pi*i8)=0;
-sin(pi*i9)=0;
-sin(pi*i10)=0;
-sin(pi*i11)=0;
-sin(pi*i12)=0;
-sin(pi*i13)=0;
-sin(pi*i14)=0;
-sin(pi*i15)=0;
-sin(pi*i16)=0;
-sin(pi*i17)=0;
-sin(pi*i18)=0;
-sin(pi*i19)=0;
-sin(pi*i20)=0;
-sin(pi*i21)=0;
-sin(pi*i22)=0;
-sin(pi*i23)=0;
-sin(pi*i24)=0;
-sin(pi*i25)=0;
-sin(pi*i26)=0;
-sin(pi*i27)=0;
-sin(pi*i28)=0;
-sin(pi*i29)=0;
-sin(pi*i30)=0;
 
 end

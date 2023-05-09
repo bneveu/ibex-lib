@@ -1,0 +1,18 @@
+reset;
+option prestats 1;
+option display 0;
+
+
+option solver_msg 0;
+model model_quad_relax.mod;
+data data.ampl;
+
+display n_y > associ.txt;
+display {i in 1..n_y} assoc_prod[i,1] > associ.txt;
+display n_y > assocj.txt;
+display {i in 1..n_y} assoc_prod[i,2] > assocj.txt;
+param n_x=n-n_y;
+display n_x > diag_ref.txt;
+display {i in 1..n-n_y} Q[i,i] > diag_ref.txt;
+print {i in 1..n-n_y,j in i..n-n_y} Q[i,j] > coef_ref.txt;
+

@@ -12,6 +12,7 @@
 #define __IBEX_CTC_INTEGER_H__
 
 #include "ibex_Ctc.h"
+#include "ibex_System.h"
 
 namespace ibex {
 
@@ -30,6 +31,10 @@ public:
 	 */
 	CtcInteger(int nb_var, const BitSet& is_int);
 
+         /**
+	 * \param a System s : the integer variables bitset is found by get_integer_variables.
+	 */
+        CtcInteger(const System& sys);
 	/**
 	 * \brief Delete this.
 	 */

@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 23, 2021
-// Last Update : Nov 29, 2021
+// Last Update : Oct 20, 2022
 //============================================================================
 
 #ifndef __IBEX_QIBEXOPTIMIZER_H__
@@ -29,24 +29,27 @@ namespace ibex {
 		   double abs_eps_f=OptimizerConfig::default_abs_eps_f);
 
     void init();
+    /* redefinition of contract calling Optimizer:contract and qibex_contract_and_bound */
+    void contract(Cell & c);
+        
     /* when using quadratic convex relaxation, contracts the objective and may return a new loup  */
     void qibex_contract_and_bound(Cell& c);
 
     /* the external call through ampl */
-    void quadratic_relaxation_call(const IntervalVector & box);
+    void qibex_relaxation_call(const IntervalVector & box, double objlb);
 
     /* results of the quadratic convex relaxation 
-       when using quadratic convex relaxation,  the external solver  returns 
-       the status b of the relaxation 
+       returns true when using quadratic convex relaxation :  the external solver  returns 
+       the status of the relaxation  (solved, solved?, infeasible, unbounded)
        the best point v computed by the relaxation that may be a new loup point,
        the point w of the auxiliary variables (used for the bisection strategy)
        and the lower bound newlb*/
-    bool quadratic_relaxation_results(std::string & b, double& newlb, Vector & v, Vector& w);
+    bool qibex_relaxation_results(std::string & status, double& newlb, Vector & v, Vector& w);
 
-    /* the analysis of the relaxation gives the next variable to bisect ant its ratio
-    and returns a pair made of the best point and  the new lower bound */
-    std::pair<Vector,double> qibex_relaxation(IntervalVector & box, int& var_to_bisect, double& ratio, double& gap0);
-    
+    /* the convex quadratic relaxation   returns a triple made of the best point, the point of the auxiliary variables  and  the new lower bound */
+    std::tuple<Vector,Vector,double> qibex_relaxation_analysis (IntervalVector & box, std::string& status);
+    /* the analysis of the relaxation gives the next variable to bisect ant its ratio*/
+    void qibex_bisection_choice (Cell& c, IntervalVector & qcp_box, Vector&v, Vector& w);
     int compute_var_to_bisect(const IntervalVector & box, const Vector& v, const Vector & w, double& gap0);
     double compute_ratio(const IntervalVector & box,  const Vector& v, int i);
    
@@ -56,11 +59,17 @@ namespace ibex {
     double tolerance;
     // boolean to use the ibex loupfinder (the qibex loup finder is inside the relaxation)
     bool loupfinderp=true;
+    // boolean indicating if the relaxation is made rigourous (by default ; not rigourous)
+    bool rigor=false;
+    // boolean indicating if the contractors are called after an improvement of the lower bound
+    bool recontract=true;
+    // redefining of update_loup to take into account the loupfinderp indicator
     bool update_loup(const IntervalVector& box, BoxProperties& prop);
     // checks if v is a new louppoint (after rounding it to integer in case of integer minlp variable) update the loup and louppoint  and returns the new ymax 
     double qibex_loupfinder(Vector& v);
-    double compute_ymax();
-    double compute_emptybuffer_uplo();
+    // statistics from Ampl
+    double ampltime;
+    double solvertime;
   private :
     int n_x;
     int n_y;
@@ -69,6 +78,10 @@ namespace ibex {
     std::vector<int> ref_diag_coefs;
     std::vector<int> hessian_diag_coefs;
     std::vector<std::vector<int>> ref_coefs;
+    std::string qibex_ampl_init_run = "/libre/neveu/ampl/ampl model_quad_relax_init.run > amplout";
+    std::string qibex_ampl_run = "/libre/neveu/ampl/ampl model_quad_relax.run > amplout";
+    std::string qibex_ampl_rigor_run = "/libre/neveu/ampl/ampl model_quad_relax_rigueur.run > amplout";
+    void check_timeout();
   };
 }
 #endif // __IBEX_QIBEXOPTIMIZER_H__

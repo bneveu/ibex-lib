@@ -1,8 +1,8 @@
 variables
-i1 in [1,200];
-i2 in [1,200];
-i3 in [1,20];
-i4 in [1,20];
+i1 integer in [1,200];
+i2 integer in [1,200];
+i3 integer in [1,20];
+i4 integer in [1,20];
 x5 in [-1.e8,1.e8];
 x6 in [-1.e8,1.e8];
 x7 in [-1.e8,1.e8];
@@ -12,10 +12,7 @@ minimize
 (1.10471*i3^2*i4 + 0.04811*i1*i2*(14 + i4));
 
 constraints
-integer(i1);
-integer(i2);
-integer(i3);
-integer(i4);
+
 -4243.28147100424/(i3*i4) + x5 = 0;
 sqrt(0.25*i4^2 + (0.5*i1 + 0.5*i3)^2) + x7 = 0;
 -(59405.9405940594 + 2121.64073550212*i4)*x7/(i3*i4*(0.0833333333333333*

@@ -1,18 +1,18 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : optimizer04.cpp
+// File        : optimizer04qcpeq.cpp
 // Author      : Gilles Chabert  Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jul 12, 2012
-// Last Update : Jul 12, 2012
+// Last Update : Oct 21, 2022
 //============================================================================
 
 
 #include "ibex.h"
 
 #include "ibex_LinearizerAffine2.h"
-
+#include "ibex_AmplInterface.h"
 
 const double default_relax_ratio = 0.2;
 //const double default_relax_ratio = 0.01;
@@ -30,12 +30,13 @@ int main(int argc, char** argv){
 	try {
 Timer timer;
 	timer.start();
-	if (argc<9) {
-		cerr << "usage: optimizer04 filename filtering linear_relaxation bisection upperbounding strategy [beamsize] prec goal_prec timelimit randomseed"  << endl;
+	if (argc<14) {
+		cerr << "usage: optimizer04 filename filtering linear_relaxation bisection upperbounding strategy [beamsize] recontract rigor qibexwidth prec goal_prec tolerance timelimit randomseed"  << endl;
 		exit(1);
 	}
 
 	System * sys;
+	NormalizedSystem * norm_sys;
 	#ifdef __IBEX_AMPL_INTERFACE_H__
 	std::size_t found = string(argv[1]).find(".nl");
 	if (found!=std::string::npos){
@@ -56,19 +57,7 @@ Timer timer;
 	    sys->box[i] =  Interval(sys->box[i].lb(), 1.e8);
 	}
 	
-	  /*
-	  if (sys->box[i].lb() == -1.e8) 
-	    	    //	     sys->box[i]= Interval(NEG_INFINITY,sys->box[i].ub());
-	    //	    sys->box[i]= Interval(-1.e100,sys->box[i].ub());
-	    sys->box[i]= Interval(-10.,sys->box[i].ub());
-	  if (sys->box[i].ub() == 1.e8) 
-	    //      sys->box[i]= Interval(sys->box[i].lb(), POS_INFINITY);
-	    //	    sys->box[i]= Interval(sys->box[i].lb(), 1.e100);
-	    sys->box[i]= Interval(sys->box[i].lb(), 10.);
-	    }
-	  */
-
-
+	 
 	string filtering = argv[2];
 	string linearrelaxation= argv[3];
 	string bisection= argv[4];
@@ -77,43 +66,50 @@ Timer timer;
 	int nbinput=6;
 	int beamsize;
 	if (strategy=="bs" || strategy== "beamsearch") {beamsize=atoi(argv[7]); nbinput++;}
-	
-	double prec= atof(argv[nbinput+1]);
-	double goalprec= atof (argv[nbinput+2]);
-	double timelimit= atof(argv[nbinput+3]);
+	string recontraction= argv[nbinput+1];
+	string rigormode = argv[nbinput+2];
+	double qibexwidth= atof(argv[nbinput+3]);
+	double prec= atof(argv[nbinput+4]);
+	double goalprec= atof (argv[nbinput+5]);
+	double tolerance=atof(argv[nbinput+6]);
+	double timelimit= atof(argv[nbinput+7]);
 	//	double eqeps= 1.e-6;
-	double eqeps= 1.e-8;
-	//	double tolerance=0.0;
-	double tolerance=1.e-4;
-	int randomseed = atoi(argv[nbinput+4]);
-	//	double initloup=atof(argv[nbinput+5]);
+	double eqeps= tolerance;
+	int randomseed = atoi(argv[nbinput+8]);
+	//	double initloup=atof(argv[nbinput+9]);
 	RNG::srand(randomseed);
 
 	// the extended system 
 	ExtendedSystem ext_sys(*sys,eqeps);
-	//	NormalizedSystem norm_sys(*sys,eqeps);
+	// no need of normalized system if all constraints are LEQ
+	int leq=0;
+	for (int j=0; j < sys->nb_ctr; j++){
+	  if (sys->ops[j] == LEQ)
+	    leq++;
+	}
+	//	if (leq==sys->nb_ctr)  cout << "only leq " << endl;
+	if (leq==sys->nb_ctr)
+	  norm_sys=(NormalizedSystem*)sys;
+	else
+	  norm_sys= new NormalizedSystem (*sys,eqeps);
 
 	ext_sys.tolerance=tolerance;
-	//	norm_sys.tolerance=tolerance;
+	norm_sys->tolerance=tolerance;
 	sys->tolerance=tolerance;
 	//	cout << "nor_sys" << norm_sys << endl;
-
 
 	//	cout << "loupfind " << loupfind << endl;
 	LoupFinder* loupfinder;
 	if (loupfind=="xninhc4")
-	  //loupfinder= new LoupFinderDefault (norm_sys,true);
-	  loupfinder= new LoupFinderDefault (*sys,true);
+	  loupfinder= new LoupFinderDefault (*norm_sys,true);
 	else if (loupfind=="xn")
-	  //	  	  loupfinder= new LoupFinderDefault (norm_sys,false);
-	  loupfinder= new LoupFinderDefault (*sys,false);
+	  loupfinder= new LoupFinderDefault (*norm_sys,false);
 	  
 	else if (loupfind=="inhc4")
-	  //	  	  loupfinder= new LoupFinderInHC4 (norm_sys);
-	  loupfinder= new LoupFinderInHC4 (*sys);
-	else if (loupfind=="prob")
-	  //	  	   loupfinder= new LoupFinderProbing (norm_sys);
-	  loupfinder= new LoupFinderProbing (*sys);
+	  loupfinder= new LoupFinderInHC4 (*norm_sys);
+
+	else if (loupfind=="prob" || loupfind=="no")
+	  loupfinder= new LoupFinderProbing (*norm_sys);
 	  
 	else 
 	  {cout << " loupfinder not found " << endl;  return(-1) ;}
@@ -145,9 +141,9 @@ Timer timer;
 	Bsc * bs;
 	OptimLargestFirst * bs1;
 
-	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection=="lsmearmg" || bisection=="lsmearss" || bisection=="lsmearmgss" || bisection=="qibexsmearsumrel")
+	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection=="lsmearmg" || bisection=="lsmearss" || bisection=="lsmearmgss" || bisection=="qibexsmearsumrel" || bisection=="qibexsmearsum" || bisection=="qibexlargestfirst" )
 	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),true,prec,0.5);
-	if  (bisection=="lsmearnoobj" || bisection=="lsmearmgnoobj" || bisection=="smearsumrelnoobj"|| bisection=="smearsumnoobj" || bisection=="qibexsmearsumrelnoobj")
+	if  (bisection=="lsmearnoobj" || bisection=="lsmearmgnoobj" || bisection=="smearsumrelnoobj"|| bisection=="smearsumnoobj" || bisection=="qibexsmearsumrelnoobj" || bisection=="qibexsmearsumnoobj" || bisection == "qibexlargestfirstnoobj" )
 	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),false,prec,0.5);
 	if (bisection=="roundrobin")
 	  bs = new RoundRobin (prec,0.5);
@@ -173,12 +169,18 @@ Timer timer;
 	  bs = new LSmear(ext_sys,prec,*bs1,LSMEAR);
 	else if  (bisection=="qibexsmearsumrel" || bisection=="qibexsmearsumrelnoobj")
 	  bs = new QibexSmearSumRelative(ext_sys,prec,*bs1);
+	else if  (bisection=="qibexsmearsum" || bisection=="qibexsmearsumnoobj")
+	  bs = new QibexSmearSum(ext_sys,prec,*bs1);
+	else if  (bisection=="qibexlargestfirst")
+	  bs = new QibexLargestFirst(ext_sys.goal_var(),true,prec,0.5);
+	else if  (bisection=="qibexlargestfirstnoobj")
+	  bs = new QibexLargestFirst(ext_sys.goal_var(),false,prec,0.5);
 	else if (bisection=="lsmearmg"|| bisection=="lsmearmgnoobj" )
 	  bs = new LSmear(ext_sys,prec,*bs1);
 	else {cout << bisection << " is not an implemented  bisection mode "  << endl; return -1;}
 
 	// The contractors
-
+        CtcIdentity ident(ext_sys.nb_var);
 	// the first contractor called
 	CtcHC4 hc4(ext_sys.ctrs,0.01,true);
 	//	CtcHC4 hc4(ext_sys.ctrs,0.1,true);
@@ -208,6 +210,8 @@ Timer timer;
 	else if 
 	  (filtering =="3bcidhc4")
 	  ctc= &hc43bcidhc4;
+	else if (filtering=="no")
+	  ctc=&ident;
 	else {cout << filtering <<  " is not an implemented  contraction  mode "  << endl; return -1;}
 
 	Linearizer* lr;
@@ -260,25 +264,43 @@ Timer timer;
 	
 	else
 	  ctcxn = ctc;
-	/*
-	Ctc* ctckkt = new CtcKhunTucker(norm_sys, true);
-	ctcxn = new CtcCompo (*ctcxn , *ctckkt);
-	*/
-
-	// the optimizer : the same precision goalprec is used as relative and absolute precision
-	//	double minwidth=1.0; // for bisection qibex heuristics
-	double minwidth=0.01; // for bisection qibex heuristics
-
-	//	BitSet b = sys->active_ctrs(sys->box);
-	//	cout << " active constraints " << b << endl;
 	
-	QibexOptimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),minwidth,tolerance,prec,goalprec,goalprec);
+
+
+	IntervalVector boxn (sys->nb_var);
+	IntervalVector gradient(sys->nb_var);
+	IntervalVector gradient1(sys->nb_var);
+	for (int i=0; i < sys->nb_var; i++)
+	  boxn[i]=Interval(0.0,0.0);
+	gradient=  sys->goal->gradient(boxn);
+	ofstream fic("diag_hessian.txt");
+	for (int i=0; i < sys->nb_var; i++){
+	  boxn[i]=Interval(1.0,1.0);
+	  gradient1=sys->goal->gradient(boxn);
+	  fic << ((gradient1[i]-gradient[i])/2).mid() << " " ;
+	  boxn[i]=Interval(0.0,0.0);
+	}
+	fic.close();
+	// the optimizer : the same precision goalprec is used as relative and absolute precision
+	QibexOptimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),qibexwidth,tolerance,prec,goalprec,goalprec);
 
 	//	cout << " sys.box " << sys->box << endl;
 
 	// the trace 
-	o.trace=0;
+	o.trace=1;
+	// rigor mode
+	if (rigormode=="r")
+	  o.rigor=true;
+	else
+	  o.rigor=false;
 
+	// contraction after relaxation
+	if (recontraction=="r")
+	  o.recontract=true;
+	else
+	  o.recontract=false;
+	
+	if (loupfind=="no") o.loupfinderp=false;
 	// the allowed time for search
 
 	o.timeout=timelimit;
@@ -292,19 +314,21 @@ Timer timer;
 	timer.stop();
 	double time = timer.get_time();
 	cout << " presolve time " << time << endl;
+
 	o.optimize(sys->box);
 	//	std::cerr.rdbuf(OldBuf);
 
 	// printing the results     
 	o.report();
         cout << o.get_time() << "  " << o.get_nb_cells()+1 << endl;
+	cout << "external solver time " << o.solvertime << " ampl time " << o.ampltime << endl;
 	/*
 	if (filtering == "acidhc4"  )
 	cout    << " nbcidvar " <<  acidhc4.nbvar_stat() << endl;
 	*/
 	delete bs;
 
-	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection=="lsmearmg" || bisection=="qibexsmearsumrel"  || bisection=="lsmearnoobj" || bisection=="lsmearmgnoobj" || bisection=="smearsumrelnoobj"|| bisection=="smearsumnoobj" || bisection=="qibexsmearsumrelnoobj")
+	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection=="lsmearmg" || bisection=="qibexsmearsumrel"  || bisection == "qibexsmearsum" || bisection== "qibexlargestfirst" || bisection=="lsmearnoobj" || bisection=="lsmearmgnoobj" || bisection=="smearsumrelnoobj"|| bisection=="smearsumnoobj" || bisection=="qibexsmearsumrelnoobj" || bisection == "qibexsmearsumnoobj" || bisection== "qibexlargestfirstnoobj"  )
 	  delete bs1;
 	
 
@@ -321,6 +345,7 @@ Timer timer;
 	  delete cxn_poly1;
 	}
 	delete sys;
+	if (leq <sys->nb_ctr) delete norm_sys;
 
 	
 	}

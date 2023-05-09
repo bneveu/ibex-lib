@@ -16,6 +16,7 @@
 #include "ibex_CtcHC4.h"
 #include "ibex_CtcAcid.h"
 #include "ibex_CtcNewton.h"
+#include "ibex_CtcInteger.h"
 #include "ibex_CtcPolytopeHull.h"
 #include "ibex_CtcCompo.h"
 #include "ibex_CtcFixPoint.h"
@@ -78,9 +79,11 @@ Ctc* DefaultSolver::ctc (const System& sys, double prec) {
 
 	// first contractor : non incremental hc4
 	ctc_list.set_ref(index++, rec(new CtcHC4 (sys.ctrs,0.01)));
-	// second contractor : acid (hc4)
-	ctc_list.set_ref(index++, rec(new CtcAcid (sys, rec(new CtcHC4 (sys.ctrs,0.1,true)))));
 
+	// second contractor : acid (hc4)
+	ctc_list.set_ref(index++, rec(new CtcCompo (rec (new CtcAcid (sys,rec(new CtcHC4 (sys.ctrs,0.1,true)))),
+						    rec(new  CtcInteger (sys)))));
+	
 	// if the system is a square system of equations, the third contractor is Newton
 	System* eqs=get_square_eq_sys(*this, sys);
 	if (eqs) {
@@ -91,7 +94,8 @@ Ctc* DefaultSolver::ctc (const System& sys, double prec) {
 	if (strcmp(_IBEX_LP_LIB_,"NONE")!=0)
 		ctc_list.set_ref(index++,rec(new CtcFixPoint(rec(new CtcCompo(
 				rec(new CtcPolytopeHull(rec(new LinearizerXTaylor(sys)))),
-				rec(new CtcHC4 (sys.ctrs,0.01)))))));
+				rec(new CtcHC4 (sys.ctrs,0.01)),
+				rec(new  CtcInteger (sys)))))));
 	// in case the system is not square, or if no LP solver is
 	// available, there may be only 2 or 3 sub-contractors.
 	ctc_list.resize(index);

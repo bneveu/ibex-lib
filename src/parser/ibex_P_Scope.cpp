@@ -148,7 +148,7 @@ public:
 
 	const ExprSymbol& symbol;
 	const Domain d;
-
+        int integ=false;
 private:
 	S_Var(const S_Var& e) : symbol(e.symbol), d(e.d) {  }
 };
@@ -253,6 +253,15 @@ void P_Scope::add_var(const char* id, const Dim* d, const Domain& domain) {
 	vars.push_back(s);
 }
 
+  void P_Scope::add_int_var(const char* id, const Dim* d, const Domain& domain) {
+	S_Var* s = new S_Var(id,d,domain);
+	tab.front().insert_new(id,s);
+	s->integ=true;
+	vars.push_back(s);
+}
+
+
+  
 void P_Scope::add_iterator(const char* id) {
 	tab.front().insert_new(id, new S_Iterator(-1));
 }
@@ -317,6 +326,13 @@ Array<const ExprSymbol> P_Scope::var_symbols() const {
 	for (unsigned int i=0; i<vars.size(); i++)
 		x.set_ref(i,vars[i]->symbol);
 	return x;
+}
+
+  Array<int> P_Scope::var_integers() const {
+	Array<int> integers(vars.size());
+	for (unsigned int i=0; i<vars.size(); i++)
+		integers.set_ref(i,vars[i]->integ);
+	return integers;
 }
 
 

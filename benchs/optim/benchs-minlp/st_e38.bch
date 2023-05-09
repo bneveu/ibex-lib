@@ -1,6 +1,6 @@
 variables
-i1 in [18,100];
-i2 in [10,100];
+i1 integer in [18,100];
+i2 integer in [10,100];
 x3 in [40,80];
 x4 in [20,60];
 

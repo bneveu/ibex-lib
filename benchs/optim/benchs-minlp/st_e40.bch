@@ -1,15 +1,13 @@
 variables
-i1 in [1,12];
-i2 in [1,12];
-i3 in [1,12];
+i1 integer in [1,12];
+i2 integer in [1,12];
+i3 integer in [1,12];
 x4 in [-1.e8,1.e8];
 
 minimize
  2*i1 + i2 + 1.4142135*i3;
 
 constraints
-integer(i1);
-integer(i2);
 
 
  (-0.15*i1*i2) - 0.14142135*i2*i3 - 0.1319*i1*i3 + x4 = 0;

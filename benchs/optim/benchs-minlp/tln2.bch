@@ -1,13 +1,13 @@
 
 variables
-b1 in[ 0, 1];
-b2 in[ 0, 1];
-i3 in [ 0,  15];
-i4 in [ 0,  15];
-i5 in [ 0,  5];
-i6 in [ 0,  5];
-i7 in [ 0,  5];
-i8 in [ 0,  5];
+b1 integer in [ 0, 1];
+b2 integer in [ 0, 1];
+i3 integer in [ 0,  15];
+i4 integer in [ 0,  15];
+i5 integer in [ 0,  5];
+i6 integer in [ 0,  5];
+i7 integer in [ 0,  5];
+i8 integer in [ 0,  5];
 
 minimize
 0.1*b1 + 0.2*b2 + i3 + i4;
