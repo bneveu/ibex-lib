@@ -108,6 +108,9 @@ int main(int argc, char** argv){
 	  loupfinder = new LoupFinderProbing (norm_sys);
 	else if (loupfindermethod=="inhc4")
 	  loupfinder = new LoupFinderInHC4 (norm_sys);
+	else
+	  {cout << loupfindermethod <<  " is not an implemented  feasible point finding method "  << endl; return -1;}
+
 	CellBufferOptim* buffer;
 	CellHeap futurebuffer (ext_sys);
        	CellHeap currentbuffer (ext_sys);
@@ -117,7 +120,8 @@ int main(int argc, char** argv){
 	  buffer = new CellDoubleHeap  (ext_sys);
        	else if (strategy=="bs")
 	  buffer = new CellBeamSearch  (currentbuffer, futurebuffer, ext_sys, beamsize);
-
+	else
+	  {cout << strategy <<  " is not an implemented  node selection strategy "  << endl; return -1;}
 	cout << "file " << argv[1] << endl;
 	
 

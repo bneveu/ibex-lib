@@ -83,7 +83,10 @@ void DefaultOptimizerConfig::set_eps_h(double _eps_h) {
 
 void DefaultOptimizerConfig::set_rigor(bool _rigor) {
 	rigor = _rigor;
-
+	if (rigor && sys.minlp) {rigor=false;
+	  				ibex_warning("[OptimizerConfig] rigor automatically disabled with minlp systems.");
+					return;
+	}
 	if (!rigor && kkt) {
 		for (int i=0; i<sys.nb_ctr; i++)
 			if (sys.ctrs[i].op==EQ) {
