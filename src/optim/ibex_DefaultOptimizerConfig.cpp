@@ -53,7 +53,7 @@ DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys) : sys(sys), kk
 	set_eps_h(ExtendedSystem::default_eps_h);
 	set_rigor(default_rigor);
 	set_inHC4(default_inHC4);
-	// by defaut, we apply KKT for unconstrained problems
+	// by defaut, we apply KKT for continuous unconstrained problems
 	set_kkt(sys.nb_ctr==0 && sys.minlp==false);
 	set_random_seed(default_random_seed);
 }
@@ -229,8 +229,10 @@ Bsc& DefaultOptimizerConfig::get_bsc() {
 }
   */
 Bsc& DefaultOptimizerConfig::get_bsc() {
+	if (found(BSC_TAG)) // in practice, get_bsc() is only called once by Optimizer.
+			return get<Bsc>(BSC_TAG);
 
-  	ExtendedSystem& ext_sys=get_ext_sys();
+	ExtendedSystem& ext_sys=get_ext_sys();
 
 	const Vector& eps_x=get_eps_x();
 	Vector eps_x_extended(ext_sys.nb_var);
@@ -243,104 +245,105 @@ Bsc& DefaultOptimizerConfig::get_bsc() {
 	if (found(BSC_TAG)) // in practice, get_bsc() is only called once by Optimizer.
 			return get<Bsc>(BSC_TAG);
 		  
-
+        // TODO: should the following value be set to "abs_eps_f" instead?
+	// This question is probably related to the discussion #400
 	eps_x_extended[ext_sys.goal_var()] = OptimizerConfig::default_eps_x;
         if (get_bisector()=="minlpsmearsumnoobj"){
 	  return  rec(new MinlpSmearSum(
-			get_ext_sys(),eps_x_extended,
-			rec(new OptimLargestFirst(get_ext_sys().goal_var(),false,eps_x_extended,default_bisect_ratio)),
+			ext_sys,eps_x_extended,
+			rec(new OptimLargestFirst(ext_sys.goal_var(),false,eps_x_extended,default_bisect_ratio)),
 			false),
 			BSC_TAG);
 	}
 	else if (get_bisector()=="minlpsmearsum"){
 	     return  rec(new MinlpSmearSum(
-			get_ext_sys(),eps_x_extended,
-			rec(new OptimLargestFirst(get_ext_sys().goal_var(),true,eps_x_extended,default_bisect_ratio)),
+			ext_sys,eps_x_extended,
+			rec(new OptimLargestFirst(ext_sys.goal_var(),true,eps_x_extended,default_bisect_ratio)),
 			true),
 			 BSC_TAG);
 	}
        
 	else if (get_bisector()=="minlpsmearsumrelnoobj"){
 	  return rec(new MinlpSmearSumRelative(
-			get_ext_sys(),eps_x_extended,
-			rec(new OptimLargestFirst(get_ext_sys().goal_var(),false,eps_x_extended,default_bisect_ratio)),false),
+			ext_sys,eps_x_extended,
+			rec(new OptimLargestFirst(ext_sys.goal_var(),false,eps_x_extended,default_bisect_ratio)),false),
 			BSC_TAG);
 	}
 
 
 	else if (get_bisector()=="minlpsmearsumrel"){
 	  return rec(new MinlpSmearSumRelative(
-			get_ext_sys(),eps_x_extended,
-			rec(new OptimLargestFirst(get_ext_sys().goal_var(),true,eps_x_extended,default_bisect_ratio)),true),
+			ext_sys,eps_x_extended,
+			rec(new OptimLargestFirst(ext_sys.goal_var(),true,eps_x_extended,default_bisect_ratio)),true),
 			BSC_TAG);
 	}
         else if (get_bisector() == "minlplsmearmg"){
 	   return rec(new MinlpLSmear(
-			get_ext_sys(),eps_x_extended,
-			rec(new OptimLargestFirst(get_ext_sys().goal_var(),true,eps_x_extended,default_bisect_ratio)),true),
+			ext_sys,eps_x_extended,
+			rec(new OptimLargestFirst(ext_sys.goal_var(),true,eps_x_extended,default_bisect_ratio)),true),
 			BSC_TAG);
 	}
 	else if (get_bisector() == "minlplsmearmgnoobj"){
 	   return rec(new MinlpLSmear(
-			get_ext_sys(),eps_x_extended,
-			rec(new OptimLargestFirst(get_ext_sys().goal_var(),false,eps_x_extended,default_bisect_ratio)),false),
+			ext_sys,eps_x_extended,
+			rec(new OptimLargestFirst(ext_sys.goal_var(),false,eps_x_extended,default_bisect_ratio)),false),
 			BSC_TAG);
 	}
   
 	else if (get_bisector()=="minlplargestfirst"){
 	  
-	  return rec(new MinlpLargestFirst(get_ext_sys(),
-					   get_ext_sys().goal_var(),true,eps_x_extended,default_bisect_ratio),
+	  return rec(new MinlpLargestFirst(ext_sys,
+					   ext_sys.goal_var(),true,eps_x_extended,default_bisect_ratio),
 		     BSC_TAG);
 	}
 	else if (get_bisector()=="minlplargestfirstnoobj"){
 	  
-	  return rec(new MinlpLargestFirst(get_ext_sys(),
-					   get_ext_sys().goal_var(),false,eps_x_extended,default_bisect_ratio),
+	  return rec(new MinlpLargestFirst(ext_sys,
+					   ext_sys.goal_var(),false,eps_x_extended,default_bisect_ratio),
 		     BSC_TAG);
 	}
 	
 	else if (get_bisector()=="smearsumnoobj"){
 	    return  rec(new SmearSum(
-			get_ext_sys(),eps_x_extended,
-			rec(new OptimLargestFirst(get_ext_sys().goal_var(),false,eps_x_extended,default_bisect_ratio)),false),
+			ext_sys,eps_x_extended,
+			rec(new OptimLargestFirst(ext_sys.goal_var(),false,eps_x_extended,default_bisect_ratio)),false),
 			BSC_TAG);
 	}
 	else if (get_bisector()=="smearsum"){
 	    return  rec(new SmearSum(
-			get_ext_sys(),eps_x_extended,
-			rec(new OptimLargestFirst(get_ext_sys().goal_var(),true,eps_x_extended,default_bisect_ratio)),true),
+			ext_sys,eps_x_extended,
+			rec(new OptimLargestFirst(ext_sys.goal_var(),true,eps_x_extended,default_bisect_ratio)),true),
 			BSC_TAG);
 	  }
 	else if (get_bisector()=="smearsumrelnoobj"){
 	    return  rec(new SmearSumRelative(
-			get_ext_sys(),eps_x_extended,
-			rec(new OptimLargestFirst(get_ext_sys().goal_var(),false,eps_x_extended,default_bisect_ratio)),false),
+			ext_sys,eps_x_extended,
+			rec(new OptimLargestFirst(ext_sys.goal_var(),false,eps_x_extended,default_bisect_ratio)),false),
 			BSC_TAG);
 	  }
 	else if (get_bisector()=="smearsumrel"){
 	    return  rec(new SmearSumRelative(
-			get_ext_sys(),eps_x_extended,
-			rec(new OptimLargestFirst(get_ext_sys().goal_var(),true,eps_x_extended,default_bisect_ratio)),true),
+			ext_sys,eps_x_extended,
+			rec(new OptimLargestFirst(ext_sys.goal_var(),true,eps_x_extended,default_bisect_ratio)),true),
 			BSC_TAG);
 	  }
 	
 	else if (get_bisector()=="roundrobin")
 	  return  rec(new RoundRobin(eps_x_extended,default_bisect_ratio),BSC_TAG);
 	else if (get_bisector()=="largestfirst")		
-	  return  rec(new OptimLargestFirst (get_ext_sys().goal_var(),true,eps_x_extended,default_bisect_ratio),BSC_TAG);
+	  return  rec(new OptimLargestFirst (ext_sys.goal_var(),true,eps_x_extended,default_bisect_ratio),BSC_TAG);
 	else if (get_bisector()=="largestfirstnoobj")
-	  return  rec(new OptimLargestFirst (get_ext_sys().goal_var(),false,eps_x_extended,default_bisect_ratio),BSC_TAG);
+	  return  rec(new OptimLargestFirst (ext_sys.goal_var(),false,eps_x_extended,default_bisect_ratio),BSC_TAG);
 	
-	else if (get_ext_sys().minlp)
+	else if (ext_sys.minlp)
 	  return rec(new MinlpSmearSumRelative(
-			get_ext_sys(),eps_x_extended,
-			rec(new OptimLargestFirst(get_ext_sys().goal_var(),false,eps_x_extended,default_bisect_ratio)),false),
+			ext_sys,eps_x_extended,
+			rec(new OptimLargestFirst(ext_sys.goal_var(),false,eps_x_extended,default_bisect_ratio)),false),
 			BSC_TAG);
 	else
 	  return rec(new LSmear(
-			ext_sys, eps_x_extended,
-			rec(new OptimLargestFirst(ext_sys.goal_var(),true, eps_x_extended, default_bisect_ratio))),
+				ext_sys, eps_x_extended,
+				rec(new OptimLargestFirst(ext_sys.goal_var(),true, eps_x_extended, default_bisect_ratio))),
 			BSC_TAG);
 }
 

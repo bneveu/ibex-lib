@@ -21,15 +21,9 @@ void LoupFinder::add_property(const IntervalVector& init_box, BoxProperties& pro
 
 }
   
-  /*
-  bool LoupFinder::point_check(const System& sys, Vector & pt){
-    return    sys.is_inner(pt);
-  }
-  */
   
 bool LoupFinder::integer_and_bound_check(const System& sys, Vector & pt){
   if (sys.minlp){
-      //      double eps=1.e-2;
       double eps=0.5;
       BitSet& b = *(sys.get_integer_variables());
       for (int i=0; i< pt.size(); i++){

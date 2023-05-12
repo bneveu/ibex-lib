@@ -76,7 +76,7 @@ public:
 
 } // end anonymous namespace
 
-System::System() : id(next_id()), nb_var(0), nb_ctr(0), goal(NULL), ops(NULL), box(1) /* tmp */ {
+  System::System() : id(next_id()), nb_var(0), nb_ctr(0), goal(NULL), ops(NULL), box(1), integer_variables(NULL) /* tmp */ {
 
 }
 
@@ -84,6 +84,7 @@ System::System(const char* filename, int simpl_level) : id(next_id()), nb_var(0)
 	FILE *fd;
 	if ((fd = fopen(filename, "r")) == NULL) throw UnknownFileException(filename);
 	load(fd, simpl_level);
+
 }
 
 System::System(int n, const char* syntax, int simpl_level) : id(next_id()), nb_var(n), /* NOT TMP (required by parser) */
@@ -101,6 +102,8 @@ System::System(int n, const char* syntax, int simpl_level) : id(next_id()), nb_v
 		throw e;
 	}
 	UNLOCK;
+	//TODO / find integer variables
+	integer_variables= new BitSet(nb_var);
 }
 
 System::System(const System& sys, copy_mode mode) : id(next_id()), nb_var(0), nb_ctr(0), goal(NULL), ops(NULL), box(1) {
@@ -122,16 +125,23 @@ std::string System::minibex(bool human) const {
 		domains.set_ref(i,*new Domain(args[i].dim));
 	}
 
+	
 	ibex::load(domains, box);
 
+	int index=0;
+	
 	for (int i=0; i<args.size(); i++) {
 		const ExprSymbol& x=args[i];
-		s << x.name;
+	        s << x.name;
+	
 		if (x.dim.nb_rows()>1 || x.dim.nb_cols()>1) s << '[' << x.dim.nb_rows() << ']';
 		if (x.dim.nb_cols()>1) s << '[' << x.dim.nb_cols() << ']';
+		if ((*integer_variables)[index])
+		  s << " integer ";
 		s << " in ";
 		ExprPrinter().print(s,domains[i],human);
 		s << ";\n";
+		index+=x.dim.size();
 	}
 
 	s << '\n';

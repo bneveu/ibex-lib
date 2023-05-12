@@ -49,9 +49,6 @@ int main(int argc, char** argv){
 	}
 	else{
 	  sys = new System(argv[1]);
-	  if (sys->minlp==false){
-	    BitSet b (sys->nb_var);
-	    sys->set_integer_variables(b);}
 	}
 	    
 	    
@@ -59,7 +56,7 @@ int main(int argc, char** argv){
 	sys = new System(argv[1]);
 	#endif
 
-	
+	if (!(sys->goal)) {cout << " No goal " << endl; return -1;}
 	for (int i=0; i< sys->box.size(); i++){
 	  if (sys->box[i].lb() < -initbox_limit) 
 	    sys->box[i]= Interval(-initbox_limit,sys->box[i].ub()) ;
@@ -86,11 +83,15 @@ int main(int argc, char** argv){
 	//	double initloup=atof(argv[nbinput+5]);
 	RNG::srand(randomseed);
 	//        cout << "fin lecture parametres " << endl;
-	// the extended system 
+
+
+	//	cout << " sys " << sys->minibex() <<endl;
+	if (sys->minlp)	cout << " integer variables " << *(sys->get_integer_variables()) << endl;
+	// the extended system
 	ExtendedSystem ext_sys(*sys,eqeps);
         NormalizedSystem norm_sys(*sys,eqeps);
 
-        if (sys->minlp)	cout << " integer variables " << *(sys->get_integer_variables()) << endl;
+
 
 	
 	ext_sys.tolerance=eqeps;
@@ -256,8 +257,9 @@ int main(int argc, char** argv){
 	  lr=new LinearizerXTaylor (ext_sys);
 	  lr1=new LinearizerAffine2(ext_sys);
 	}
-	  
-	//	else {cout << linearrelaxation  <<  " is not an implemented  linear relaxation mode "  << endl; return -1;}
+	else if (linearrelaxation=="no") {;}
+	else {cout << linearrelaxation  <<  " is not an implemented  linear relaxation mode "  << endl; return -1;}
+
 	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
 	//	CtcFixPoint* cxn;
 	Ctc* cxn;

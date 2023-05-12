@@ -297,14 +297,13 @@ public:
 
         bool is_integer(int i) const;
 
-        /** Boolean : true if  the system contains integer variables , false if all variables are real */
+        /** Boolean : true if  the system contains integer variables, false if all variables are real */
         bool minlp=false;
    
         /** the tolerance for checking an inequality (by default no tolerance)*/
         double tolerance =0.0;
 
-         /**  \brief Find the integer variables in the .nl file
-	 */
+        /**  \brief Find the integer variables in the .file in nl format */
         std::vector<int> find_integer_variables (char* filename);
         
 
@@ -318,9 +317,8 @@ protected:
 	SymbolMap<Domain*> mutable_constants;
 
         /** Bitset indicating which variables are integer (to be used only when minlp is true) */
-        BitSet* integer_variables=NULL;
+        BitSet* integer_variables = NULL;
 
-  
         bool is_inactive( Interval& gx, CmpOp op) const ;
   
         bool  is_ineffective( Interval& gx, CmpOp op) const;
