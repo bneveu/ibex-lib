@@ -191,15 +191,20 @@ std::string System::minibex(bool human) const {
 std::ostream& operator<<(std::ostream& os, const System& sys) {
 
 	os << "variables: " << endl << "  ";
+	int index=0;
 	for (int i=0; i<sys.args.size(); i++) {
 		const ExprSymbol& x = sys.args[i];
 		os << x;
+		if((*(sys.get_integer_variables()))[index])
+		  os << " integer" ;
+		   
 		if (x.dim.nb_rows()>1) os << '[' << x.dim.nb_rows() << ']';
 		if (x.dim.nb_cols()>1) {
 			if (x.dim.nb_rows()==1) os << "[1]";
 			os << '[' << x.dim.nb_cols() << ']';
 		}
 		if (i<sys.args.size()-1) os << ", ";
+		index+=x.dim.size();
 	}
 	os << endl;
 
@@ -449,78 +454,82 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
   
 
   vector<int> System::find_integer_variables (char* filename) {
-  ifstream fic (filename);
-    string a;
-    int nbvar;
-    for (int i=0; i<7 ;i++){
-      fic >> a;
+    vector<int> integers;
+    std::size_t found = string(filename).find(".nl");
+    if (found!=std::string::npos){
+      ifstream fic (filename);
+      string a;
+      int nbvar;
+      for (int i=0; i<7 ;i++){
+	fic >> a;
     }
 
-  fic >> nbvar;
-  //  cout << " nbvar " << nbvar << endl;
-  for (int i=0; i<10 ;i++){
-    fic >> a;
-    //    cout << "  " << a ;
-  }
-  for (int i=0; i<6 ;i++){
-    fic >> a;
-    //    cout << "  " << a ;
-  }
-  for (int i=0; i<7 ;i++){
-    fic >> a;
-    //    cout << "  " << a ;
-  }
-  int nlvarc;
-  int nlvaro;
-  int nlvarb;
-  fic >> nlvarc;
-  fic >> nlvaro;
-  fic >> nlvarb;
-  //  cout << " nlvarc " << nlvarc << " nlvaro " <<  nlvaro << " nlvarb " << nlvarb << endl;
-  for (int i=0; i<7 ;i++){
-    fic >> a;
-    //    cout << "  " << a ;
-  }
-  for (int i=0; i<11 ;i++){
-    fic >> a;
-    //    cout << "  " << a ;
-  }
-  int lbin ;
-  int lint ;
-  int nlbd;
-  int nlcd;
-  int nlod;
-  fic >> lbin;
-  fic >> lint;
-  fic >> nlbd;
-  fic >> nlcd;
-  fic >> nlod;
-  //  cout << "lbin " << lbin << " lint " << lint << " nlbd " << nlbd << " nlcd " << nlcd << " nlod " << nlod << endl;
-  // the integer variables are found among the variables by using the variable ordering of the nl files described in
-  //Hooking your solver to ampl by David M Gay
+      fic >> nbvar;
+      //  cout << " nbvar " << nbvar << endl;
+      for (int i=0; i<10 ;i++){
+	fic >> a;
+	//    cout << "  " << a ;
+      }
+      for (int i=0; i<6 ;i++){
+	fic >> a;
+	//    cout << "  " << a ;
+      }
+      for (int i=0; i<7 ;i++){
+	fic >> a;
+	//    cout << "  " << a ;
+      }
+      int nlvarc;
+      int nlvaro;
+      int nlvarb;
+      fic >> nlvarc;
+      fic >> nlvaro;
+      fic >> nlvarb;
+      //  cout << " nlvarc " << nlvarc << " nlvaro " <<  nlvaro << " nlvarb " << nlvarb << endl;
+      for (int i=0; i<7 ;i++){
+	fic >> a;
+	//    cout << "  " << a ;
+      }
+      for (int i=0; i<11 ;i++){
+	fic >> a;
+	//    cout << "  " << a ;
+      }
+      int lbin ;
+      int lint ;
+      int nlbd;
+      int nlcd;
+      int nlod;
+      fic >> lbin;
+      fic >> lint;
+      fic >> nlbd;
+      fic >> nlcd;
+      fic >> nlod;
+      //  cout << "lbin " << lbin << " lint " << lint << " nlbd " << nlbd << " nlcd " << nlcd << " nlod " << nlod << endl;
+      // the integer variables are found among the variables by using the variable ordering of the nl files described in
+      //Hooking your solver to ampl by David M Gay
   
   
-  fic.close ();
-  vector<int> integers;
-  for (int i=nlvarb-nlbd;i<nlvarb;i++)
-    {//cout << i << " " << endl;
-    integers.push_back(i);
-    }
-  for (int i=nlvarc-nlcd;i< nlvarc; i++)
-    {//cout << i << " " << endl;
-    integers.push_back(i);
-    }
-  for (int i=nlvaro-nlod;i< nlvaro; i++)
-    {//cout << i << " " << endl;
-    integers.push_back(i);
-    }
-  for (int  i= nbvar-lbin-lint; i< nbvar; i++)
-    {//cout << i << " " << endl;
-    integers.push_back(i);
-    }
+      fic.close ();
+
+      for (int i=nlvarb-nlbd;i<nlvarb;i++)
+	{//cout << i << " " << endl;
+	  integers.push_back(i);
+	}
+      for (int i=nlvarc-nlcd;i< nlvarc; i++)
+	{//cout << i << " " << endl;
+	  integers.push_back(i);
+	}
+      for (int i=nlvaro-nlod;i< nlvaro; i++)
+	{//cout << i << " " << endl;
+	  integers.push_back(i);
+	}
+      for (int  i= nbvar-lbin-lint; i< nbvar; i++)
+	{//cout << i << " " << endl;
+	  integers.push_back(i);
+	}
+    }  
   return integers;
   
-}
+  }
 
           
 

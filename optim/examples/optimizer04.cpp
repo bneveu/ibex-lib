@@ -86,6 +86,7 @@ int main(int argc, char** argv){
 
 
 	//	cout << " sys " << sys->minibex() <<endl;
+	//	cout << " sys " << *sys  <<endl;
 	if (sys->minlp)	cout << " integer variables " << *(sys->get_integer_variables()) << endl;
 	// the extended system
 	ExtendedSystem ext_sys(*sys,eqeps);
