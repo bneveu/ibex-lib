@@ -83,7 +83,10 @@ void DefaultOptimizerConfig::set_eps_h(double _eps_h) {
 
 void DefaultOptimizerConfig::set_rigor(bool _rigor) {
 	rigor = _rigor;
-
+        if (rigor && sys.minlp) {rigor=false;
+	  				ibex_warning("[OptimizerConfig] rigor automatically disabled with minlp systems.");
+					return;
+	}
 	if (!rigor && kkt) {
 		for (int i=0; i<sys.nb_ctr; i++)
 			if (sys.ctrs[i].op==EQ) {
@@ -113,7 +116,10 @@ void DefaultOptimizerConfig::set_inHC4(bool _inHC4) {
 
 void DefaultOptimizerConfig::set_kkt(bool _kkt) {
 	kkt = _kkt;
-
+	if (sys.minlp){
+	  kkt=false;
+	  ibex_warning("[OptimizerConfig] KKT automatically disabled with minlp system.");
+	  return;}
 	// if KKT is applied with equalities, rigor mode is forced.
 	if (kkt && !rigor && sys.nb_ctr>1) {
 		rigor=true;
@@ -200,32 +206,11 @@ Ctc& DefaultOptimizerConfig::get_ctc() {
 	return rec(new CtcCompo(ctc_list), CTC_TAG);
 }
 
-  /*
+
 Bsc& DefaultOptimizerConfig::get_bsc() {
-	if (found(BSC_TAG)) // in practice, get_bsc() is only called once by Optimizer.
+
+        if (found(BSC_TAG)) // in practice, get_bsc() is only called once by Optimizer.
 			return get<Bsc>(BSC_TAG);
-
-	ExtendedSystem& ext_sys=get_ext_sys();
-
-	const Vector& eps_x=get_eps_x();
-	Vector eps_x_extended(ext_sys.nb_var);
-
-	if (eps_x.size()==1) // not initialized
-		ext_sys.write_ext_vec(Vector(sys.nb_var,eps_x[0]), eps_x_extended);
-	else
-		ext_sys.write_ext_vec(eps_x, eps_x_extended);
-
-	// TODO: should the following value be set to "abs_eps_f" instead?
-	// This question is probably related to the discussion #400
-	eps_x_extended[ext_sys.goal_var()] = OptimizerConfig::default_eps_x;
-
-	return rec(new LSmear(
-			ext_sys, eps_x_extended,
-			rec(new OptimLargestFirst(ext_sys.goal_var(),true, eps_x_extended, default_bisect_ratio))),
-			BSC_TAG);
-}
-  */
-Bsc& DefaultOptimizerConfig::get_bsc() {
 
   	ExtendedSystem& ext_sys=get_ext_sys();
 
@@ -237,10 +222,8 @@ Bsc& DefaultOptimizerConfig::get_bsc() {
 	else
 		ext_sys.write_ext_vec(eps_x, eps_x_extended);
 
-	if (found(BSC_TAG)) // in practice, get_bsc() is only called once by Optimizer.
-			return get<Bsc>(BSC_TAG);
-		  
-
+	// TODO: should the following value be set to "abs_eps_f" instead?
+	// This question is probably related to the discussion #400
 	eps_x_extended[ext_sys.goal_var()] = OptimizerConfig::default_eps_x;
         if (get_bisector()=="minlpsmearsumnoobj"){
 	  return  rec(new MinlpSmearSum(
@@ -329,12 +312,12 @@ Bsc& DefaultOptimizerConfig::get_bsc() {
 	else if (get_bisector()=="largestfirstnoobj")
 	  return  rec(new OptimLargestFirst (get_ext_sys().goal_var(),false,eps_x_extended,default_bisect_ratio),BSC_TAG);
 	
-	else if (get_ext_sys().minlp)
+	else if (get_ext_sys().minlp)  // default strategy for minlp optimization
 	  return rec(new MinlpSmearSumRelative(
 			get_ext_sys(),eps_x_extended,
 			rec(new OptimLargestFirst(get_ext_sys().goal_var(),false,eps_x_extended,default_bisect_ratio)),false),
 			BSC_TAG);
-	else
+	else                         // default strategy for continuous optimization
 	  return rec(new LSmear(
 			ext_sys, eps_x_extended,
 			rec(new OptimLargestFirst(ext_sys.goal_var(),true, eps_x_extended, default_bisect_ratio))),
