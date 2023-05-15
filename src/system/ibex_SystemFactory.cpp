@@ -51,6 +51,12 @@ void SystemFactory::add_var(const ExprSymbol& v, const IntervalVector& init_box,
 	tmp_input_args.push_back(&v);
 	nb_arg++;
 	if (is_integer){
+	  if (!(integer_variables))
+	    integer_variables=new BitSet (v.dim.size());
+	  else{
+	    if (integer_variables->capacity() < nb_var + v.dim.size())
+	      integer_variables->resize(nb_var + v.dim.size());
+	  }
 	  for (unsigned int i=nb_var ;i< nb_var+v.dim.size(); i++)
 	    integer_variables->add(i);
 	}
@@ -74,15 +80,19 @@ void SystemFactory::add_var(const ExprSymbol& v, const IntervalVector& init_box,
 	  tmp_input_args.push_back(&a[i]);
 	  nb_arg++;
 	  if (is_integer){
-	    for (unsigned int i=nb_var ;i< nb_var+a[i].dim.size(); i++)
-	      integer_variables->add(i);
+	    if (!(integer_variables))
+	      integer_variables=new BitSet (a[i].dim.size());
+	    else{
+	      if (integer_variables->capacity() < nb_var + a[i].dim.size())
+		integer_variables->resize(nb_var + a[i].dim.size());
+	    }
+	    for (unsigned int j=nb_var ;j< nb_var+a[i].dim.size(); i++)
+	      integer_variables->add(j);
 	  }
+	  
 	  nb_var+= a[i].dim.size();
 	  
 	}
-
-	if (is_integer)
-	  
 	boxes.push_back(box);
 }
 
@@ -271,7 +281,8 @@ void System::init(const SystemFactory& fac) {
 	}
         // init integer variables
 	integer_variables=fac.integer_variables;
-
+	if (!integer_variables) {integer_variables= new BitSet(nb_var);}
+	else minlp=true;
        
 	// =========== init box ==============
 	box.resize(nb_var);

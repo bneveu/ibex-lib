@@ -87,6 +87,7 @@ void DefaultOptimizerConfig::set_rigor(bool _rigor) {
 	  				ibex_warning("[OptimizerConfig] rigor automatically disabled with minlp systems.");
 					return;
 	}
+	// not useful in default configuration : kkt is only true for uncontrained continupus systems.
 	if (!rigor && kkt) {
 		for (int i=0; i<sys.nb_ctr; i++)
 			if (sys.ctrs[i].op==EQ) {
@@ -116,7 +117,10 @@ void DefaultOptimizerConfig::set_inHC4(bool _inHC4) {
 
 void DefaultOptimizerConfig::set_kkt(bool _kkt) {
 	kkt = _kkt;
-
+        if (sys.minlp){
+	  kkt=false;
+	  ibex_warning("[OptimizerConfig] KKT automatically disabled with minlp system.");
+	  return;}
 	// if KKT is applied with equalities, rigor mode is forced.
 	if (kkt && !rigor && sys.nb_ctr>1) {
 		rigor=true;

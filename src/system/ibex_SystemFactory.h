@@ -132,7 +132,7 @@ protected:
 	std::vector<const ExprNode*> f_ctrs;
 
 	mutable bool system_built; // for cleanup
-  BitSet * integer_variables=NULL;
+        BitSet * integer_variables=NULL;
 private:
 
 	void init_args();
