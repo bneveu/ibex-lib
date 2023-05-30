@@ -320,6 +320,12 @@ public:
 	 * Default value: false.
 	 */
         bool integerobj=false;
+
+        /**  
+        * \brief tolerance on the integrality of othe objective in case of integer objective
+        * Default value 1.e-8
+	*/
+        double integer_tolerance=1.e-8;
   
 protected:
   /*

@@ -49,9 +49,6 @@ int main(int argc, char** argv){
 	}
 	else{
 	  sys = new System(argv[1]);
-	  if (sys->minlp==false){
-	    BitSet b (sys->nb_var);
-	    sys->set_integer_variables(b);}
 	}
 	    
 	    
@@ -59,7 +56,7 @@ int main(int argc, char** argv){
 	sys = new System(argv[1]);
 	#endif
 
-	
+	if (!(sys->goal)) {cout << " No goal " << endl; return -1;}
 	for (int i=0; i< sys->box.size(); i++){
 	  if (sys->box[i].lb() < -initbox_limit) 
 	    sys->box[i]= Interval(-initbox_limit,sys->box[i].ub()) ;
@@ -86,11 +83,18 @@ int main(int argc, char** argv){
 	//	double initloup=atof(argv[nbinput+5]);
 	RNG::srand(randomseed);
 	//        cout << "fin lecture parametres " << endl;
-	// the extended system 
+
+
+	//	cout << " sys " << sys->minibex() <<endl;
+	//	cout << " sys " << *sys  <<endl;
+	
+	if (sys->minlp)	cout << " number of integer variables " << (sys->get_integer_variables())->size() << endl;
+	if (sys->minlp)	cout << " integer variables " << *(sys->get_integer_variables()) << endl;
+	// the extended system
 	ExtendedSystem ext_sys(*sys,eqeps);
         NormalizedSystem norm_sys(*sys,eqeps);
 
-        if (sys->minlp)	cout << " integer variables " << *(sys->get_integer_variables()) << endl;
+
 
 	
 	ext_sys.tolerance=eqeps;
@@ -108,6 +112,9 @@ int main(int argc, char** argv){
 	  loupfinder = new LoupFinderProbing (norm_sys);
 	else if (loupfindermethod=="inhc4")
 	  loupfinder = new LoupFinderInHC4 (norm_sys);
+	else
+	  {cout << loupfindermethod <<  " is not an implemented  feasible point finding method "  << endl; return -1;}
+
 	CellBufferOptim* buffer;
 	CellHeap futurebuffer (ext_sys);
        	CellHeap currentbuffer (ext_sys);
@@ -117,7 +124,8 @@ int main(int argc, char** argv){
 	  buffer = new CellDoubleHeap  (ext_sys);
        	else if (strategy=="bs")
 	  buffer = new CellBeamSearch  (currentbuffer, futurebuffer, ext_sys, beamsize);
-
+	else
+	  {cout << strategy <<  " is not an implemented  node selection strategy "  << endl; return -1;}
 	cout << "file " << argv[1] << endl;
 	
 
@@ -252,8 +260,9 @@ int main(int argc, char** argv){
 	  lr=new LinearizerXTaylor (ext_sys);
 	  lr1=new LinearizerAffine2(ext_sys);
 	}
-	  
-	//	else {cout << linearrelaxation  <<  " is not an implemented  linear relaxation mode "  << endl; return -1;}
+	else if (linearrelaxation=="no") {;}
+	else {cout << linearrelaxation  <<  " is not an implemented  linear relaxation mode "  << endl; return -1;}
+
 	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
 	//	CtcFixPoint* cxn;
 	Ctc* cxn;
@@ -285,10 +294,11 @@ int main(int argc, char** argv){
 	
 	else
 	  ctcxn = ctc;
-	/*
-	Ctc* ctckkt = new CtcKhunTucker(norm_sys, true);
-	ctcxn = new CtcCompo (*ctcxn , *ctckkt);
-	*/
+	if (sys->nb_ctr==0 && sys->minlp==false){  // CtcKuhnTucker for unconstrained continuous problems
+	  Ctc* ctckkt = new CtcKuhnTucker(norm_sys, true);
+	  ctcxn = new CtcCompo (*ctcxn , *ctckkt, integ);
+	}
+
 
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
 	Optimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),prec,goalprec,goalprec);
@@ -299,6 +309,7 @@ int main(int argc, char** argv){
 
 	//integer objective
 	o.integerobj=integerobjective;
+	o.integer_tolerance=goalprec;
 	// the allowed time for search
 	o.timeout=timelimit;
 	cout.precision(16);

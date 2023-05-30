@@ -110,6 +110,8 @@ bool Optimizer::update_loup(const IntervalVector& box, BoxProperties& prop) {
 	try {
 
 		pair<IntervalVector,double> p=loup_finder.find(box,loup_point,loup,prop);
+		if (!integerobj || 
+		    (std::ceil (p.second) - p.second) < integer_tolerance || (p.second - std::floor(p.second)) < integer_tolerance){
 		loup_point = p.first;
 		loup = p.second;
 
@@ -123,7 +125,9 @@ bool Optimizer::update_loup(const IntervalVector& box, BoxProperties& prop) {
 //			else
 //				cout << loup_point.lb() << endl;
 	       
-		return true;
+		return true;}
+		else
+		  return false;
 
 	} catch(LoupFinder::NotFound&) {
 		return false;
@@ -149,7 +153,7 @@ void Optimizer::update_uplo() {
 	//	cout << " buffer empty "  << buffer.empty() << " uplo " << uplo << endl;
 	if (! buffer.empty()) {
  		new_uplo= buffer.minimum();
-		//		cout << " new_uplo " << new_uplo << endl;
+		cout << " new_uplo " << new_uplo <<  " loup " << loup << endl;
 		if (new_uplo > loup && uplo_of_epsboxes > loup) {
 		        cout << " loup = " << loup << " new_uplo=" << new_uplo <<  " uplo_of_epsboxes=" << uplo_of_epsboxes << endl;
 			ibex_error("optimizer: new_uplo>loup (please report bug)");
@@ -179,7 +183,7 @@ void Optimizer::update_uplo() {
 		double m = (new_uplo < uplo_of_epsboxes) ? new_uplo :  uplo_of_epsboxes;
 		double olduplo=uplo;
 		if (uplo < m) uplo = m; // warning: hides the field "m" of the class
-		if (integerobj) uplo=std::ceil(uplo);
+		//		if (integerobj) uplo=std::ceil(uplo);
 		if (trace && uplo > olduplo) cout << "\033[33m uplo= " << uplo << "\033[0m" << endl;
 		// note: we always have uplo <= uplo_of_epsboxes but we may have uplo > new_uplo, because
 		// ymax is strictly lower than the loup.
@@ -653,7 +657,9 @@ void Optimizer::report() {
 	if (status==INFEASIBLE) {
 		cout << " infeasible problem " << endl;
 	} else {
-		cout << " f* in\t[" << uplo << "," << loup << "]" << endl;
+	  if (! integerobj) cout << " f* in\t[" << uplo << "," << loup << "]" << endl;
+	  else cout << " f *in\t" <<  integer( Interval(uplo-2* integer_tolerance, loup+2 *integer_tolerance)) << endl;
+	  
 		cout << "\t(best bound)" << endl << endl;
 
 		if (loup==initial_loup)

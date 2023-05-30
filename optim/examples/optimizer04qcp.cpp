@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : optimizer04qcpeq.cpp
+// File        : optimizer04qcp.cpp
 // Author      : Gilles Chabert  Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : Jul 12, 2012
-// Last Update : Oct 21, 2022
+// Created     : Dec 10 ,2021
+// Last Update : May 16, 2023
 //============================================================================
 
 
@@ -16,7 +16,7 @@
 
 const double default_relax_ratio = 0.2;
 //const double default_relax_ratio = 0.01;
-
+const double initbox_limit = 1.e8;
 using namespace std;
 using namespace ibex;
 
@@ -30,8 +30,8 @@ int main(int argc, char** argv){
 	try {
 Timer timer;
 	timer.start();
-	if (argc<14) {
-		cerr << "usage: optimizer04 filename filtering linear_relaxation bisection upperbounding strategy [beamsize] recontract rigor qibexwidth prec goal_prec tolerance timelimit randomseed"  << endl;
+	if (argc<15) {
+		cerr << "usage: optimizer04qcp filename filtering linear_relaxation bisection upperbounding strategy [beamsize] recontract rigor qibexwidth integerobj prec goal_prec tolerance timelimit randomseed"  << endl;
 		exit(1);
 	}
 
@@ -42,19 +42,22 @@ Timer timer;
 	if (found!=std::string::npos){
 	  AmplInterface interface (argv[1]);
 	  sys= new System(interface);
+	  vector<int> integers = sys->find_integer_variables (argv[1]);
+	  sys->set_integer_variables(integers);
+	  
 	}else
-	  sys = new System(argv[1],0);
+	  sys = new System(argv[1]);
 	#else
-	sys = new System(argv[1],0);
+	sys = new System(argv[1]);
 	#endif
 
 	
 	
 	for (int i=0; i< sys->box.size(); i++){
-	  if (sys->box[i].lb() < -1.e8) 
+	  if (sys->box[i].lb() < -initbox_limit) 
 	    sys->box[i]= Interval(-1.e8,sys->box[i].ub()) ;
-	  if (sys->box[i].ub() >1.e8) 
-	    sys->box[i] =  Interval(sys->box[i].lb(), 1.e8);
+	  if (sys->box[i].ub() >initbox_limit) 
+	    sys->box[i] =  Interval(sys->box[i].lb(), initbox_limit);
 	}
 	
 	 
@@ -69,14 +72,15 @@ Timer timer;
 	string recontraction= argv[nbinput+1];
 	string rigormode = argv[nbinput+2];
 	double qibexwidth= atof(argv[nbinput+3]);
-	double prec= atof(argv[nbinput+4]);
-	double goalprec= atof (argv[nbinput+5]);
-	double tolerance=atof(argv[nbinput+6]);
-	double timelimit= atof(argv[nbinput+7]);
+	int integerobjective= atoi(argv[nbinput+4]);
+	double prec= atof(argv[nbinput+5]);
+	double goalprec= atof (argv[nbinput+6]);
+	double tolerance=atof(argv[nbinput+7]);
+	double timelimit= atof(argv[nbinput+8]);
 	//	double eqeps= 1.e-6;
 	double eqeps= tolerance;
-	int randomseed = atoi(argv[nbinput+8]);
-	//	double initloup=atof(argv[nbinput+9]);
+	int randomseed = atoi(argv[nbinput+9]);
+
 	RNG::srand(randomseed);
 
 	// the extended system 
@@ -180,9 +184,11 @@ Timer timer;
 	else {cout << bisection << " is not an implemented  bisection mode "  << endl; return -1;}
 
 	// The contractors
+	CtcInteger integ (ext_sys.nb_var,*(ext_sys.get_integer_variables()));
         CtcIdentity ident(ext_sys.nb_var);
 	// the first contractor called
 	CtcHC4 hc4(ext_sys.ctrs,0.01,true);
+	CtcCompo hc4integ (integ, hc4, integ);
 	//	CtcHC4 hc4(ext_sys.ctrs,0.1,true);
 	// hc4 inside acid and 3bcid : incremental propagation beginning with the shaved variable
 	CtcHC4 hc44cid(ext_sys.ctrs,0.1,true);
@@ -192,18 +198,18 @@ Timer timer;
 	// The 3BCID contractor on all variables (component of the contractor when filtering == "3bcidhc4") 
 	Ctc3BCid c3bcidhc4(hc44cid);
 	// hc4 followed by 3bcidhc4 : the actual contractor used when filtering == "3bcidhc4" 
-	CtcCompo hc43bcidhc4 (hc4, c3bcidhc4);
-
+	//	CtcCompo hc43bcidhc4 (hc4, c3bcidhc4);
+	CtcCompo hc43bcidhc4 (integ,hc4, integ, c3bcidhc4, integ);
 	// The ACID contractor (component of the contractor  when filtering == "acidhc4")
 	CtcAcid acidhc4(ext_sys,hc44cid,true);
 	// hc4 followed by acidhc4 : the actual contractor used when filtering == "acidhc4" 
-	CtcCompo hc4acidhc4 (hc4, acidhc4);
-
+	//	CtcCompo hc4acidhc4 (hc4, acidhc4);
+	CtcCompo hc4acidhc4 (integ, hc4, integ, acidhc4, integ);
       
 
 	Ctc* ctc;
 	if (filtering == "hc4")
-	  ctc= &hc4;
+	  ctc= &hc4integ;
 	else if
 	  (filtering =="acidhc4")   
 	  ctc= &hc4acidhc4;
@@ -211,7 +217,7 @@ Timer timer;
 	  (filtering =="3bcidhc4")
 	  ctc= &hc43bcidhc4;
 	else if (filtering=="no")
-	  ctc=&ident;
+	  ctc=&integ;
 	else {cout << filtering <<  " is not an implemented  contraction  mode "  << endl; return -1;}
 
 	Linearizer* lr;
@@ -242,7 +248,7 @@ Timer timer;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn")
           {
 		cxn_poly = new CtcPolytopeHull(*lr);
-		cxn_compo =new CtcCompo(*cxn_poly, hc44xn);
+		cxn_compo =new CtcCompo(integ,*cxn_poly,integ, hc44xn, integ);
 		cxn = new CtcFixPoint (*cxn_compo, default_relax_ratio);
 		//	cxn =new CtcCompo(*cxn_poly, hc44xn);
 	  }
@@ -251,7 +257,7 @@ Timer timer;
 	    cout << " xnart " << endl;
 	    cxn_poly = new CtcPolytopeHull(*lr);
 	    cxn_poly1 = new CtcPolytopeHull(*lr1);
-	    cxn_compo =new CtcCompo(*cxn_poly1, *cxn_poly, hc44xn);
+	    cxn_compo =new CtcCompo(integ,*cxn_poly1, *cxn_poly, hc44xn, integ);
 	    //	    cxn = new CtcFixPoint (*cxn_compo, default_relax_ratio);
 	    
 	    cxn =new CtcCompo(*cxn_poly1, *cxn_poly, hc44xn);
@@ -260,7 +266,7 @@ Timer timer;
 	//  the actual contractor  ctc + linear relaxation 
 	Ctc* ctcxn;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn" || linearrelaxation=="xnart") 
-          ctcxn= new CtcCompo  (*ctc, *cxn); 
+          ctcxn= new CtcCompo  (*ctc, *cxn, integ); 
 	
 	else
 	  ctcxn = ctc;
@@ -302,13 +308,16 @@ Timer timer;
 	
 	if (loupfind=="no") o.loupfinderp=false;
 	// the allowed time for search
+	
+	//integer objective
+	o.integerobj=integerobjective;
 
+	o.integer_tolerance=tolerance;
 	o.timeout=timelimit;
 	cout << " timelimit " << timelimit << endl;
 	cout.precision(16);
 
 	// the search itself 
-	//	o.optimize(sys->box,initloup);
 	//	std::ofstream Out("err.txt");
 	//	std::streambuf* OldBuf = std::cerr.rdbuf(Out.rdbuf());
 	timer.stop();
@@ -322,10 +331,7 @@ Timer timer;
 	o.report();
         cout << o.get_time() << "  " << o.get_nb_cells()+1 << endl;
 	cout << "external solver time " << o.solvertime << " ampl time " << o.ampltime << endl;
-	/*
-	if (filtering == "acidhc4"  )
-	cout    << " nbcidvar " <<  acidhc4.nbvar_stat() << endl;
-	*/
+
 	delete bs;
 
 	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection=="lsmearmg" || bisection=="qibexsmearsumrel"  || bisection == "qibexsmearsum" || bisection== "qibexlargestfirst" || bisection=="lsmearnoobj" || bisection=="lsmearmgnoobj" || bisection=="smearsumrelnoobj"|| bisection=="smearsumnoobj" || bisection=="qibexsmearsumrelnoobj" || bisection == "qibexsmearsumnoobj" || bisection== "qibexlargestfirstnoobj"  )
