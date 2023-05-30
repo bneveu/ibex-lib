@@ -108,26 +108,19 @@ double Optimizer::compute_ymax() {
 bool Optimizer::update_loup(const IntervalVector& box, BoxProperties& prop) {
 
 	try {
-
 		pair<IntervalVector,double> p=loup_finder.find(box,loup_point,loup,prop);
+
 		if (!integerobj || 
 		    (std::ceil (p.second) - p.second) < integer_tolerance || (p.second - std::floor(p.second)) < integer_tolerance){
-		loup_point = p.first;
-		loup = p.second;
-
-		if (trace) {
-			cout << "                    ";
-			cout << "\033[32m loup= " << loup << "\033[0m" << endl;
-		}
 //			cout << " loup point=";
 //			if (loup_finder.rigorous())
 //				cout << loup_point << endl;
 //			else
 //				cout << loup_point.lb() << endl;
 	       
-		return true;}
-		else
-		  return false;
+		return true;
+		}
+		else return false;
 
 	} catch(LoupFinder::NotFound&) {
 		return false;
@@ -298,11 +291,13 @@ void Optimizer::contract_and_bound(Cell& c) {
 	// - the width of the box is less than the precision given to the optimizer ("prec" for the original variables
 	//   and "goal_abs_prec" for the goal variable)
 	// - the extended box has no bisectable domains (if prec=0 or <1 ulp)
-	if (((tmp_box.diam().max()-eps_x.max())<=0 && y.diam() <=abs_eps_f) || !c.box.is_bisectable()) {
+	if (((tmp_box.diam().max()-eps_x.max())<0 && y.diam() <=abs_eps_f)
+	    || (!c.box.is_bisectable())) {
 	  //	  cout << tmp_box.max_diam() << "  box  " << c.box << endl;
-		update_uplo_of_epsboxes(y.lb());
-		c.box.set_empty();
-		return;
+	  if (tmp_box.diam().max()>0) // there is an eps box only if max diam is positive
+	    update_uplo_of_epsboxes(y.lb());
+	  c.box.set_empty();
+	  return;
 	}
 
 	// ** important: ** must be done after upper-bounding

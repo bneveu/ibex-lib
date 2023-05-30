@@ -322,7 +322,7 @@ public:
         bool integerobj=false;
 
         /**  
-        * \brief tolerance on the integrality of othe objective in case of integer objective
+        * \brief tolerance on the integrality of the objective in case of integer objective
         * Default value 1.e-8
 	*/
         double integer_tolerance=1.e-8;
@@ -475,6 +475,8 @@ protected:
 
 	/** Result. */
 	CovOptimData* cov;
+
+       
 };
 
 inline Optimizer::Status Optimizer::get_status() const { return status; }

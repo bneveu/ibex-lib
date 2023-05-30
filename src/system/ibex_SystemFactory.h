@@ -13,6 +13,7 @@
 
 #include "ibex_System.h"
 #include "ibex_ExprCopy.h"
+#include "ibex_BitSet.h"
 
 namespace ibex {
 
@@ -38,9 +39,9 @@ public:
 	 * 	The reference to this variable is kept
 	 * 	until the system is built.
 	 */
-	void add_var(const ExprSymbol& v);
-	void add_var(const ExprSymbol& v, const Interval& init_box);
-	void add_var(const ExprSymbol& v, const IntervalVector& init_box);
+  void add_var(const ExprSymbol& v, bool is_integer=false);
+  void add_var(const ExprSymbol& v, const Interval& init_box, bool is_integer=false);
+  void add_var(const ExprSymbol& v, const IntervalVector& init_box, bool is_integer=false);
 
 	/**
 	 * \brief Add all variables.
@@ -48,8 +49,8 @@ public:
 	 *  References to the variables are kept
 	 * 	until the system is built.
 	 */
-	void add_var(const Array<const ExprSymbol>& a);
-	void add_var(const Array<const ExprSymbol>& a, const IntervalVector& box);
+  void add_var(const Array<const ExprSymbol>& a, bool is_integer=false);
+  void add_var(const Array<const ExprSymbol>& a, const IntervalVector& box, bool is_integer=false);
 	//void add_var(const Array<const ExprSymbol>& a, const Array<const IntervalVector>& init_boxes);
 
 	/**
@@ -131,7 +132,7 @@ protected:
 	std::vector<const ExprNode*> f_ctrs;
 
 	mutable bool system_built; // for cleanup
-
+        BitSet * integer_variables=NULL;
 private:
 
 	void init_args();

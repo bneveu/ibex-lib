@@ -76,7 +76,7 @@ public:
 
 } // end anonymous namespace
 
-System::System() : id(next_id()), nb_var(0), nb_ctr(0), goal(NULL), ops(NULL), box(1) /* tmp */ {
+  System::System() : id(next_id()), nb_var(0), nb_ctr(0), goal(NULL), ops(NULL), box(1), integer_variables(NULL) /* tmp */ {
 
 }
 
@@ -84,6 +84,7 @@ System::System(const char* filename, int simpl_level) : id(next_id()), nb_var(0)
 	FILE *fd;
 	if ((fd = fopen(filename, "r")) == NULL) throw UnknownFileException(filename);
 	load(fd, simpl_level);
+
 }
 
 System::System(int n, const char* syntax, int simpl_level) : id(next_id()), nb_var(n), /* NOT TMP (required by parser) */
@@ -101,6 +102,8 @@ System::System(int n, const char* syntax, int simpl_level) : id(next_id()), nb_v
 		throw e;
 	}
 	UNLOCK;
+	//TODO / find integer variables
+	integer_variables= new BitSet(nb_var);
 }
 
 System::System(const System& sys, copy_mode mode) : id(next_id()), nb_var(0), nb_ctr(0), goal(NULL), ops(NULL), box(1) {
@@ -122,16 +125,23 @@ std::string System::minibex(bool human) const {
 		domains.set_ref(i,*new Domain(args[i].dim));
 	}
 
+	
 	ibex::load(domains, box);
 
+	int index=0;
+	
 	for (int i=0; i<args.size(); i++) {
 		const ExprSymbol& x=args[i];
-		s << x.name;
+	        s << x.name;
+	
 		if (x.dim.nb_rows()>1 || x.dim.nb_cols()>1) s << '[' << x.dim.nb_rows() << ']';
 		if (x.dim.nb_cols()>1) s << '[' << x.dim.nb_cols() << ']';
+		if ((*integer_variables)[index])
+		  s << " integer ";
 		s << " in ";
 		ExprPrinter().print(s,domains[i],human);
 		s << ";\n";
+		index+=x.dim.size();
 	}
 
 	s << '\n';
@@ -181,15 +191,20 @@ std::string System::minibex(bool human) const {
 std::ostream& operator<<(std::ostream& os, const System& sys) {
 
 	os << "variables: " << endl << "  ";
+	int index=0;
 	for (int i=0; i<sys.args.size(); i++) {
 		const ExprSymbol& x = sys.args[i];
 		os << x;
+		if((*(sys.get_integer_variables()))[index])
+		  os << " integer" ;
+		   
 		if (x.dim.nb_rows()>1) os << '[' << x.dim.nb_rows() << ']';
 		if (x.dim.nb_cols()>1) {
 			if (x.dim.nb_rows()==1) os << "[1]";
 			os << '[' << x.dim.nb_cols() << ']';
 		}
 		if (i<sys.args.size()-1) os << ", ";
+		index+=x.dim.size();
 	}
 	os << endl;
 
@@ -439,78 +454,82 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
   
 
   vector<int> System::find_integer_variables (char* filename) {
-  ifstream fic (filename);
-    string a;
-    int nbvar;
-    for (int i=0; i<7 ;i++){
-      fic >> a;
+    vector<int> integers;
+    std::size_t found = string(filename).find(".nl");
+    if (found!=std::string::npos){
+      ifstream fic (filename);
+      string a;
+      int nbvar;
+      for (int i=0; i<7 ;i++){
+	fic >> a;
     }
 
-  fic >> nbvar;
-  //  cout << " nbvar " << nbvar << endl;
-  for (int i=0; i<10 ;i++){
-    fic >> a;
-    //    cout << "  " << a ;
-  }
-  for (int i=0; i<6 ;i++){
-    fic >> a;
-    //    cout << "  " << a ;
-  }
-  for (int i=0; i<7 ;i++){
-    fic >> a;
-    //    cout << "  " << a ;
-  }
-  int nlvarc;
-  int nlvaro;
-  int nlvarb;
-  fic >> nlvarc;
-  fic >> nlvaro;
-  fic >> nlvarb;
-  //  cout << " nlvarc " << nlvarc << " nlvaro " <<  nlvaro << " nlvarb " << nlvarb << endl;
-  for (int i=0; i<7 ;i++){
-    fic >> a;
-    //    cout << "  " << a ;
-  }
-  for (int i=0; i<11 ;i++){
-    fic >> a;
-    //    cout << "  " << a ;
-  }
-  int lbin ;
-  int lint ;
-  int nlbd;
-  int nlcd;
-  int nlod;
-  fic >> lbin;
-  fic >> lint;
-  fic >> nlbd;
-  fic >> nlcd;
-  fic >> nlod;
-  //  cout << "lbin " << lbin << " lint " << lint << " nlbd " << nlbd << " nlcd " << nlcd << " nlod " << nlod << endl;
-  // the integer variables are found among the variables by using the variable ordering of the nl files described in
-  //Hooking your solver to ampl by David M Gay
+      fic >> nbvar;
+      //  cout << " nbvar " << nbvar << endl;
+      for (int i=0; i<10 ;i++){
+	fic >> a;
+	//    cout << "  " << a ;
+      }
+      for (int i=0; i<6 ;i++){
+	fic >> a;
+	//    cout << "  " << a ;
+      }
+      for (int i=0; i<7 ;i++){
+	fic >> a;
+	//    cout << "  " << a ;
+      }
+      int nlvarc;
+      int nlvaro;
+      int nlvarb;
+      fic >> nlvarc;
+      fic >> nlvaro;
+      fic >> nlvarb;
+      //  cout << " nlvarc " << nlvarc << " nlvaro " <<  nlvaro << " nlvarb " << nlvarb << endl;
+      for (int i=0; i<7 ;i++){
+	fic >> a;
+	//    cout << "  " << a ;
+      }
+      for (int i=0; i<11 ;i++){
+	fic >> a;
+	//    cout << "  " << a ;
+      }
+      int lbin ;
+      int lint ;
+      int nlbd;
+      int nlcd;
+      int nlod;
+      fic >> lbin;
+      fic >> lint;
+      fic >> nlbd;
+      fic >> nlcd;
+      fic >> nlod;
+      //  cout << "lbin " << lbin << " lint " << lint << " nlbd " << nlbd << " nlcd " << nlcd << " nlod " << nlod << endl;
+      // the integer variables are found among the variables by using the variable ordering of the nl files described in
+      //Hooking your solver to ampl by David M Gay
   
   
-  fic.close ();
-  vector<int> integers;
-  for (int i=nlvarb-nlbd;i<nlvarb;i++)
-    {//cout << i << " " << endl;
-    integers.push_back(i);
-    }
-  for (int i=nlvarc-nlcd;i< nlvarc; i++)
-    {//cout << i << " " << endl;
-    integers.push_back(i);
-    }
-  for (int i=nlvaro-nlod;i< nlvaro; i++)
-    {//cout << i << " " << endl;
-    integers.push_back(i);
-    }
-  for (int  i= nbvar-lbin-lint; i< nbvar; i++)
-    {//cout << i << " " << endl;
-    integers.push_back(i);
-    }
+      fic.close ();
+
+      for (int i=nlvarb-nlbd;i<nlvarb;i++)
+	{//cout << i << " " << endl;
+	  integers.push_back(i);
+	}
+      for (int i=nlvarc-nlcd;i< nlvarc; i++)
+	{//cout << i << " " << endl;
+	  integers.push_back(i);
+	}
+      for (int i=nlvaro-nlod;i< nlvaro; i++)
+	{//cout << i << " " << endl;
+	  integers.push_back(i);
+	}
+      for (int  i= nbvar-lbin-lint; i< nbvar; i++)
+	{//cout << i << " " << endl;
+	  integers.push_back(i);
+	}
+    }  
   return integers;
   
-}
+  }
 
           
 

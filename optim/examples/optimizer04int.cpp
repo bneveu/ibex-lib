@@ -82,6 +82,7 @@ int main(int argc, char** argv){
 
 	// the extended system 
 	ExtendedSystem ext_sys(*sys,eqeps);
+
         NormalizedSystem norm_sys(*sys,eqeps);
 
 	BitSet b (ext_sys.nb_var);
@@ -117,7 +118,15 @@ int main(int argc, char** argv){
 	  buffer = new CellHeap   (ext_sys);
 	else if (strategy=="dh")
 	  buffer = new CellDoubleHeap  (ext_sys);
+<<<<<<< HEAD
+	/*
+	else if (strategy=="bfs")
+	  buffer = new CellDoubleHeap (ext_sys,0);
+	*/
+	else if (strategy=="bs")
+=======
        	else if (strategy=="bs")
+>>>>>>> 55e00950fe0aabd058de124a48d1f535a6bbf225
 	  buffer = new CellBeamSearch  (currentbuffer, futurebuffer, ext_sys, beamsize);
 
 	cout << "file " << argv[1] << endl;
@@ -136,10 +145,17 @@ int main(int argc, char** argv){
 	Bsc * bs;
 	OptimLargestFirst * bs1;
 
+<<<<<<< HEAD
+	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection=="lsmearmg" || bisection=="lsmearss" || bisection=="lsmearmgss" || bisection=="minlpsmearsumrel" || bisection == "minlpsmearsum")
+	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),true,prec);
+        else if
+	  (bisection=="lsmearnoobj" || bisection=="smearsumnoobj" || bisection=="smearmaxnoobj" || bisection=="smearsumrelnoobj" || bisection == "minlpsmearsumrelnoobj" ||bisection == "minlpsmearsumnoobj" || bisection=="smearmaxrelnoobj" || bisection=="lsmearmgnoobj" )
+=======
 	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection == "minlpsmearsumrel" ||  bisection == "minlpsmearsum" || bisection=="lsmearmg" || bisection=="lsmearss" || bisection=="lsmearmgss")
 	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),true,prec);
         else if
 	  (bisection=="lsmearnoobj" || bisection=="smearsumnoobj" || bisection=="smearmaxnoobj" || bisection=="smearsumrelnoobj" || bisection == "minlpsmearsumnoobj" ||  bisection == "minlpsmearsumrelnoobj" || bisection=="smearmaxrelnoobj" || bisection=="lsmearmgnoobj" )
+>>>>>>> 55e00950fe0aabd058de124a48d1f535a6bbf225
 	  bs1=  new OptimLargestFirst(ext_sys.goal_var(),false,prec);
 
 	  
@@ -154,9 +170,12 @@ int main(int argc, char** argv){
 	  bs= new MinlpLargestFirst(ext_sys,ext_sys.goal_var(),true,prec);
 	else if (bisection== "minlplargestfirstnoobj")
 	  bs= new MinlpLargestFirst(ext_sys,ext_sys.goal_var(),false,prec);
+<<<<<<< HEAD
+=======
 
 
 	
+>>>>>>> 55e00950fe0aabd058de124a48d1f535a6bbf225
 	else if (bisection=="smearsum" || bisection== "smearsumnoobj")
 	  bs = new SmearSum(ext_sys,prec,*bs1);
 	else if (bisection=="smearmax" || bisection == "smearmaxnoobj")
@@ -167,8 +186,11 @@ int main(int argc, char** argv){
           bs = new MinlpSmearSumRelative(ext_sys,prec,*bs1);
 	else if (bisection=="minlpsmearsum" || bisection=="minlpsmearsumnoobj")
           bs = new MinlpSmearSum(ext_sys,prec,*bs1);
+<<<<<<< HEAD
+=======
 
 	
+>>>>>>> 55e00950fe0aabd058de124a48d1f535a6bbf225
 	else if (bisection=="smearmaxrel" || bisection=="smearmaxrelnoobj")
 	  bs = new SmearMaxRelative(ext_sys,prec,*bs1);
 	else if  (bisection=="lsmear" || bisection=="lsmearnoobj"){

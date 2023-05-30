@@ -36,41 +36,62 @@ SystemFactory::~SystemFactory() {
 	}
 }
 
-void SystemFactory::add_var(const ExprSymbol& v) {
-	add_var(v,IntervalVector(v.dim.size()));
+  void SystemFactory::add_var(const ExprSymbol& v, bool is_integer) {
+    add_var(v,IntervalVector(v.dim.size()), is_integer);
 }
 
-void SystemFactory::add_var(const ExprSymbol& v, const Interval& init_box) {
-	add_var(v,IntervalVector(v.dim.size(),init_box));
+  void SystemFactory::add_var(const ExprSymbol& v, const Interval& init_box, bool is_integer) {
+    add_var(v,IntervalVector(v.dim.size(),init_box),is_integer);
 }
 
-void SystemFactory::add_var(const ExprSymbol& v, const IntervalVector& init_box) {
+void SystemFactory::add_var(const ExprSymbol& v, const IntervalVector& init_box, bool is_integer) {
 	assert(v.dim.size()==init_box.size());
 	if (goal || !ctrs.empty()) ibex_error("cannot add a variable to a system after a constraint (or the goal function)");
 
 	tmp_input_args.push_back(&v);
 	nb_arg++;
+	if (is_integer){
+	  if (!(integer_variables))
+	    integer_variables=new BitSet (v.dim.size());
+	  else{
+	    if (integer_variables->capacity() < nb_var + v.dim.size())
+	      integer_variables->resize(nb_var + v.dim.size());
+	  }
+	  for (unsigned int i=nb_var ;i< nb_var+v.dim.size(); i++)
+	    integer_variables->add(i);
+	}
 	nb_var+= v.dim.size();
 
 	boxes.push_back(init_box);
 }
 
-void SystemFactory::add_var(const Array<const ExprSymbol>& a) {
+	void SystemFactory::add_var(const Array<const ExprSymbol>& a, bool is_integer) {
 	if (system_built) ibex_error("only one system can be built with a factory");
 	if (goal || !ctrs.empty()) ibex_error("cannot add a variable to a system after a constraint (or the goal function)");
 
 	for (int i=0; i<a.size(); i++)
-		add_var(a[i]);
+	  add_var(a[i], is_integer);
 }
 
-void SystemFactory::add_var(const Array<const ExprSymbol>& a, const IntervalVector& box) {
+	void SystemFactory::add_var(const Array<const ExprSymbol>& a, const IntervalVector& box, bool is_integer) {
 	if (system_built) ibex_error("only one system can be built with a factory");
 	if (goal || !ctrs.empty()) ibex_error("cannot add a variable to a system after a constraint (or the goal function)");
-
 	for (int i=0; i<a.size(); i++) {
-		tmp_input_args.push_back(&a[i]);
-		nb_arg++;
-		nb_var+= a[i].dim.size();
+	  tmp_input_args.push_back(&a[i]);
+	  nb_arg++;
+	  if (is_integer){
+	    if (!(integer_variables))
+	      integer_variables=new BitSet (a[i].dim.size());
+	    else{
+	      if (integer_variables->capacity() < nb_var + a[i].dim.size())
+		integer_variables->resize(nb_var + a[i].dim.size());
+	    }
+	    for (unsigned int j=nb_var ;j< nb_var+a[i].dim.size(); i++)
+	      integer_variables->add(j);
+	  }
+	  
+	  nb_var+= a[i].dim.size();
+	  
 	}
 	boxes.push_back(box);
 }
@@ -258,7 +279,11 @@ void System::init(const SystemFactory& fac) {
 	for (int i=0; i<fac.nb_arg; i++) {
 		args.set_ref(i,fac.sys_args[i]);
 	}
-
+        // init integer variables
+	integer_variables=fac.integer_variables;
+	if (!integer_variables) {integer_variables= new BitSet(nb_var);}
+	else minlp=true;
+       
 	// =========== init box ==============
 	box.resize(nb_var);
 	int i=0;
