@@ -119,11 +119,9 @@ void DefaultOptimizerConfig::set_inHC4(bool _inHC4) {
 
 void DefaultOptimizerConfig::set_kkt(bool _kkt) {
 	kkt = _kkt;
-<<<<<<< HEAD
-	if (sys.minlp){
-=======
+
         if (sys.minlp){
->>>>>>> 497ca59995c750991cf39c8992685b5045ed351c
+
 	  kkt=false;
 	  ibex_warning("[OptimizerConfig] KKT automatically disabled with minlp system.");
 	  return;}
@@ -232,36 +230,7 @@ Bsc& DefaultOptimizerConfig::get_bsc() {
 	// TODO: should the following value be set to "abs_eps_f" instead?
 	// This question is probably related to the discussion #400
 	eps_x_extended[ext_sys.goal_var()] = OptimizerConfig::default_eps_x;
-<<<<<<< HEAD
-=======
 
-	return rec(new LSmear(
-			ext_sys, eps_x_extended,
-			rec(new OptimLargestFirst(ext_sys.goal_var(),true, eps_x_extended, default_bisect_ratio))),
-			BSC_TAG);
-}
-  */
-Bsc& DefaultOptimizerConfig::get_bsc() {
-	if (found(BSC_TAG)) // in practice, get_bsc() is only called once by Optimizer.
-			return get<Bsc>(BSC_TAG);
-
-	ExtendedSystem& ext_sys=get_ext_sys();
-
-	const Vector& eps_x=get_eps_x();
-	Vector eps_x_extended(ext_sys.nb_var);
-
-	if (eps_x.size()==1) // not initialized
-		ext_sys.write_ext_vec(Vector(sys.nb_var,eps_x[0]), eps_x_extended);
-	else
-		ext_sys.write_ext_vec(eps_x, eps_x_extended);
-
-	if (found(BSC_TAG)) // in practice, get_bsc() is only called once by Optimizer.
-			return get<Bsc>(BSC_TAG);
-		  
-        // TODO: should the following value be set to "abs_eps_f" instead?
-	// This question is probably related to the discussion #400
-	eps_x_extended[ext_sys.goal_var()] = OptimizerConfig::default_eps_x;
->>>>>>> 497ca59995c750991cf39c8992685b5045ed351c
         if (get_bisector()=="minlpsmearsumnoobj"){
 	  return  rec(new MinlpSmearSum(
 			ext_sys,eps_x_extended,
@@ -349,11 +318,8 @@ Bsc& DefaultOptimizerConfig::get_bsc() {
 	else if (get_bisector()=="largestfirstnoobj")
 	  return  rec(new OptimLargestFirst (ext_sys.goal_var(),false,eps_x_extended,default_bisect_ratio),BSC_TAG);
 	
-<<<<<<< HEAD
-	else if (get_ext_sys().minlp)  // default strategy for minlp optimization
-=======
 	else if (ext_sys.minlp)
->>>>>>> 497ca59995c750991cf39c8992685b5045ed351c
+
 	  return rec(new MinlpSmearSumRelative(
 			ext_sys,eps_x_extended,
 			rec(new OptimLargestFirst(ext_sys.goal_var(),false,eps_x_extended,default_bisect_ratio)),false),

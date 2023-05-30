@@ -117,8 +117,13 @@ bool Optimizer::update_loup(const IntervalVector& box, BoxProperties& prop) {
 //				cout << loup_point << endl;
 //			else
 //				cout << loup_point.lb() << endl;
-	       
-		return true;
+		  loup=p.second;
+		  loup_point=p.first;
+		  if (trace) {
+		    cout << "                    ";
+		    cout << "\033[32m loup= " << loup << "\033[0m" << endl;
+		  }
+		  return true;
 		}
 		else return false;
 
@@ -146,7 +151,7 @@ void Optimizer::update_uplo() {
 	//	cout << " buffer empty "  << buffer.empty() << " uplo " << uplo << endl;
 	if (! buffer.empty()) {
  		new_uplo= buffer.minimum();
-		cout << " new_uplo " << new_uplo <<  " loup " << loup << endl;
+		//		cout << " new_uplo " << new_uplo <<  " loup " << loup << endl;
 		if (new_uplo > loup && uplo_of_epsboxes > loup) {
 		        cout << " loup = " << loup << " new_uplo=" << new_uplo <<  " uplo_of_epsboxes=" << uplo_of_epsboxes << endl;
 			ibex_error("optimizer: new_uplo>loup (please report bug)");
