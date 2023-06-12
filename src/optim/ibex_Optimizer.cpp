@@ -674,6 +674,11 @@ void Optimizer::report() {
 		cout << endl;
 		double rel_prec=get_obj_rel_prec();
 		double abs_prec=get_obj_abs_prec();
+		if (integerobj) {  // with the integrality tolerance it is possible to obtain an objective lower than uplo
+		  rel_prec = fabs(rel_prec);
+		  abs_prec = fabs(abs_prec);
+		}
+		  
 
 		cout << " relative precision on f*:\t" << rel_prec;
 		if (rel_prec <= rel_eps_f)

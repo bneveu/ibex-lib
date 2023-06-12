@@ -69,8 +69,8 @@ public:
 	 *
 	 * \deprecated. Should be 0.
 	 */
-  //	void set_eps_x(double eps_x);
-  void set_eps_x(const Vector& eps_x);
+        //	void set_eps_x(double eps_x);
+        void set_eps_x(const Vector& eps_x);
 	/**
 	 * \brief Set trace activation flag.
 	 *
@@ -143,11 +143,11 @@ public:
 	/** see #set_anticipated_upper_bounding(). */
 	bool with_anticipated_upper_bounding() const;
 
-	/** Default goal relative precision: 1e-3. */
-	static constexpr double default_rel_eps_f = 1e-03;
+	/** Default goal relative precision: 1e-6. */
+	static constexpr double default_rel_eps_f = 1e-06;
 
-	/** Default goal absolute precision: 1e-7. */
-	static constexpr double default_abs_eps_f = 1e-07;
+	/** Default goal absolute precision: 1e-6. */
+	static constexpr double default_abs_eps_f = 1e-06;
 
 	/** Default bisection precision: 0. */
 	static constexpr double default_eps_x = 0;
@@ -188,18 +188,18 @@ protected:
 	double rel_eps_f;
 	double abs_eps_f;
   //	double eps_x;
-  Vector eps_x;
-	int trace;
+        Vector eps_x;
+	int trace=0;
 	double timeout;
 	bool extended_COV;
 	bool anticipated_UB;
-  bool integerobj;
+        bool integerobj=false;
 };
 
   inline OptimizerConfig::OptimizerConfig(): eps_x(1) {
 	rel_eps_f      = OptimizerConfig::default_rel_eps_f;
 	abs_eps_f      = OptimizerConfig::default_abs_eps_f;
-	eps_x[0]          = OptimizerConfig::default_eps_x;
+	eps_x[0]       = OptimizerConfig::default_eps_x;
 	trace          = OptimizerConfig::default_trace;
 	timeout        = OptimizerConfig::default_timeout;
 	extended_COV   = OptimizerConfig::default_extended_cov;

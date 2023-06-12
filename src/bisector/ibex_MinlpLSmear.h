@@ -25,6 +25,7 @@ typedef enum{ MINLPLSMEAR=0, MINLPLSMEAR_MG } minlplsmear_mode;
  * \brief bisector which first ponderates the constraints by using the dual
  * solution of a linear programming relaxation and then computes the impact
  * by using the Smear function heuristic.
+ * Variant choosing first among the integer variables
  *
  */
 class MinlpLSmear : public MinlpSmearSumRelative {
