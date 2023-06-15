@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Aug 27, 2012
-// Last Update : Apr 25, 2018
+// Last Update : May 15, 2023
 //============================================================================
 
 #include "ibex_SystemFactory.h"
@@ -24,6 +24,9 @@ SystemFactory::~SystemFactory() {
 	if (!system_built) {
 		if (goal) delete goal;
 
+		if (integer_variables)
+		  delete integer_variables;
+		
 		for (unsigned int i=0; i<ctrs.size(); i++)
 			delete ctrs[i];
 

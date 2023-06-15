@@ -18,7 +18,7 @@
 
 const double default_relax_ratio =0.2;
 const double initbox_limit = 1.e8;  // TODO . parameter ??
-const double eqeps= 1.e-8;  // TODO parameter ??
+const double eqeps= 1.e-6;  // TODO parameter ??
 
 using namespace std;
 using namespace ibex;

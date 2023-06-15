@@ -2,8 +2,8 @@ variables
 x1 in [0.414,1.e8];
 x2 in [0.207,1.e8];
 x3 in [0.00178571428571429,0.02];
-i4 in [1,100];
-x5 in [1.0,1.e8];
+i4 integer in [1,100];
+x5 in [1.1,1.e8];
 x6 in [-1.e8,1.e8];
 b7 integer in [0,1];
 b8 integer in [0,1];
