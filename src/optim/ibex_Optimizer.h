@@ -328,15 +328,14 @@ public:
         double integer_tolerance=1.e-8;
   
 protected:
-  /*
-	 * \brief Initialize the optimizer from a single box.
+        /** \brief Initialize the optimizer from a single box.
 	 */
 	void start(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
 
-	/*
-	 * \brief Initialize the optimizer from a COV input file.
+	/** \brief Initialize the optimizer from a COV input file.
 	 */
 	void start(const CovOptimData& cov, double obj_init_bound=POS_INFINITY);
+  
 	/**
 	 * \brief Run the optimizer (once started).
 	 */

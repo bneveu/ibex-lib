@@ -49,7 +49,9 @@ enum { 	NORMALIZED_SYSTEM_TAG,
 
 }
 
-DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys) : sys(sys), kkt(false) {
+  DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys) : sys(sys) {
+  //  cout << "epsh : " << ExtendedSystem::default_eps_h << endl;
+	
 	set_eps_h(ExtendedSystem::default_eps_h);
 	set_rigor(default_rigor);
 	set_inHC4(default_inHC4);

@@ -21,7 +21,7 @@ namespace ibex {
 /**
  * \ingroup bisector
  *
- * \brief smear sum relative bisector for minlp
+ * \brief smear sum bisector for minlp
  *
  */
 class MinlpSmearSum : public SmearFunction {
@@ -40,7 +40,7 @@ public:
 	 *
          * \param sys              - the system
 	 * \param prec             - see #Bsc::Bsc(double).
-	 * \param lf : a largest first bisector to be used when the Smear based heuristic could not choose any variable        * \param gb : boolean indicating if the goal variable can be bisected : default true.
+	 * \param lf : a largest first bisector to be used when the Smear based heuristic could not choose any variable   * \param gb : boolean indicating if the goal variable can be bisected : default true.
          * TODO . reintroduce param ratio . It is now set to its default value 0.45
 
 	 */

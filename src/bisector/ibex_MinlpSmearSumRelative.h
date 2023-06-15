@@ -28,7 +28,7 @@ class MinlpSmearSumRelative : public SmearFunction {
 public:
 
 	/**
-	 * \brief Create a bisector with largest-first heuristic.
+	 * \brief Create a bisector with SmearSumRelative heuristic choosing first among the integer variables
 	 *
 	 */
   MinlpSmearSumRelative(System& sys,  double prec,   LargestFirst& lf, bool gb=true);
@@ -39,7 +39,8 @@ public:
          * of this heuristic.
 	 *
 	 * \param prec             - see #Bsc::Bsc(double).
-	 * \param lf : a largest first bisector to be used when the Smear based heuristic could not choose any variable        * \param gb : boolean indicating if the goal variable can be bisected : default true.
+	 * \param lf : a largest first bisector to be used when the Smear based heuristic could not choose any variable
+         * \param gb : boolean indicating if the goal variable can be bisected : default true.
          * TODO . reintroduce param ratio . It is now set to its default value 0.45
 	 */
 
