@@ -163,12 +163,12 @@ protected:
 
 	const System& sys;
 
-	double eps_h;
-	bool rigor;
-	bool inHC4;
-	bool kkt;
-	int random_seed;
-        std::string bisector;
+	double eps_h = 1.e-8;
+	bool rigor= false;
+	bool inHC4 = true;
+	bool kkt =false;
+	int random_seed =1;
+        std::string bisector="";
 };
 
 

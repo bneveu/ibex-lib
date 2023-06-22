@@ -30,25 +30,25 @@ namespace ibex {
    int MinlpSmearSumRelative::var_to_bisect(IntervalMatrix& J, const IntervalVector& box) const {
     double max_magn = NEG_INFINITY;
     int var = -1;
-    double* ctrjsum = new double[sys.f_ctrs.image_dim()];
+    int image_dim=sys.f_ctrs.image_dim();
+    vector<double> ctrjsum;
+    for (int i=0; i<sys.f_ctrs.image_dim(); i++) {ctrjsum.push_back(0);}
     BitSet& b= *(sys.get_integer_variables());
     //    cout << "integers " << b <<  " nbvars " << nbvars << endl;
     for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
-      ctrjsum[i]=0;
       // not an extended system or constraint is active or it is the objective 
       if (constraint_to_consider(i, box))
-	for (int j=0; j<nbvars ; j++) {
-	  if ( (j!= goal_var() && b[j]) ||  (goal_to_bisect && j== goal_var())){
-
+	for (int j=0; j<nbvars-1 ; j++) {
+	  if (b[j] && !(too_small(box,j))){
 	    ctrjsum[i]+= J[i][j].mag() * box[j].diam();
 	    //	    cout << " j " << j << " " << ctrjsum[i] << endl;
 	  }
 	}
       //      cout << " i " << ctrjsum[i] << endl;
-    }
+   
     // computes the variable with the maximal sum of normalized impacts
-    for (int j=0; j<nbvars; j++) {
-      if (!too_small(box,j) && (j!= goal_var()) && b[j]==1){
+    for (int j=0; j<nbvars-1; j++) {
+      if (b[j] && !(too_small(box,j))){
 	double sum_smear=0;
 	for (int i=0; i<sys.f_ctrs.image_dim(); i++) {
 	  if (ctrjsum[i]!=0)
@@ -71,7 +71,9 @@ namespace ibex {
       // not an extended system or constraint is active or it is the objective 
 	  if (constraint_to_consider(i, box))
 	    for (int j=0; j<nbvars ; j++) {
-	      ctrjsum[i]+= J[i][j].mag() * box[j].diam();
+	      if (!too_small(box,j) && (goal_to_bisect || j!= goal_var())){
+		ctrjsum[i]+= J[i][j].mag() * box[j].diam();
+	      }
 	    }
 	}
 	
@@ -91,10 +93,11 @@ namespace ibex {
 	  }
 	}	  
       }
-
-    delete[] ctrjsum;
+    }
     //    cout << " var " << var << endl;
     return var;
+    
+
    }
 
 

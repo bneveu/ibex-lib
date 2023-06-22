@@ -18,7 +18,7 @@
 
 const double default_relax_ratio =0.2;
 const double initbox_limit = 1.e8;  // TODO . parameter ??
-const double eqeps= 1.e-6;  // TODO parameter ??
+//const double eqeps= 1.e-6;  // TODO parameter ??
 
 using namespace std;
 using namespace ibex;
@@ -32,8 +32,8 @@ int main(int argc, char** argv){
 	// --------------------------
 	try {
 	  
-	if (argc<12) {
-		cerr << "usage: optimizer04int filename filtering linear_relaxation bisection upperbounding strategy [beamsize] integerobj prec goal_prec timelimit randomseed"  << endl;
+	if (argc<13) {
+		cerr << "usage: optimizer04int filename filtering linear_relaxation bisection upperbounding strategy [beamsize] integerobj prec goal_prec tolerance timelimit randomseed"  << endl;
 		exit(1);
 	}
 	  
@@ -77,9 +77,10 @@ int main(int argc, char** argv){
 	int integerobjective= atoi(argv[nbinput+1]);
 	double prec= atof(argv[nbinput+2]);
 	double goalprec= atof (argv[nbinput+3]);
-	double timelimit= atof(argv[nbinput+4]);
+	double tolerance= atof (argv[nbinput+4]);
+	double timelimit= atof(argv[nbinput+5]);
 
-	int randomseed = atoi(argv[nbinput+5]);
+	int randomseed = atoi(argv[nbinput+6]);
 	//	double initloup=atof(argv[nbinput+5]);
 	RNG::srand(randomseed);
 	//        cout << "fin lecture parametres " << endl;
@@ -91,15 +92,15 @@ int main(int argc, char** argv){
 	if (sys->minlp)	cout << " number of integer variables " << (sys->get_integer_variables())->size() << endl;
 	if (sys->minlp)	cout << " integer variables " << *(sys->get_integer_variables()) << endl;
 	// the extended system
-	ExtendedSystem ext_sys(*sys,eqeps);
-        NormalizedSystem norm_sys(*sys,eqeps);
+	ExtendedSystem ext_sys(*sys,tolerance,0);
+        NormalizedSystem norm_sys(*sys,tolerance,0);
 
 
 
 	
-	ext_sys.tolerance=eqeps;
-	norm_sys.tolerance=eqeps;
-	sys->tolerance=eqeps;
+	ext_sys.tolerance=tolerance;
+	norm_sys.tolerance=tolerance;
+	sys->tolerance=tolerance;
 	
 	//	cout << "nor_sys" << norm_sys << endl;
 	//	LoupFinderDefault loupfinder (norm_sys,true);
@@ -275,6 +276,7 @@ int main(int argc, char** argv){
 		cxn_compo =new CtcCompo(integ,*cxn_poly,integ, hc44xn,integ);
 		cxn = new CtcFixPoint (*cxn_compo, default_relax_ratio);
 		//cxn =new CtcCompo(*cxn_poly, hc44xn);
+		//	cxn=cxn_compo;
 	  }
 	else if  (linearrelaxation=="xnart")
 	  {
@@ -302,11 +304,13 @@ int main(int argc, char** argv){
 
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
 	Optimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),prec,goalprec,goalprec);
-       	cout << " sys.box " << sys->box << endl;
+
 
 	// the trace 
 	o.trace=1;
+	if (o.trace) cout << " sys.box " << sys->box << endl;
 
+	
 	//integer objective
 	o.integerobj=integerobjective;
 	o.integer_tolerance=goalprec;

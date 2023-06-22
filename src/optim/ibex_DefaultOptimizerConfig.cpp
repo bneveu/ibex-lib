@@ -49,7 +49,7 @@ enum { 	NORMALIZED_SYSTEM_TAG,
 
 }
 
-  DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys) : sys(sys) {
+  DefaultOptimizerConfig::DefaultOptimizerConfig(const System& sys) : OptimizerConfig(), sys(sys) {
   //  cout << "epsh : " << ExtendedSystem::default_eps_h << endl;
 	
 	set_eps_h(ExtendedSystem::default_eps_h);
@@ -58,6 +58,8 @@ enum { 	NORMALIZED_SYSTEM_TAG,
 	// by defaut, we apply KKT for continuous unconstrained problems
 	set_kkt(sys.nb_ctr==0 && sys.minlp==false);
 	set_random_seed(default_random_seed);
+	std::string bisector = "";
+	set_bisector(bisector);
 }
 
 // note:deprecated.
@@ -120,9 +122,10 @@ void DefaultOptimizerConfig::set_inHC4(bool _inHC4) {
 }
 
 void DefaultOptimizerConfig::set_kkt(bool _kkt) {
+
 	kkt = _kkt;
 
-        if (sys.minlp){
+        if (sys.minlp && kkt){
 
 	  kkt=false;
 	  ibex_warning("[OptimizerConfig] KKT automatically disabled with minlp system.");
@@ -338,7 +341,9 @@ LoupFinder& DefaultOptimizerConfig::get_loup_finder() {
         if (found(LOUP_FINDER_TAG)) // in practice, get_loup_finder() is only called once by Optimizer.
 			return get<LoupFinder>(LOUP_FINDER_TAG);
 
-	const NormalizedSystem& norm_sys = get_norm_sys();
+	//	const NormalizedSystem& norm_sys = get_norm_sys();
+	NormalizedSystem& norm_sys = get_norm_sys();
+	norm_sys.tolerance=eps_h;
 
 	return rec(rigor? (LoupFinder*) new LoupFinderCertify(sys,rec(new LoupFinderDefault(norm_sys, inHC4))) :
 			(LoupFinder*) new LoupFinderDefault(norm_sys, inHC4), LOUP_FINDER_TAG);

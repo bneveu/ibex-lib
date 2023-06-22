@@ -102,6 +102,7 @@ void P_SysGenerator::generate(P_Source& source, System& sys, int simpl_level) {
 	  }
 	}
 	sys.set_integer_variables(*integer_vars);
+	delete integer_vars;
 	
 	//==================== *** cleanup *** ====================
 	for (IBEX_NODE_MAP(bool)::const_iterator it=garbage.begin(); it!=garbage.end(); it++) {
