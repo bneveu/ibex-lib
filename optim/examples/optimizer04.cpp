@@ -18,7 +18,6 @@
 
 const double default_relax_ratio =0.2;
 const double initbox_limit = 1.e8;  // TODO . parameter ??
-//const double eqeps= 1.e-6;  // TODO parameter ??
 
 using namespace std;
 using namespace ibex;
@@ -59,11 +58,10 @@ int main(int argc, char** argv){
 	if (!(sys->goal)) {cout << " No goal " << endl; return -1;}
 	for (int i=0; i< sys->box.size(); i++){
 	  if (sys->box[i].lb() < -initbox_limit) 
-	    sys->box[i]= Interval(-initbox_limit,sys->box[i].ub()) ;
+	    sys->box[i]= Interval(-initbox_limit, sys->box[i].ub()) ;
 	  if (sys->box[i].ub() >initbox_limit)
- 	    sys->box[i] =  Interval(sys->box[i].lb(), initbox_limit);
+ 	    sys->box[i] = Interval(sys->box[i].lb(), initbox_limit);
 	}
-
 
 	string filtering = argv[2];
 	string linearrelaxation= argv[3];
@@ -85,24 +83,25 @@ int main(int argc, char** argv){
 	RNG::srand(randomseed);
 	//        cout << "fin lecture parametres " << endl;
 
-
-	//	cout << " sys " << sys->minibex() <<endl;
 	//	cout << " sys " << *sys  <<endl;
 	
 	if (sys->minlp)	cout << " number of integer variables " << (sys->get_integer_variables())->size() << endl;
 	if (sys->minlp)	cout << " integer variables " << *(sys->get_integer_variables()) << endl;
 	// the extended system
-	ExtendedSystem ext_sys(*sys,tolerance,0);
-        NormalizedSystem norm_sys(*sys,tolerance,0);
+	ExtendedSystem ext_sys(*sys,tolerance);
+        NormalizedSystem norm_sys(*sys,tolerance);
 
 
 
 	
-	ext_sys.tolerance=tolerance;
-	norm_sys.tolerance=tolerance;
-	sys->tolerance=tolerance;
+	//	ext_sys.tolerance=tolerance;
+	//	norm_sys.tolerance=tolerance;
+	//	sys->tolerance=tolerance;
 	
 	//	cout << "nor_sys" << norm_sys << endl;
+
+	//	cout << "ext_sys" << ext_sys << endl;
+	
 	//	LoupFinderDefault loupfinder (norm_sys,true);
 	LoupFinder* loupfinder;
 	if (loupfindermethod=="xninhc4")
@@ -336,7 +335,6 @@ int main(int argc, char** argv){
 	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection=="lsmearmg" ||bisection =="minlpsmearsumrel" ||bisection =="minlpsmearsum" || bisection=="lsmearnoobj" || bisection=="smearsumnoobj" || bisection=="smearmaxnoobj" || bisection=="smearsumrelnoobj" || bisection =="minlpsmearsumnoobj" || bisection == "minlpsmearsumrelnoobj" || bisection=="smearmaxrelnoobj" || bisection=="lsmearmgnoobj" )
 
 	  delete bs1;
-	// bs1 deleted by SmearFunction destructor  (TO CHANGE)
 	
 	delete loupfinder;
 

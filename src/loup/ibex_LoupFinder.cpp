@@ -39,6 +39,7 @@ bool LoupFinder::integer_and_bound_check(const System& sys, Vector & pt){
 	  }
 	else bound_check_i(sys,pt,i);
       }
+      return true;
   }
 
   else bound_check(sys,pt);
@@ -82,7 +83,7 @@ bool LoupFinder::check(const System& sys,  Vector& pt, double& loup, bool _is_in
 	// The test of the constraints is done only when the evaluation of the criterion
 	// is better than the loup (a cheaper test).
 	if (sys.minlp){
-	  //	  cout << " loup " << loup << " res " << res << " pt " << pt << endl;
+	  //	  cout << " loup " << loup << " res " << res << " pt " << pt <<  " sys inner " << sys.is_inner(pt) << endl;
 	    if (integer_and_bound_check(sys,pt) && sys.is_inner(pt)) {
 	      res = sys.goal_ub(pt); // integer_and_bound_check may modify the loup_point by making integer the values of integer variables
 	      // and putting it in the initial box
