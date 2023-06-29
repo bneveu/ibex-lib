@@ -348,7 +348,6 @@ BitSet System::active_ctrs(const IntervalVector& box) const {
 	BitSet effective(BitSet::all(f_ctrs.image_dim()));
 
 	IntervalVector res = f_ctrs.eval_vector(box);
-	//	cout << " res " << res << endl;
 	for (int c=0; c<f_ctrs.image_dim(); c++) {
 		if (is_ineffective(res[c],ops[c])) effective.remove(c);
 	}
