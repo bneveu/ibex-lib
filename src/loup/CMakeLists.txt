@@ -17,6 +17,11 @@ target_sources (ibex PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LoupFinderProbing.h
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LoupFinderXTaylor.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LoupFinderXTaylor.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LoupFinderDefaultIpopt.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LoupFinderDefaultIpopt.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LoupFinderIpopt.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ibex_LoupFinderIpopt.h
+  
 )
 
 target_include_directories (ibex PUBLIC

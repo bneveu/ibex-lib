@@ -365,7 +365,7 @@ Optimizer::Status Optimizer::optimize(const char* cov_file, double obj_init_boun
 
 	uplo=NEG_INFINITY;
 	uplo_of_epsboxes=POS_INFINITY;
-	loup_point = init_box; //.set_empty();
+	//	if (loup_point.is_empty())	loup_point = init_box; //.set_empty();
 
 	nb_cells=0;
 
@@ -638,8 +638,9 @@ void Optimizer::report() {
 		cout << red() << " infeasible problem" << endl;
 		break;
 	case NO_FEASIBLE_FOUND:
+	  if (loup_point.is_empty())
 		cout << red() << " no feasible point found (the problem may be infeasible)" << endl;
-		break;
+	  break;
 	case UNBOUNDED_OBJ:
 		cout << red() << " possibly unbounded objective (f*=-oo)" << endl;
 		break;
@@ -656,13 +657,14 @@ void Optimizer::report() {
 	// before the required precision is reached => means infeasible problem
 	if (status==INFEASIBLE) {
 		cout << " infeasible problem " << endl;
-	} else {
+	}
+	else {
 	  if (! integerobj) cout << " f* in\t[" << uplo << "," << loup << "]" << endl;
 	  else cout << " f *in\t" <<  integer( Interval(uplo-2* integer_tolerance, loup+2 *integer_tolerance)) << endl;
 	  
 		cout << "\t(best bound)" << endl << endl;
 
-		if (loup==initial_loup)
+		if (loup==initial_loup && loup_point.is_empty())
 			cout << " x* =\t--\n\t(no feasible point found)" << endl;
 		else {
 			if (loup_finder.rigorous())

@@ -92,7 +92,9 @@ public:
   virtual double goal_ub(Vector&pt)=0;
   virtual void sysbound(Vector& pt)=0;
   virtual void sysbound(IntervalVector& pt)=0;
-  
+  double ampltime=0;
+  double ipopttime=0;
+
 protected:
 
 	/**

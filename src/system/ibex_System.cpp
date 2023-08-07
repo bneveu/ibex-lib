@@ -187,7 +187,7 @@ std::string System::minibex(bool human) const {
 
 	return s.str();
 }
-
+  /*
 std::ostream& operator<<(std::ostream& os, const System& sys) {
 
 	os << "variables: " << endl << "  ";
@@ -224,7 +224,48 @@ std::ostream& operator<<(std::ostream& os, const System& sys) {
 	}
 	return os;
 }
+  */
 
+  // Ecriture du système en format AMPL (vérifié pour les systèmes à plat)
+std::ostream& operator<<(std::ostream& os, const System& sys) {
+
+  //	os << "variables: " << endl << "  ";
+	int index=0;
+	for (int i=0; i<sys.args.size(); i++) {
+		const ExprSymbol& x = sys.args[i];
+		os << "var " << x;
+		if((*(sys.get_integer_variables()))[index])
+		  os << " integer" ;
+		os << " >= " << sys.box[i].lb() << " , " << "<= " << sys.box[i].ub() ;
+		if (x.dim.nb_rows()>1) os << '[' << x.dim.nb_rows() << ']';
+		if (x.dim.nb_cols()>1) {
+			if (x.dim.nb_rows()==1) os << "[1]";
+			os << '[' << x.dim.nb_cols() << ']';
+		}
+		if (i<sys.args.size()-1) os << "; " << endl;
+		index+=x.dim.size();
+	}
+	os << ";" << endl;
+	/*
+	os << "box: " << endl << "  ";
+	os << sys.box << endl;
+	*/
+
+
+	if (sys.goal!=NULL){
+	  os << "minimize obj: " << endl;
+	  os << "  " << sys.goal->expr() << ";" << endl;
+	}
+	else
+		os << " obj: (none)" << endl;
+	if (sys.nb_ctr>0) {
+		os << "subject to" << endl;
+		for (int i=0; i<sys.ctrs.size(); i++)
+		  os << " e"  << i+1 << ": "<< sys.ctrs[i] << ";" << endl;
+	}
+	return os;
+}
+  
 Domain& System::constant(const std::string& name) {
 	const char* _name=name.c_str();
 	try {
@@ -459,12 +500,15 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
       ifstream fic (filename);
       string a;
       int nbvar;
+      /*
       for (int i=0; i<7 ;i++){
 	fic >> a;
-    }
-
+      }
+      */
+      string line;
+      getline(fic,line);
       fic >> nbvar;
-      //  cout << " nbvar " << nbvar << endl;
+      cout << " nbvar " << nbvar << endl;
       for (int i=0; i<10 ;i++){
 	fic >> a;
 	//    cout << "  " << a ;
@@ -483,7 +527,7 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
       fic >> nlvarc;
       fic >> nlvaro;
       fic >> nlvarb;
-      //  cout << " nlvarc " << nlvarc << " nlvaro " <<  nlvaro << " nlvarb " << nlvarb << endl;
+      cout << " nlvarc " << nlvarc << " nlvaro " <<  nlvaro << " nlvarb " << nlvarb << endl;
       for (int i=0; i<7 ;i++){
 	fic >> a;
 	//    cout << "  " << a ;

@@ -171,6 +171,7 @@ public:
 	 * \return the uplo of the last call to optimize(...).
 	 */
 	double get_uplo() const;
+        void set_uplo(double uplo);
 
 	/**
 	 * \brief Get the "loup" (>= f*).
@@ -189,6 +190,9 @@ public:
 	 *
 	 * \return the argmin of the last call to optimize(...).
 	 */
+
+        void set_loup(double loup);
+        void set_loup_point(const IntervalVector & v);
 	const IntervalVector& get_loup_point() const;
 
 	/**
@@ -483,6 +487,18 @@ inline Optimizer::Status Optimizer::get_status() const { return status; }
 inline double Optimizer::get_uplo() const { return uplo; }
 
 inline double Optimizer::get_loup() const { return loup; }
+
+  inline void Optimizer::set_loup(double lp) {loup=lp;}
+
+  inline void Optimizer::set_uplo(double up) {uplo=up;}
+
+
+  inline void Optimizer::set_loup_point(const IntervalVector& v) {loup_point=v;}
+
+  
+
+
+
 
 inline const IntervalVector& Optimizer::get_loup_point() const { return loup_point; }
 
