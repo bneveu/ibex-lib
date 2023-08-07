@@ -1,0 +1,14 @@
+
+option show_stats 1;
+option prestats 1;
+option display 1;
+option presolve 0;
+
+option solver "/libre/neveu/ibex-lib/ampl/ampl.linux-intel64/ipopt";
+
+options ipopt_options  "print_level=0 output_file=toto.txt constr_viol_tol=1.e-10";
+
+option solver_msg 0;
+reset;
+model system.mod;
+
