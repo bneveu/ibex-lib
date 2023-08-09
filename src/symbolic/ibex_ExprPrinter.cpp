@@ -177,10 +177,12 @@ void ExprPrinter::print_dbl(double x) {
 }
 
 void ExprPrinter::print_itv(const Interval& x) {
+        double prec=1.e-12;
 	if (x.is_empty())
 		(*os) << "(empty)";
-	else if (x.is_degenerated())
-		print_dbl(x.mid());
+	//	else if (x.is_degenerated())
+	else if ((x.ub()-x.lb())/fabs(x.ub()) < prec ||x.ub()-x.lb()< prec ) // patch to read by ampl
+	        print_dbl(x.mid());
 	else {
 		(*os) << '[';
 		print_dbl(x.lb());
