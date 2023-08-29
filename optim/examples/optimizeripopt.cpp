@@ -65,6 +65,7 @@ double check_ipopt(LoupFinder& loup_finder, Vector& v, bool integerobj, double i
   double newub=POS_INFINITY;
     double loup=POS_INFINITY;
     if (loup_finder.integer_check(v)){
+      cout << "v after check " << v << endl;
       newub=loup_finder.goal_ub(v);
       cout << "newub " << newub << endl;
       if ( loup_finder.is_inner(v)){
@@ -240,8 +241,13 @@ int main(int argc, char** argv){
 	//	ext_sys.tolerance=tolerance;
 	//	norm_sys.tolerance=tolerance;
 	//	sys->tolerance=tolerance;
+	//	cout << " sys " << endl;
+	//	cout << *sys << endl;
 	
-	/*	cout << "norm_sys" << endl;
+	/*	
+
+
+cout << "norm_sys" << endl;
 	cout << norm_sys << endl;
 	*/
 	//	cout << "ext_sys" << ext_sys << endl;
@@ -249,9 +255,9 @@ int main(int argc, char** argv){
 	//	LoupFinderDefault loupfinder (norm_sys,true);
 	LoupFinder* loupfinder;
 	if (loupfindermethod=="ipoptxninhc4")
-	  loupfinder = new LoupFinderDefaultIpopt (*sys,norm_sys,true);
+	  loupfinder = new LoupFinderDefaultIpopt (*sys,norm_sys,ext_sys,true);
 	else if (loupfindermethod=="ipoptxn")
-	  loupfinder = new LoupFinderDefaultIpopt (*sys,norm_sys,false);
+	  loupfinder = new LoupFinderDefaultIpopt (*sys,norm_sys,ext_sys,false);
 	else if (loupfindermethod=="xninhc4")
 	  loupfinder = new LoupFinderDefault (norm_sys,true);
 	else if (loupfindermethod=="xn")
@@ -452,7 +458,7 @@ int main(int argc, char** argv){
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
 	Optimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),prec,goalprec,goalprec);
 
-
+      
 	// the trace 
 	o.trace=1;
 	if (o.trace) cout << " sys.box " << sys->box << endl;
@@ -463,8 +469,9 @@ int main(int argc, char** argv){
 	string status= "undefined";
 	bool res;
 	int res0;
-
+	/*
 	if (found!=std::string::npos){
+	  cout << "appel direct nl " << endl;
 	  string str = "time /libre/neveu/ibex-lib/ampl/ampl.linux-intel64/ipopt";
 	  str.append(string(" "));
 	  str.append(string(argv[1]));
@@ -474,10 +481,12 @@ int main(int argc, char** argv){
           res=ipopt_direct_results(sys->nb_var,status,obj,v);
 	}
 	else{
-	  write_system_ampl(*sys);
-	  res0= system("/libre/neveu/ampl/ampl model_ipopt.run");
-	  res=ipopt_ampl_results(sys->nb_var,status,obj,v);
-	}
+	*/
+	write_system_ampl(*sys);
+	res0=system("rm results.txt");
+	res0= system("/libre/neveu/ampl/ampl model_ipopt.run");
+	res=ipopt_ampl_results(sys->nb_var,status,obj,v);
+	  //	}
 	
 	cout << " resultats ipopt " << status;
 	double initloup=POS_INFINITY;
@@ -493,6 +502,7 @@ int main(int argc, char** argv){
 	  if (initloup == POS_INFINITY) lp.set_empty();
 	  o.set_loup_point(lp);
 	}
+	//	return 0;
 	//integer objective
 	o.integerobj=integerobjective;
 	o.integer_tolerance=goalprec;
@@ -504,14 +514,18 @@ int main(int argc, char** argv){
 	//	std::ofstream Out("err.txt");
 	//	std::streambuf* OldBuf = std::cerr.rdbuf(Out.rdbuf());
 	if (o.trace) cout << " sys.box " << sys->box << endl;
+	if (loupfindermethod=="ipoptxninhc4" || loupfindermethod=="ipoptxn")
+	  ((LoupFinderDefaultIpopt*) loupfinder)->finder_ipopt.optimizer= &o;
 	o.optimize(sys->box,initloup);
 	//	std::cerr.rdbuf(OldBuf);
 
 	// printing the results     
 	o.report();
         cout << o.get_time() << "  " << o.get_nb_cells()+1 << endl;
-        if (loupfindermethod == "ipoptxn" || loupfindermethod =="ipoptxninhc4")
+        if (loupfindermethod == "ipoptxn" || loupfindermethod =="ipoptxninhc4"){
 	  cout << " ipopttime " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.ipopttime << " ampltime " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.ampltime << endl;
+	  cout << " correction nodes " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.correction_nodes << " correction time " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.correction_time << endl;
+	}
 	//	if (filtering == "acidhc4"  )
 	//cout    << " nbcidvar " <<  acidhc4.nbvar_stat() << endl;
 
