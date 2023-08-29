@@ -15,7 +15,39 @@
 using namespace std;
 namespace ibex {
 
-  LoupFinderIpopt::LoupFinderIpopt(System& sys, const System& normsys) : sys(sys),normsys(normsys){
+  LoupFinderIpopt::LoupFinderIpopt(System& sys, const System& normsys, const ExtendedSystem& extsys) : sys(sys),normsys(normsys),extsys(extsys){
+
+}
+
+  void LoupFinderIpopt::correct_ipopt_sol (Vector&v, double& loup){
+  IntervalVector box = sys.box;
+  double eps=1.e-6;
+  //  cout << " size " << v.size() << " boxsize " << sys.box.size() << endl;
+  IntervalVector boxsol(v.size());
+  for ( int i=0; i< v.size() ; i++){
+    double epsi = eps;
+    if (fabs(v[i])>1) epsi= eps*fabs(v[i]);
+    boxsol[i]= box[i] & Interval(v[i]- epsi, v[i]+ epsi);
+  }
+  //  cout << "boxsol " << boxsol << endl;
+  if (recursive_call){
+    recursive_call=false;
+    CellHeap buffer(extsys);
+    Optimizer opt(sys.nb_var,optimizer->ctc,optimizer->bsc,optimizer->loup_finder,buffer,extsys.goal_var(),optimizer->eps_x[0],optimizer->rel_eps_f, optimizer->abs_eps_f);
+    opt.set_uplo(optimizer->get_uplo());
+    opt.set_loup(optimizer->get_loup());
+    opt.optimize(boxsol);
+    recursive_call=true;
+    correction_nodes+=opt.get_nb_cells();
+    correction_time+=opt.get_time();
+    if (opt.get_loup() < optimizer->get_loup()){
+      //      cout << "new loup after correction " << opt.get_loup() << endl;
+      loup= opt.get_loup();
+      v = opt.get_loup_point().mid();
+    }
+  }
+  //  optimizer->report();
+
 
 }
 
@@ -86,9 +118,13 @@ namespace ibex {
     return false;
   }
 
- 
-std::pair<IntervalVector, double> LoupFinderIpopt::find(const IntervalVector& box, const IntervalVector& current_loup_point, double current_loup) {
+	    
 
+
+
+  
+std::pair<IntervalVector, double> LoupFinderIpopt::find(const IntervalVector& box, const IntervalVector& current_loup_point, double current_loup) {
+  if (recursive_call){
 	int n=sys.nb_var;
 	Vector loup_point(n);
 	double loup = current_loup;
@@ -112,19 +148,33 @@ std::pair<IntervalVector, double> LoupFinderIpopt::find(const IntervalVector& bo
 	  if( check(normsys,pt,loup,_is_inner))
 
 	      
-	  /*  A FAIRE ...
-	  if (initloup==POS_INFINITY)
-	    initloup=correct_ipopt_sol(v,o,*sys);
-	  */
+
+	  
+
 	    { loup_changed=true;
 	      loup_point=pt;
-	      cout << "*** ipopt " ;
+	      cout << "*** ipopt      " ;
 	    }
+	  else{
+	    
+	    correct_ipopt_sol(pt, ipoptloup);
+	    if (ipoptloup < current_loup)
+	      {loup_changed=true;
+		loup_point=pt;
+		loup=ipoptloup;
+		cout << "*** ipopt+corr " ;
+	      }
+	  }
+	    
+	  
 	}
 	if (loup_changed)
 	  return std::make_pair(loup_point,loup);
 	else
 	  throw NotFound();
+  }
+  else
+    throw NotFound();
 }
 
 

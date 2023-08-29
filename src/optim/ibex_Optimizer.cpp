@@ -375,7 +375,7 @@ Optimizer::Status Optimizer::optimize(const char* cov_file, double obj_init_boun
 
 	write_ext_box(init_box, root->box);
 	root->box[goal_var]=Interval(uplo,loup);
-	cout << "root->box[goal_var]" <<  root->box[goal_var] << endl; 
+	//	cout << "root->box[goal_var]" <<  root->box[goal_var] << endl; 
 	// add data required by the bisector
 	bsc.add_property(init_box, root->prop);
 

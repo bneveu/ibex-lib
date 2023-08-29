@@ -14,24 +14,23 @@
 #include "ibex_BxpLinearRelaxArgMin.h"
 #include "ibex_LoupFinderProbing.h"
 #include "ibex_LoupFinderIpopt.h"
-
+#include "ibex_CellHeap.h"
 using namespace std;
 
 namespace ibex {
 
-  LoupFinderDefaultIpopt::LoupFinderDefaultIpopt(System& sys, const System& normsys, bool inHC4)  : sys(sys), normsys(normsys),
-									 //	finder_probing(inHC4? (LoupFinder&) *new LoupFinderInHC4(sys) : (LoupFinder&) *new LoupFinderFwdBwd(sys)),
+  LoupFinderDefaultIpopt::LoupFinderDefaultIpopt(System& sys, const System& normsys, const ExtendedSystem& extsys, bool inHC4)  : sys(sys), normsys(normsys), extsys(extsys),									 //	finder_probing(inHC4? (LoupFinder&) *new LoupFinderInHC4(sys) : (LoupFinder&) *new LoupFinderFwdBwd(sys)),
         finder_probing(inHC4? (LoupFinder&) *new LoupFinderInHC4(normsys) : (LoupFinder&) *new LoupFinderProbing(normsys)),
         finder_x_taylor(normsys),
-    finder_ipopt(sys,normsys){
+	finder_ipopt(sys,normsys,extsys){
 
 }
 
-  bool LoupFinderDefaultIpopt::integer_check(Vector& pt) {return integer_and_bound_check(sys,pt);}
-  bool LoupFinderDefaultIpopt::is_inner (Vector& pt) {return is_inner0(sys,pt);}
-  double LoupFinderDefaultIpopt::goal_ub (Vector& pt) {return goal_ub0(sys,pt);}
-  void LoupFinderDefaultIpopt::sysbound(Vector& pt) {bound_check(sys,pt);}
-  void LoupFinderDefaultIpopt::sysbound(IntervalVector& vec) {bound_check(sys,vec);}
+  bool LoupFinderDefaultIpopt::integer_check(Vector& pt) {return integer_and_bound_check(normsys,pt);}
+  bool LoupFinderDefaultIpopt::is_inner (Vector& pt) {return is_inner0(normsys,pt);}
+  double LoupFinderDefaultIpopt::goal_ub (Vector& pt) {return goal_ub0(normsys,pt);}
+  void LoupFinderDefaultIpopt::sysbound(Vector& pt) {bound_check(normsys,pt);}
+  void LoupFinderDefaultIpopt::sysbound(IntervalVector& vec) {bound_check(normsys,vec);}
   
 void LoupFinderDefaultIpopt::add_property(const IntervalVector& init_box, BoxProperties& prop) {
 	finder_probing.add_property(init_box,prop);

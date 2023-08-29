@@ -1,6 +1,6 @@
 variables
-i1 in [0,200];
-i2 in [0,200];
+i1 integer in [0,200];
+i2 integer in [0,200];
 x3 in [0,100];
 minimize
 0.04712385*sqrt(900 + i1^2)*i2;

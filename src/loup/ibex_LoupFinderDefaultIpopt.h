@@ -48,7 +48,7 @@ public:
 	 *                2/ generates symbolically components of the main function (heavy)
 	 *
 	 */
-  LoupFinderDefaultIpopt( System& sys, const System& normsys, bool inHC4=true);
+  LoupFinderDefaultIpopt( System& sys, const System& normsys, const ExtendedSystem& extsys, bool inHC4=true);
 
 	/**
 	 * \brief Delete this.
@@ -91,10 +91,11 @@ public:
         bool integer_check(Vector& pt);
         bool is_inner(Vector& pt);
         double goal_ub(Vector& pt);
-  void sysbound(Vector& pt);
-    void sysbound(IntervalVector& vec);
-         System& sys;
-  const System& normsys;
+        void sysbound(Vector& pt);
+        void sysbound(IntervalVector& vec);
+        System& sys;
+        const System& normsys;
+        const ExtendedSystem& extsys;
 
 };
 
