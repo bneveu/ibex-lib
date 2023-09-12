@@ -46,6 +46,7 @@ namespace ibex {
        and the lower bound newlb*/
     bool qibex_relaxation_results(std::string & status, double& newlb, Vector & v, Vector& w);
 
+    
     /* the convex quadratic relaxation   returns a triple made of the best point, the point of the auxiliary variables  and  the new lower bound */
     std::tuple<Vector,Vector,double> qibex_relaxation_analysis (IntervalVector & box, std::string& status);
     /* the analysis of the relaxation gives the next variable to bisect ant its ratio*/
@@ -70,6 +71,8 @@ namespace ibex {
     // statistics from Ampl
     double ampltime;
     double solvertime;
+    double presolvetime;
+
   private :
     int n_x;
     int n_y;

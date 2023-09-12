@@ -13,7 +13,6 @@
 #include <stdlib.h>
 #include <iomanip>
 #include "ibex_Timer.h"
-
 using namespace std;
 
 namespace ibex {
@@ -268,8 +267,9 @@ namespace ibex {
 	
 	if (qibex_relaxation_results(status, newlb, v, w)){
 	  if (trace){
-	   cout << "status " << status << endl;
-	   cout << " nb cells " << nb_cells << endl;
+	    //	    cout << "status " << status << endl;
+	    if (nb_cells%1000 == 0) cout << " nb cells " << nb_cells << endl;
+	   //	   cout << " newlb " << newlb << endl;
 	  }
 	  //	  cout << " v " << v << endl;
 	  //	  cout << "n_x " << n_x << " n_y " << n_y << " v " << v << endl;
@@ -297,7 +297,7 @@ namespace ibex {
 	  }
 	  
 	  else{
-	    double epsinteger=1.e-4;
+	    double epsinteger=1.e-2;
 	    if (newlb >= std::floor(newlb) + epsinteger)
 	      newlb= std::ceil(newlb);
 	    else
@@ -430,7 +430,7 @@ namespace ibex {
 
     double objlb= y.lb();
     if (objlb < -1.e300) objlb=-1.e300;
-    //  cout << "c.box " << c.box << endl;
+    //    cout << "c.box " << c.box << endl;
     //    cout << "objlb " << objlb << endl;
     qibex_relaxation_call(qcp_box,objlb);
   
@@ -459,14 +459,19 @@ namespace ibex {
       ymax=qibex_loupfinder(v);
       if (ymax < POS_INFINITY){
       //cout << " ymax " << ymax <<" newlb " << newlb << endl;
+
 	if (newlb<= ymax){
 	  y &= Interval(newlb,ymax);
+	  }
+
+
 	//	buffer.contract(ymax);
-	}
+      
 	else{
 	//	y &= Interval(newlb,newlb);}
 	  c.box.set_empty(); check_timeout(); return;}
-      
+
+	//	y&= Interval(NEG_INFINITY,ymax);  // sans borne inf
 	//  semble inutile (si le pt faisable est l'optimum, newlb=newub et l'arret de la branche est automatique 
 	/*
 	if (c.var_to_bisect==-1 && gap0 <= 1.e-10 && loup_finder.integer_check(v))
@@ -483,12 +488,17 @@ namespace ibex {
 	*/
 	c.prop.update(BoxEvent(c.box,BoxEvent::CONTRACT,BitSet::singleton(n+1,goal_var)));
       }
-      else{
-	y &= Interval(newlb,POS_INFINITY);
+
+      else{ 
+	//	cout << "y before newlb " << y << endl;
+	//	if (y.diam()>0)
+	if (c.box.max_diam()>0){
+	  y &= Interval(newlb,POS_INFINITY); 
 	c.prop.update(BoxEvent(c.box,BoxEvent::CONTRACT,BitSet::singleton(n+1,goal_var)));
-      //      cout << " y after newlb" << y << endl;
+	}
+	//	cout << "newlb" << newlb << " y after newlb" << y << endl;
       }
-    
+
 
       if (y.is_empty() ) {
 	c.box.set_empty();
@@ -508,7 +518,7 @@ namespace ibex {
   }
 
   void QibexOptimizer::check_timeout(){
-    if (timeout>0 && time + solvertime + ampltime > timeout)
+    if (timeout>0 && time + solvertime + ampltime + presolvetime > timeout)
       throw TimeOutException();
   }
   
@@ -518,5 +528,6 @@ namespace ibex {
     qibex_contract_and_bound(c);
   }
 
+ 
 } // end namespace ibex
 

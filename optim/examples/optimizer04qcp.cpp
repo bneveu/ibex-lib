@@ -288,7 +288,10 @@ Timer timer;
 	}
 	fic.close();
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
-	QibexOptimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),qibexwidth,tolerance,prec,goalprec,goalprec);
+	double absgoalprec=goalprec;
+	double relgoalprec=goalprec;
+	if (integerobjective) absgoalprec=0.99;
+	QibexOptimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),qibexwidth,tolerance,prec,relgoalprec,absgoalprec);
 
 	//	cout << " sys.box " << sys->box << endl;
 
@@ -312,7 +315,7 @@ Timer timer;
 	//integer objective
 	o.integerobj=integerobjective;
 
-	o.integer_tolerance=tolerance;
+	o.integer_tolerance=goalprec;
 	o.timeout=timelimit;
 	cout << " timelimit " << timelimit << endl;
 	cout.precision(16);
@@ -321,8 +324,9 @@ Timer timer;
 	//	std::ofstream Out("err.txt");
 	//	std::streambuf* OldBuf = std::cerr.rdbuf(Out.rdbuf());
 	timer.stop();
-	double time = timer.get_time();
-	cout << " presolve time " << time << endl;
+	double presolvetime = timer.get_time();
+	cout << " presolve time " << presolvetime << endl;
+	
 
 	o.optimize(sys->box);
 	//	std::cerr.rdbuf(OldBuf);
@@ -331,7 +335,7 @@ Timer timer;
 	o.report();
         cout << o.get_time() << "  " << o.get_nb_cells()+1 << endl;
 	cout << "external solver time " << o.solvertime << " ampl time " << o.ampltime << endl;
-
+        cout << " total time " << o.solvertime +  o.ampltime + presolvetime + o.get_time() << endl;
 	delete bs;
 
 	if  (bisection=="lsmear" || bisection=="smearsum" || bisection=="smearmax" || bisection=="smearsumrel" || bisection=="smearmaxrel" || bisection=="lsmearmg" || bisection=="qibexsmearsumrel"  || bisection == "qibexsmearsum" || bisection== "qibexlargestfirst" || bisection=="lsmearnoobj" || bisection=="lsmearmgnoobj" || bisection=="smearsumrelnoobj"|| bisection=="smearsumnoobj" || bisection=="qibexsmearsumrelnoobj" || bisection == "qibexsmearsumnoobj" || bisection== "qibexlargestfirstnoobj"  )
