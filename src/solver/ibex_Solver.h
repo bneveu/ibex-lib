@@ -303,6 +303,11 @@ protected:
 	 */
 	CovSolverData::BoxStatus check_sol(const IntervalVector& box);
 
+  	/**
+	 * \brief Check if all integer variables are fixed
+	 */	 
+        bool allintegervariablesfixed  (const IntervalVector& box);
+        
 	/**
 	 * \brief Check if the box is "BOUNDARY"
 	 * \see SolverOutputBox.
@@ -387,6 +392,11 @@ protected:
 	 * \brief Number of cells of the previous call.
 	 */
 	unsigned int old_nb_cells;
+
+        /**
+	 * \brief The system.
+	 */
+        const System& sys;
 };
 
 /*============================================ inline implementation ============================================ */

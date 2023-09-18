@@ -243,13 +243,8 @@ int main(int argc, char** argv){
 	//	sys->tolerance=tolerance;
 	//	cout << " sys " << endl;
 	//	cout << *sys << endl;
-	
-	/*	
+	//	cout << "norm_sys " << norm_sys << endl;
 
-
-cout << "norm_sys" << endl;
-	cout << norm_sys << endl;
-	*/
 	//	cout << "ext_sys" << ext_sys << endl;
 	
 	//	LoupFinderDefault loupfinder (norm_sys,true);

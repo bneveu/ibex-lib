@@ -106,28 +106,24 @@ Ctc* DefaultSolver::ctc (const System& sys, double prec) {
 DefaultSolver::DefaultSolver(const System& sys, double eps_x_min, double eps_x_max,
 		bool dfs, double random_seed) : Solver(sys, rec(ctc(sys,eps_x_min)),
 		get_square_eq_sys(*this, sys)!=NULL?
-				(Bsc&) rec(new SmearSumRelative(*get_square_eq_sys(*this, sys), eps_x_min)) :
-				(Bsc&) rec(new RoundRobin(eps_x_min)),
-				rec(dfs? (CellBuffer*) new CellStack() : (CellBuffer*) new CellList()),
-				Vector(sys.nb_var,eps_x_min), Vector(sys.nb_var,eps_x_max)),
-		sys(sys) {
-
-	RNG::srand(random_seed);
-
-}
+	                         (Bsc&) rec(new SmearSumRelative(*get_square_eq_sys(*this, sys), eps_x_min)) :
+			         (Bsc&) rec(new RoundRobin(eps_x_min)),
+						       rec(dfs? (CellBuffer*) new CellStack() : (CellBuffer*) new CellList()),
+		Vector(sys.nb_var,eps_x_min), Vector(sys.nb_var,eps_x_max))
+              {
+		RNG::srand(random_seed);
+              }
 
 // Note: we set the precision for Newton to the minimum of the precisions.
 DefaultSolver::DefaultSolver(const System& sys, const Vector& eps_x_min, double eps_x_max,
-		bool dfs, double random_seed) : Solver(sys, rec(ctc(sys,eps_x_min.min())),
+			     bool dfs, double random_seed) : Solver(sys, rec(ctc(sys,eps_x_min.min())),
 		get_square_eq_sys(*this, sys)!=NULL?
-				(Bsc&) rec(new SmearSumRelative(*get_square_eq_sys(*this, sys), eps_x_min)) :
-				(Bsc&) rec(new RoundRobin(eps_x_min)),
+								    (Bsc&) rec(new SmearSumRelative(*get_square_eq_sys(*this, sys), eps_x_min)) :
+								    (Bsc&) rec(new RoundRobin(eps_x_min)),
 		rec(dfs? (CellBuffer*) new CellStack() : (CellBuffer*) new CellList()),
-		eps_x_min, Vector(sys.nb_var,eps_x_max)),
-		sys(sys) {
-
-	RNG::srand(random_seed);
-
-}
+		eps_x_min, Vector(sys.nb_var,eps_x_max))
+             {
+	       RNG::srand(random_seed);
+	     }
 
 } // end namespace ibex

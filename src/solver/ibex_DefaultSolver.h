@@ -66,7 +66,6 @@ public:
 	 */
 	static constexpr double default_random_seed = 1.0;
 
-	const System& sys;
 
 private:
 

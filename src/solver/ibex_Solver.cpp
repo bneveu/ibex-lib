@@ -13,6 +13,7 @@
 #include "ibex_NoBisectableVariableException.h"
 #include "ibex_LinearException.h"
 #include "ibex_CovSolverData.h"
+#include "ibex_CtcInteger.h"
 
 #include <cassert>
 
@@ -25,7 +26,7 @@ namespace {
 }
 
 Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
-		const Vector& eps_x_min, const Vector& eps_x_max) :
+	       const Vector& eps_x_min, const Vector& eps_x_max) : sys(sys),
 		  ctc(ctc), bsc(bsc), buffer(buffer), eps_x_min(eps_x_min), eps_x_max(eps_x_max),
 		  boundary_test(ALL_TRUE), time_limit(-1), cell_limit(-1), trace(0),
 		  solve_init_box(sys.box), eqs(NULL), ineqs(NULL),
@@ -218,6 +219,7 @@ bool Solver::next(CovSolverData::BoxStatus& status, const IntervalVector** sol) 
 				delete buffer.pop();
 				// note: more natural to push first the second, so that
 				// solutions in a 1-dimensional problem come in increasing order
+
 				buffer.push(new_cells.second);
 				buffer.push(new_cells.first);
 				nb_cells+=2;
@@ -313,6 +315,7 @@ Solver::Status Solver::solve(bool stop_at_first) {
 }
 
 bool Solver::check_ineq(const IntervalVector& box) {
+  
 	if (!ineqs)
 		return true;
 
@@ -341,13 +344,28 @@ bool Solver::check_ineq(const IntervalVector& box) {
 	return !not_inner;
 }
 
+  bool Solver::allintegervariablesfixed  (const IntervalVector& box){
+    for (int i =0; i< box.size() ; i++)
+      if (sys.is_integer(i) && box[i].diam() >=1)
+	return false;
+    return true;
+  }
+  
 CovSolverData::BoxStatus Solver::check_sol(const IntervalVector& box) {
-
+        if ((sys.get_integer_variables())->size() > 0
+	    && !(allintegervariablesfixed(box))){
+	    return CovSolverData::UNKNOWN;
+	  }
 	if (!eqs) {
 		if (check_ineq(box)) {
-			if (trace >=1) cout << " [solution] " << box << endl;
-			manif->add_inner(box);
-			return CovSolverData::SOLUTION;
+		  IntervalVector box1(box);
+		  if ((sys.get_integer_variables())->size() > 0){
+		    CtcInteger ctcinteg (sys);
+		    ctcinteg.contract(box1);  // utile ??
+		  }
+		  if (trace >=1) cout << " [solution] " << box1 << endl;
+		  manif->add_inner(box1);
+		  return CovSolverData::SOLUTION;
 		} else if (is_boundary(box)) {
 			manif->add_boundary(box);
 			return CovSolverData::BOUNDARY;
@@ -391,11 +409,8 @@ CovSolverData::BoxStatus Solver::check_sol(const IntervalVector& box) {
 		if (box.is_disjoint(existence)) {
 			throw EmptyBoxException();
 		}
-
 		bool solution = existence.is_subset(solve_init_box);
-
 		solution &= check_ineq(existence);
-
 		if (eqs && n==m) {
 			// Check if the solution is new, that is, that the solution is not included in the unicity
 			// box of a previously found solution. For efficiency reason, this test is not performed in
@@ -412,22 +427,31 @@ CovSolverData::BoxStatus Solver::check_sol(const IntervalVector& box) {
 		}
 
 		if (solution) {
-			if (trace >=1) cout << " [solution] " << existence << endl;
-			manif->add_solution(existence, unicity, varset);
-			return CovSolverData::SOLUTION;
-		} else {
+		  if ((sys.get_integer_variables())->size() > 0){
+			  CtcInteger ctcinteg (sys);
+			  ctcinteg.contract(existence);}
+		  if (trace >=1)
+		    cout << " [solution] " << existence << endl;
+		  manif->add_solution(existence, unicity, varset);
+		  return CovSolverData::SOLUTION;
+		}
+		else {
 			if (is_boundary(existence)) {
-				if (trace >=1) cout << " [boundary] " << existence << endl;
-				manif->add_boundary(existence, varset);
-				return CovSolverData::BOUNDARY;
-			} else
-				return CovSolverData::UNKNOWN;
+			  if ((sys.get_integer_variables())->size() > 0){
+			    existence&=box;
+			    CtcInteger ctcinteg (sys);
+			    ctcinteg.contract(existence);}
+			  if (trace >=1) cout << " [boundary] " << existence << endl;
+			  manif->add_boundary(existence, varset);
+			  return CovSolverData::BOUNDARY;
+			}
+			else
+			  return CovSolverData::UNKNOWN;
 		}
 	}
 }
 
 bool Solver::is_boundary(const IntervalVector& box) {
-
 	switch (boundary_test) {
 	case ALL_TRUE : return true;
 	case ALL_FALSE : return false;
