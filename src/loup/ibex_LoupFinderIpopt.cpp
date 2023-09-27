@@ -4,8 +4,8 @@
 // Author      : Bertrand Neveu
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
-// Created     : May 14, 2012
-// Last Update : Jul 09, 2017
+// Created     : Aug 2023
+// Last Update : Sep 27, 2023
 //============================================================================
 
 #include "ibex_LoupFinderIpopt.h"

@@ -60,12 +60,13 @@ public:
   double goal_ub(Vector& pt);
   void sysbound(Vector& pt);
   void sysbound(IntervalVector& vec);  
- std::string ipopt_ampl_run = "/libre/neveu/ampl/ampl model_ipopt.run > amplout.txt";
- 
-private:
-  void correct_ipopt_sol (Vector&v, double& loup);
+  std::string ipopt_ampl_run = "/libre/neveu/ampl/ampl model_ipopt.run > amplout.txt";
   void write_system_ampl(const IntervalVector& box);
- bool ipopt_ampl_results(int n,std::string& status, double& obj, Vector & v);
+  
+
+  void correct_ipopt_sol (Vector&v, double& loup);
+
+  bool ipopt_ampl_results(int n,std::string& status, double& obj, Vector & v);
 
 };
 

@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : optimizer04int.cpp
+// File        : optimizer06.cpp
 // Author      : Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : Jul 12, 2012
-// Last Update : Jul 12, 2012
+// Created     : Aug 2023
+// Last Update : Sept 27, 2023
 //============================================================================
 
 
@@ -22,32 +22,10 @@ const double initbox_limit = 1.e8;  // TODO . parameter ??
 using namespace std;
 using namespace ibex;
 
-// write the ampl system for calling ipopt
-void write_system_ampl(const System& sys){
-	ofstream ficsys ("system.mod", ofstream::trunc);
-	
-	//	cout << *sys  <<endl;
-	ficsys.precision(15);
-	ficsys << sys  <<endl;
-	ficsys << "solve > amplout.txt;" << endl ;
-	ficsys << "option display_precision 20;" << endl;
-	ficsys << "display solve_result > results.txt;" << endl;
-	ficsys << "display obj > results.txt; "<< endl;
-	ficsys << "display _total_solve_time > results.txt;" << endl;
-	ficsys << "display _ampl_time > results.txt; " << endl;
-
-	for (int i=0; i<sys.args.size(); i++) {
-		const ExprSymbol& x = sys.args[i];
-		ficsys << " display " << x << "> results.txt;" << endl;
-	};
-	ficsys.close();
-}
-
 
 double correct_ipopt_sol (Vector&v , Optimizer& o, System& sys){
   IntervalVector box = sys.box;
   double eps=1.e-6;
-  cout << " size " << v.size() << " boxsize " << sys.box.size() << endl;
   IntervalVector boxsol(v.size());
   for ( int i=0; i< v.size() ; i++){
     double epsi = eps;
@@ -126,49 +104,7 @@ bool ipopt_direct_results(int n,string& status, double& obj, Vector & val){
 }
      
 
-bool ipopt_ampl_results(int n,string& status, double& obj, Vector & v){
-    ifstream fic1 ("results.txt");
-    if (fic1.good()){
-      string a;
-      int j;
-      double otime=0;
-      fic1 >> a;
-      fic1 >> a;
-      fic1 >> status; 
-      cout << "status " << status << endl;
-      fic1 >> a;
-      fic1 >> a; 
-      fic1 >> obj;
-       cout << "obj " << obj << endl;
-      
-      fic1 >> a;
-      fic1 >> a;
-      fic1 >> otime;
-      double solvertime =otime;
-
-      fic1 >> a;
-      fic1 >> a;
-      fic1 >> otime;
-      double ampltime =otime;
-
-      cout << "ampltime " << ampltime << " ipopttime " << solvertime << endl;
-      
-      for (int i =0 ; i< n; i++){
-	fic1 >> a;
-	fic1 >> a;
-	fic1 >> v[i];
-	cout << "j" << a << "  v["<<i<<"] " <<  v[i] << endl;
-      }
-    
-      fic1 >> a;
-      fic1.close();
-      return true;
-    }
-    return false;
-  }
-
-
-void ipopt_preprocessing(Optimizer& o, System& sys, System& normsys, System & extsys){
+void ipopt_preprocessing(Optimizer& o, System& sys, System& normsys, ExtendedSystem & extsys, double& preprocampltime, double & preprocipopttime){
    double obj=POS_INFINITY;
 	Vector v(sys.nb_var);
 	string status= "undefined";
@@ -187,11 +123,14 @@ void ipopt_preprocessing(Optimizer& o, System& sys, System& normsys, System & ex
 	}
 	else{
 	*/
-	write_system_ampl(sys);
+	LoupFinderIpopt loupfindipopt(sys,normsys,extsys);
+	loupfindipopt.write_system_ampl(sys.box);
 	res0=system("rm results.txt");
 	string ipopt_ampl_run = "/libre/neveu/ampl/ampl model_ipopt.run > amplout.txt";
 	res0= system(ipopt_ampl_run.c_str());
-	res=ipopt_ampl_results(sys.nb_var,status,obj,v);
+	res=loupfindipopt.ipopt_ampl_results(sys.nb_var,status,obj,v);
+	preprocampltime= loupfindipopt.ampltime;
+	preprocipopttime= loupfindipopt.ipopttime;
 	  //	}
 	
 	cout << " resultats ipopt " << status;
@@ -505,9 +444,11 @@ int main(int argc, char** argv){
 	o.integer_tolerance=goalprec;
 
 	// ipopt preprocessing
+	double preprocampltime=0;
+	double preprocipopttime=0;
 	if (loupfindermethod=="ipoptxn" ||loupfindermethod=="ipoptxninhc4" )
 	  ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.recursive_call=false;
-	ipopt_preprocessing(o,*sys,norm_sys,ext_sys);
+	ipopt_preprocessing(o,*sys,norm_sys,ext_sys,preprocampltime,preprocipopttime);
 	if (loupfindermethod=="ipoptxn" ||loupfindermethod=="ipoptxninhc4" )
 	  ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.recursive_call=true;
        
@@ -526,6 +467,7 @@ int main(int argc, char** argv){
 
 	// printing the results     
 	o.report();
+	cout << "preprocessing ampl time " << preprocampltime << " ipopttime " << preprocipopttime << endl;
         cout << o.get_time() << "  " << o.get_nb_cells()+1 << endl;
         if (loupfindermethod == "ipoptxn" || loupfindermethod =="ipoptxninhc4"){
 	  cout << " ipopttime " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.ipopttime << " ampltime " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.ampltime << endl;
