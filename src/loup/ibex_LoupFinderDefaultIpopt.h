@@ -20,9 +20,10 @@ namespace ibex {
 /**
  * \ingroup optim
  *
- * \brief Default upper-bounding algorithm (for inequalities only).
+ * \brief Default upper-bounding algorithm using IPOPT (for inequalities only).
  *
- * The algorithm uses two upper-bounding techniques:
+ * The algorithm uses three upper-bounding techniques:
+ * - one based on the call of Ipopt solver (through AMPL)
  * - one based on the search of an inner box:
  *      simple sampling/line probing or in-HC4
  * - one based on the search of an inner polytope:
@@ -40,7 +41,8 @@ public:
 	 * \brief Create the algorithm for a given system.
 	 *
 	 * \param sys   - The original NLP problem.
-         * \param normsys - The normalized NLP problem
+         * \param normsys - The normalized NLP problem.
+         * \param extsys - The extended NLP problem.
 	 * \param inHC4 - Flag for building inner boxes. If true, apply inHC4 (inner arithmetic).
 	 *                Otherwise, use forward/backward contractor on reversed inequalities.
 	 *                Drawbacks of the current implement of inHC4:
@@ -48,7 +50,7 @@ public:
 	 *                2/ generates symbolically components of the main function (heavy)
 	 *
 	 */
-  LoupFinderDefaultIpopt( System& sys, const System& normsys, const ExtendedSystem& extsys, bool inHC4=true);
+        LoupFinderDefaultIpopt( System& sys, const System& normsys, const ExtendedSystem& extsys, bool inHC4=true);
 
 	/**
 	 * \brief Delete this.
@@ -73,20 +75,22 @@ public:
 	 */
 	virtual void add_property(const IntervalVector& init_box, BoxProperties& prop);
 
-	/*
-	 * Loup finder using inner boxes.
+        /**
+	 * \brief Loup finder using inner boxes.
 	 *
 	 * Either HC4 or CtcUnion (of CtcFwdBwd).
 	 */
 	LoupFinder& finder_probing;
 
-         /**
-	 * Loup finder using inner polytopes.
+        /**
+	 * \brief Loup finder using inner polytopes.
 	 */
 	LoupFinderXTaylor finder_x_taylor;
 
-
-  LoupFinderIpopt finder_ipopt;
+        /**
+	 * \brief Loup finder using IPOPT solver.
+	 */
+        LoupFinderIpopt finder_ipopt;
 
         bool integer_check(Vector& pt);
         bool is_inner(Vector& pt);

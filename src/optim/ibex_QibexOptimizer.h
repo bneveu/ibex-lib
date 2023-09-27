@@ -81,9 +81,9 @@ namespace ibex {
     std::vector<int> ref_diag_coefs;
     std::vector<int> hessian_diag_coefs;
     std::vector<std::vector<int>> ref_coefs;
-    std::string qibex_ampl_init_run = "/libre/neveu/ampl/ampl model_quad_relax_init.run > amplout";
-    std::string qibex_ampl_run = "/libre/neveu/ampl/ampl model_quad_relax.run > amplout";
-    std::string qibex_ampl_rigor_run = "/libre/neveu/ampl/ampl model_quad_relax_rigueur.run > amplout";
+    std::string qibex_ampl_init_run = "/libre/neveu/ampl/ampl model_quad_relax_init.run > amplout.txt";
+    std::string qibex_ampl_run = "/libre/neveu/ampl/ampl model_quad_relax.run > amplout.txt";
+    std::string qibex_ampl_rigor_run = "/libre/neveu/ampl/ampl model_quad_relax_rigueur.run > amplout.txt";
     void check_timeout();
   };
 }

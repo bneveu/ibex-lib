@@ -20,7 +20,7 @@ namespace ibex {
 /**
  * \ingroup optim
  *
- * \brief 
+ * \brief Calls Ipopt to find a feasible point, which is a local minimum.
  *
  */
 class LoupFinderIpopt : public LoupFinder {
@@ -30,7 +30,8 @@ public:
 	 * \brief Create the algorithm for a given system.
 	 *
 	 * \param sys         - The NLP problem.
-	 * \param sample_size - Number of sample points inside the box.
+         * \param normsys     - The normalized NLP problem.
+         * \param extsys      - The extended NLP problem
 	 */
   LoupFinderIpopt(System& sys, const System& normsys, const ExtendedSystem& extsys);
 
@@ -43,45 +44,29 @@ public:
 
 
 	/**
-	 * \brief Second method (line probing).
-	 *
-	 * Performs a dichotomic search between the current loup-point and its projection on the
-	 * facet of the input box in the opposite direction of its gradient.
-	 *
-	 * return true if the loup has been modified.
-	 */
-
-	/**
 	 * \brief The NLP problem.
 	 */
-  System& sys; // original system used for generating .mod file for ampl for ipopt solver ; not const before box is set to current box during the generation  of .mod file. 
-  const System& normsys; // normalized system used for the checking the constraints.
+  System& sys; // original system used for generating .mod file for ampl for ipopt solver ; not const because box is set to current box during the generation  of .mod file.
+  
+  const System& normsys; // normalized system used for checking the constraints.
   const ExtendedSystem& extsys; // extended system used for the recursing call of optimizer
-  Optimizer* optimizer=nullptr;
+  Optimizer* optimizer=nullptr; // optimizer data are used for building an optimizer for correcting the point returned by ipopt if it does not vverify the constraints
   bool recursive_call=true;
-  int correction_nodes=0;
-  double correction_time=0.0;
-  void correct_ipopt_sol (Vector&v, double& loup);
-  void write_system_ampl(const IntervalVector& box);
-  bool ipopt_ampl_results(int n,std::string& status, double& obj, Vector & v);
+  int correction_nodes=0;  // additional nodes for correcting the point given by ipopt
+  double correction_time=0.0; // additional time for correcting the point given by ipopt
+  
   bool integer_check(Vector& pt);
   bool is_inner(Vector& pt);
   double goal_ub(Vector& pt);
   void sysbound(Vector& pt);
   void sysbound(IntervalVector& vec);  
-
+ std::string ipopt_ampl_run = "/libre/neveu/ampl/ampl model_ipopt.run > amplout.txt";
  
-protected:
-//
-//	/**
-//	 * Current loup-point
-//	 */
-//	Vector loup_point;
-//
-//	/**
-//	 * Current loup
-//	 */
-//	double loup;
+private:
+  void correct_ipopt_sol (Vector&v, double& loup);
+  void write_system_ampl(const IntervalVector& box);
+ bool ipopt_ampl_results(int n,std::string& status, double& obj, Vector & v);
+
 };
 
 } /* namespace ibex */

@@ -15,38 +15,42 @@
 using namespace std;
 namespace ibex {
 
+  double expansion_precision=1.e-6;
+
   LoupFinderIpopt::LoupFinderIpopt(System& sys, const System& normsys, const ExtendedSystem& extsys) : sys(sys),normsys(normsys),extsys(extsys){
 
 }
 
   void LoupFinderIpopt::correct_ipopt_sol (Vector&v, double& loup){
-  IntervalVector box = sys.box;
-  double eps=1.e-6;
-  //  cout << " size " << v.size() << " boxsize " << sys.box.size() << endl;
-  IntervalVector boxsol(v.size());
-  for ( int i=0; i< v.size() ; i++){
-    double epsi = eps;
-    if (fabs(v[i])>1) epsi= eps*fabs(v[i]);
-    boxsol[i]= box[i] & Interval(v[i]- epsi, v[i]+ epsi);
-  }
+    if (recursive_call){
+      recursive_call=false;
+      IntervalVector box = sys.box;
+      double eps=expansion_precision;
+      IntervalVector boxsol(v.size());
+      for ( int i=0; i< v.size() ; i++){
+	double epsi = eps;
+	if (fabs(v[i])>1) epsi= eps*fabs(v[i]);
+	boxsol[i]= box[i] & Interval(v[i]- epsi, v[i]+ epsi);
+      }
   //  cout << "boxsol " << boxsol << endl;
-  if (recursive_call){
-    recursive_call=false;
-    CellHeap buffer(extsys);
-    Optimizer opt(sys.nb_var,optimizer->ctc,optimizer->bsc,optimizer->loup_finder,buffer,extsys.goal_var(),optimizer->eps_x[0],optimizer->rel_eps_f, optimizer->abs_eps_f);
-    opt.set_uplo(optimizer->get_uplo());
-    opt.set_loup(optimizer->get_loup());
-    opt.optimize(boxsol);
-    recursive_call=true;
-    correction_nodes+=opt.get_nb_cells();
-    correction_time+=opt.get_time();
-    if (opt.get_loup() < optimizer->get_loup()){
+      CellHeap buffer(extsys);
+      Optimizer opt(sys.nb_var,optimizer->ctc,optimizer->bsc,optimizer->loup_finder,buffer,extsys.goal_var(),optimizer->eps_x[0],optimizer->rel_eps_f, optimizer->abs_eps_f);
+      opt.integerobj=optimizer->integerobj;
+      opt.integer_tolerance=optimizer->integer_tolerance;
+      opt.set_uplo(optimizer->get_uplo());
+      opt.set_loup(optimizer->get_loup());
+      opt.optimize(boxsol);
+      recursive_call=true;
+      correction_nodes+=opt.get_nb_cells();
+      correction_time+=opt.get_time();
+      if (opt.get_loup() < optimizer->get_loup()){
       //      cout << "new loup after correction " << opt.get_loup() << endl;
-      loup= opt.get_loup();
-      v = opt.get_loup_point().mid();
+	loup= opt.get_loup();
+	v = opt.get_loup_point().mid();
+      }
+    
     }
-  }
-  //  optimizer->report();
+
 
 
 }
@@ -55,13 +59,12 @@ namespace ibex {
   void LoupFinderIpopt::write_system_ampl(const IntervalVector& box){
 	ofstream ficsys ("system.mod", ofstream::trunc);
 	
-	//	cout << *sys  <<endl;
 	ficsys.precision(15);
 	IntervalVector initbox=sys.box;
 	sys.box=box;
 	ficsys << sys  << endl;
 	sys.box=initbox;
-	ficsys << "solve > toto.txt;" << endl ;
+	ficsys << "solve > amplout.txt;" << endl ;
 	ficsys << "option display_precision 20;" << endl;
 	ficsys << "display solve_result > results.txt;" << endl;
 	ficsys << "display obj > results.txt; "<< endl;
@@ -135,9 +138,9 @@ std::pair<IntervalVector, double> LoupFinderIpopt::find(const IntervalVector& bo
         double obj=POS_INFINITY;
 
 	write_system_ampl(box);
-	
-	int res0= system("/libre/neveu/ampl/ampl model_ipopt.run > toto.txt");
-	int res=ipopt_ampl_results(sys.nb_var,status,obj,pt);
+	int res0=system("rm results.txt");
+	res0= system(ipopt_ampl_run.c_str());
+	int res=ipopt_ampl_results(n,status,obj,pt);
 
 	//	cout << " resultats ipopt " << status;
 	double ipoptloup=POS_INFINITY;
@@ -146,14 +149,9 @@ std::pair<IntervalVector, double> LoupFinderIpopt::find(const IntervalVector& bo
 	  //	  cout << " obj " << obj;
 	  bool _is_inner=false;
 	  if( check(normsys,pt,loup,_is_inner))
-
-	      
-
-	  
-
 	    { loup_changed=true;
 	      loup_point=pt;
-	      cout << "*** ipopt      " ;
+	      if (optimizer->trace && !optimizer->integerobj)   cout << "*** ipopt      " ;
 	    }
 	  else{
 	    
@@ -162,7 +160,7 @@ std::pair<IntervalVector, double> LoupFinderIpopt::find(const IntervalVector& bo
 	      {loup_changed=true;
 		loup_point=pt;
 		loup=ipoptloup;
-		cout << "*** ipopt+corr " ;
+		 if (optimizer->trace && !optimizer->integerobj) cout << "*** ipopt+corr " ;
 	      }
 	  }
 	    
