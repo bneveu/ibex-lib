@@ -32,13 +32,14 @@ namespace ibex {
 	if (fabs(v[i])>1) epsi= eps*fabs(v[i]);
 	boxsol[i]= box[i] & Interval(v[i]- epsi, v[i]+ epsi);
       }
-  //  cout << "boxsol " << boxsol << endl;
+      //      cout << "correcting in boxsol " << boxsol << endl;
       CellHeap buffer(extsys);
       Optimizer opt(sys.nb_var,optimizer->ctc,optimizer->bsc,optimizer->loup_finder,buffer,extsys.goal_var(),optimizer->eps_x[0],optimizer->rel_eps_f, optimizer->abs_eps_f);
       opt.integerobj=optimizer->integerobj;
       opt.integer_tolerance=optimizer->integer_tolerance;
       opt.set_uplo(optimizer->get_uplo());
       opt.set_loup(optimizer->get_loup());
+      opt.timeout=1;
       opt.optimize(boxsol);
       recursive_call=true;
       correction_nodes+=opt.get_nb_cells();
@@ -91,12 +92,12 @@ namespace ibex {
       fic1 >> a;
       fic1 >> a; 
       fic1 >> obj;
-      //       cout << "obj " << obj << endl;
+      //      cout << "obj " << obj << endl;
       
       fic1 >> a;
       fic1 >> a;
       fic1 >> otime;
-      //cout << "ipopttime " << otime;
+      //      cout << "ipopttime " << otime;
       ipopttime +=otime;
 
       fic1 >> a;
@@ -114,7 +115,6 @@ namespace ibex {
 	//	cout << "j" << a << "  v["<<i<<"] " <<  v[i] << endl;
       }
     
-      fic1 >> a;
       fic1.close();
       return true;
     }
@@ -139,14 +139,14 @@ std::pair<IntervalVector, double> LoupFinderIpopt::find(const IntervalVector& bo
 
 	write_system_ampl(box);
 	int res0=system("rm results.txt");
+
 	res0= system(ipopt_ampl_run.c_str());
+
 	int res=ipopt_ampl_results(n,status,obj,pt);
 
-	//	cout << " resultats ipopt " << status;
+	//	cout << " resultats ipopt " << status << endl;
 	double ipoptloup=POS_INFINITY;
-	if (status=="solved"){
-	  //	  bool _is_inner = normsys.is_inner(box);
-	  //	  cout << " obj " << obj;
+	if (status=="solved" && obj < current_loup){
 	  bool _is_inner=false;
 	  if( check(normsys,pt,loup,_is_inner))
 	    { loup_changed=true;
@@ -154,7 +154,6 @@ std::pair<IntervalVector, double> LoupFinderIpopt::find(const IntervalVector& bo
 	      if (optimizer->trace && !optimizer->integerobj)   cout << "*** ipopt      " ;
 	    }
 	  else{
-	    
 	    correct_ipopt_sol(pt, ipoptloup);
 	    if (ipoptloup < current_loup)
 	      {loup_changed=true;
@@ -162,8 +161,8 @@ std::pair<IntervalVector, double> LoupFinderIpopt::find(const IntervalVector& bo
 		loup=ipoptloup;
 		 if (optimizer->trace && !optimizer->integerobj) cout << "*** ipopt+corr " ;
 	      }
-	  }
 	    
+	  }
 	  
 	}
 	if (loup_changed)

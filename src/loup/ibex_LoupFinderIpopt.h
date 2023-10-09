@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X
-// File        : ibex_LoupFinderProbing.h
-// Author      : Gilles Chabert
+// File        : ibex_LoupFinderIpopt.h
+// Author      : Bertrand Neveu
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
-// Created     : May 14, 2012
-// Last Update : Jul 09, 2017
+// Created     : Aug 2020
+// Last Update : Sep 28, 2020
 //============================================================================
 
 #ifndef __IBEX_LOUP_FINDER_IPOPT_H__
@@ -50,8 +50,8 @@ public:
   
   const System& normsys; // normalized system used for checking the constraints.
   const ExtendedSystem& extsys; // extended system used for the recursing call of optimizer
-  Optimizer* optimizer=nullptr; // optimizer data are used for building an optimizer for correcting the point returned by ipopt if it does not vverify the constraints
-  bool recursive_call=true;
+  Optimizer* optimizer=nullptr; // optimizer data are used for building an optimizer for correcting the point returned by ipopt if it does not verify the constraints
+  bool recursive_call=true; // boolean to prevent double recursion of optimizer
   int correction_nodes=0;  // additional nodes for correcting the point given by ipopt
   double correction_time=0.0; // additional time for correcting the point given by ipopt
   
@@ -61,7 +61,7 @@ public:
   void sysbound(Vector& pt);
   void sysbound(IntervalVector& vec);  
   std::string ipopt_ampl_run = "/libre/neveu/ampl/ampl model_ipopt.run > amplout.txt";
-  void write_system_ampl(const IntervalVector& box);
+  void write_system_ampl(const IntervalVector& box); // write the system.mod with box as variable bounds.
   
 
   void correct_ipopt_sol (Vector&v, double& loup);
