@@ -22,7 +22,7 @@ const double initbox_limit = 1.e8;  // TODO . parameter ??
 using namespace std;
 using namespace ibex;
 
-
+/*
 double correct_ipopt_sol (Vector&v , Optimizer& o, System& sys){
   IntervalVector box = sys.box;
   double eps=1.e-6;
@@ -38,15 +38,15 @@ double correct_ipopt_sol (Vector&v , Optimizer& o, System& sys){
   o.set_uplo(NEG_INFINITY);
   return o.get_loup();
 }
-
+*/
 // return the loup if v is feasible (after rounding of integer variables), POS_INFINITY if not
 double check_ipopt(LoupFinder& loup_finder, Vector& v, bool integerobj, double integer_tolerance){
   double newub=POS_INFINITY;
     double loup=POS_INFINITY;
     if (loup_finder.integer_check(v)){
-      cout << "v after check " << v << endl;
+      //      cout << "v after integer check " << v << endl;
       newub=loup_finder.goal_ub(v);
-      cout << "newub " << newub << endl;
+      //      cout << "newub " << newub << endl;
       if ( loup_finder.is_inner(v)){
 	cout << "is_inner " << endl;
 	if (!integerobj
@@ -124,6 +124,7 @@ void ipopt_preprocessing(Optimizer& o, System& sys, System& normsys, ExtendedSys
 	else{
 	*/
 	LoupFinderIpopt loupfindipopt(sys,normsys,extsys);
+	loupfindipopt.optimizer=&o;
 	loupfindipopt.write_system_ampl(sys.box);
 	res0=system("rm results.txt");
 	string ipopt_ampl_run = "/libre/neveu/ampl/ampl model_ipopt.run > amplout.txt";
@@ -132,16 +133,17 @@ void ipopt_preprocessing(Optimizer& o, System& sys, System& normsys, ExtendedSys
 	preprocampltime= loupfindipopt.ampltime;
 	preprocipopttime= loupfindipopt.ipopttime;
 	  //	}
-	
-	cout << " resultats ipopt " << status;
+
+	cout << " resultats ipopt " << status << endl;
 	double initloup=POS_INFINITY;
-	if (status=="solved"){
-	  cout << "v " << v ;
-	  cout << " obj " << obj;
+	if (status=="solved" || status=="infeasible"){
+	  //	  cout << "v " << v ;
+	  //	  cout << " obj " << obj;
 	  initloup= check_ipopt(o.loup_finder,v,o.integerobj,o.abs_eps_f);
-	  if (initloup==POS_INFINITY)
-	    initloup=correct_ipopt_sol(v,o,sys);
-	  cout << "loup_init " << initloup << endl;
+	  if (initloup==POS_INFINITY && sys.get_integer_variables()->size() < sys.nb_var)
+	    loupfindipopt.correct_ipopt_sol(v,initloup);
+	    //	    initloup= correct_ipopt_sol(v,o,sys);
+	  cout << "initloup " << initloup << endl;
 	  o.set_loup(initloup);
 	  IntervalVector lp(v);
 	  if (initloup == POS_INFINITY) lp.set_empty();
@@ -211,7 +213,7 @@ int main(int argc, char** argv){
 	//        cout << "fin lecture parametres " << endl;
 
 	
-	if (sys->minlp)	cout << " number of integer variables " << (sys->get_integer_variables())->size() << endl;
+	//	if (sys->minlp)	cout << " number of integer variables " << (sys->get_integer_variables())->size() << endl;
 	if (sys->minlp)	cout << " integer variables " << *(sys->get_integer_variables()) << endl;
 	// the extended system
 	ExtendedSystem ext_sys(*sys,tolerance);
@@ -437,7 +439,7 @@ int main(int argc, char** argv){
       
 	// the trace 
 	o.trace=1;
-	if (o.trace) cout << " sys.box " << sys->box << endl;
+	//	if (o.trace) cout << " sys.box " << sys->box << endl;
 	cout.precision(16);
 	//integer objective
 	o.integerobj=integerobjective;
@@ -446,8 +448,9 @@ int main(int argc, char** argv){
 	// ipopt preprocessing
 	double preprocampltime=0;
 	double preprocipopttime=0;
-	if (loupfindermethod=="ipoptxn" ||loupfindermethod=="ipoptxninhc4" )
-	  ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.recursive_call=false;
+
+	if (loupfindermethod=="ipoptxninhc4" || loupfindermethod=="ipoptxn")
+	  ((LoupFinderDefaultIpopt*) loupfinder)->finder_ipopt.optimizer= &o;
 	ipopt_preprocessing(o,*sys,norm_sys,ext_sys,preprocampltime,preprocipopttime);
 	if (loupfindermethod=="ipoptxn" ||loupfindermethod=="ipoptxninhc4" )
 	  ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.recursive_call=true;
@@ -460,8 +463,7 @@ int main(int argc, char** argv){
 	//	std::ofstream Out("err.txt");
 	//	std::streambuf* OldBuf = std::cerr.rdbuf(Out.rdbuf());
 	if (o.trace) cout << " sys.box " << sys->box << endl;
-	if (loupfindermethod=="ipoptxninhc4" || loupfindermethod=="ipoptxn")
-	  ((LoupFinderDefaultIpopt*) loupfinder)->finder_ipopt.optimizer= &o;
+	
 	o.optimize(sys->box,o.get_loup());
 	//	std::cerr.rdbuf(OldBuf);
 
