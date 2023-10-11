@@ -73,7 +73,11 @@ namespace ibex {
 
 	for (int i=0; i<sys.args.size(); i++) {
 		const ExprSymbol& x = sys.args[i];
-		ficsys << " display " << x << "> results.txt;" << endl;
+		if (x.dim.nb_rows()==1)
+		   ficsys << " display " << x << " > results.txt;" << endl;
+		else
+		  for (int j=0; j<x.dim.nb_rows() ; j++)
+		    ficsys << " display " << x << "[" << j+1 << "] > results.txt;" << endl;
 	};
 	ficsys.close();
 }
@@ -106,7 +110,9 @@ namespace ibex {
       ampltime +=otime;
 
       //      cout << "ampltime " << ampltime << " ipopttime " << ipopttime << endl;
+     
       
+
       for (int i =0 ; i< n; i++){
 	fic1 >> a;
 	fic1 >> a;

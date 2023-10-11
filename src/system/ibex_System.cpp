@@ -234,14 +234,16 @@ std::ostream& operator<<(std::ostream& os, const System& sys) {
 	for (int i=0; i<sys.args.size(); i++) {
 		const ExprSymbol& x = sys.args[i];
 		os << "var " << x;
-		if((*(sys.get_integer_variables()))[index])
-		  os << " integer" ;
-		os << " >= " << sys.box[i].lb() << " , " << "<= " << sys.box[i].ub() ;
-		if (x.dim.nb_rows()>1) os << '[' << x.dim.nb_rows() << ']';
+		
+		if (x.dim.nb_rows()>1) os << "{1.." << x.dim.nb_rows() << "}";
 		if (x.dim.nb_cols()>1) {
 			if (x.dim.nb_rows()==1) os << "[1]";
 			os << '[' << x.dim.nb_cols() << ']';
 		}
+		if((*(sys.get_integer_variables()))[index])
+		  os << " integer" ;
+		os << " >= " << sys.box[i].lb() << " , " << "<= " << sys.box[i].ub() ;
+	
 		if (i<sys.args.size()-1) os << "; " << endl;
 		index+=x.dim.size();
 	}
@@ -477,12 +479,12 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:
 			for (int i=0; i<x.dim.vec_size(); i++)
-				var_names.push_back(string(x.name)+'('+to_string(i+1)+')');
+			  var_names.push_back(string(x.name)+'('+to_string(i+1)+')');
 			break;
 		default: // MATRIX
 			for (int i=0; i<x.dim.nb_rows(); i++)
 				for (int j=0; j<x.dim.nb_cols(); j++)
-					var_names.push_back(string(x.name)+'('+to_string(i+1)+','+to_string(j+1)+')');
+				  var_names.push_back(string(x.name)+'('+to_string(i+1)+','+to_string(j+1)+')');
 			break;
 		}
 		v+=x.dim.size();
