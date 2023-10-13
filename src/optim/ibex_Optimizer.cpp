@@ -13,7 +13,7 @@
 #include "ibex_NoBisectableVariableException.h"
 #include "ibex_BxpOptimData.h"
 #include "ibex_CovOptimData.h"
-#include "ibex_LoupFinderDefault.h"
+#include "ibex_LoupFinder.h"
 
 #include <float.h>
 #include <stdlib.h>
@@ -109,14 +109,7 @@ bool Optimizer::update_loup(const IntervalVector& box, BoxProperties& prop) {
 
 	try {
 		pair<IntervalVector,double> p=loup_finder.find(box,loup_point,loup,prop);
-
-		if (!integerobj || 
-		    (std::ceil (p.second) - p.second) < integer_tolerance || (p.second - std::floor(p.second)) < integer_tolerance){
-//			cout << " loup point=";
-//			if (loup_finder.rigorous())
-//				cout << loup_point << endl;
-//			else
-//				cout << loup_point.lb() << endl;
+	
 		  loup=p.second;
 		  loup_point=p.first;
 		  if (trace) {
@@ -124,8 +117,6 @@ bool Optimizer::update_loup(const IntervalVector& box, BoxProperties& prop) {
 		    cout << "\033[32m loup= " << loup << "\033[0m" << endl;
 		  }
 		  return true;
-		}
-		else return false;
 
 	} catch(LoupFinder::NotFound&) {
 		return false;
@@ -181,7 +172,7 @@ void Optimizer::update_uplo() {
 		double m = (new_uplo < uplo_of_epsboxes) ? new_uplo :  uplo_of_epsboxes;
 		double olduplo=uplo;
 		if (uplo < m) uplo = m; // warning: hides the field "m" of the class
-		//		if (integerobj) uplo=std::ceil(uplo);
+
 		if (trace && uplo > olduplo) cout << "\033[33m uplo= " << uplo << "\033[0m" << endl;
 		// note: we always have uplo <= uplo_of_epsboxes but we may have uplo > new_uplo, because
 		// ymax is strictly lower than the loup.
@@ -224,9 +215,7 @@ void Optimizer::handle_cell(Cell& c) {
 	else {
 	  
 	  if (integerobj) {
-	    //cout << " integerobj before " << c.box[goal_var] << endl;
 	    c.box[goal_var]=integer( c.box[goal_var]);
-	    //cout << " integerobj after " << c.box[goal_var] << endl;
 	    if (c.box[goal_var].is_empty()) {delete&c ; return;}
 	  }
 	  buffer.push(&c);

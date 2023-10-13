@@ -346,7 +346,9 @@ inline double System::goal_ub(const Vector& x) const {
 		return fx.ub();
 
 }
-
+  inline Interval System::goal_eval(const IntervalVector& x) const{
+    return goal->eval(x);}
+  
 } // end namespace ibex
 
 #endif // __IBEX_SYSTEM_H__

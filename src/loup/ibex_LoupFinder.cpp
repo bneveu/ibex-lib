@@ -8,11 +8,12 @@
 //============================================================================
 
 #include "ibex_LoupFinder.h"
-
+//#include <typeinfo>
 using namespace std;
 
 namespace ibex {
 
+  double integer_tolerance=1.e-5;
 LoupFinder::~LoupFinder() {
 
 }
@@ -85,9 +86,28 @@ bool LoupFinder::check(const System& sys,  Vector& pt, double& loup, bool _is_in
 	if (sys.minlp){
 	  //	  cout << " loup " << loup << " res " << res << " pt " << pt <<  " sys inner " << sys.is_inner(pt) << endl;
 	    if (integer_and_bound_check(sys,pt) && sys.is_inner(pt)) {
-	      res = sys.goal_ub(pt); // integer_and_bound_check may modify the loup_point by making integer the values of integer variables
+	      IntervalVector ptvec= IntervalVector(pt);
+	      Interval resvec= sys.goal_eval(ptvec);
+	      //	      cout << "pt " << pt << endl;
+	      //	      cout << "type " << typeid(*this).name() << endl;
+	      //	      cout << "integerobj " << integerobj << endl;
+	      //	      cout << "resvec " << resvec << endl;
+	      if (integerobj){
+                Interval resextended (resvec.lb()-integer_tolerance,resvec.ub()+integer_tolerance);
+		Interval resint = integer(resextended);
+		//		cout << "resint " << resint << endl;
+		if (resint.is_empty())
+		  return false;
+		else
+		  {res=resint.mid();
+		    //	    cout << "res " << res << endl;
+		  }
+	      }
+	      else
+		res = resvec.ub(); // integer_and_bound_check may modify the loup_point by making integer the values of integer variables
 	      // and putting it in the initial box
 	      // we have to recompute the criterion.
+	      
 	      if (res<loup) {
 		loup = res;
 		return true;}

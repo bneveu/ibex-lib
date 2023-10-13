@@ -19,10 +19,13 @@ using namespace std;
 
 namespace ibex {
 
-  LoupFinderDefaultIpopt::LoupFinderDefaultIpopt(System& sys, const System& normsys, const ExtendedSystem& extsys, bool inHC4)  : sys(sys), normsys(normsys), extsys(extsys),									 //	finder_probing(inHC4? (LoupFinder&) *new LoupFinderInHC4(sys) : (LoupFinder&) *new LoupFinderFwdBwd(sys)),
+  LoupFinderDefaultIpopt::LoupFinderDefaultIpopt(System& sys, const System& normsys, const ExtendedSystem& extsys, bool inHC4,bool integerobjective )  : sys(sys), normsys(normsys), extsys(extsys),									 //	finder_probing(inHC4? (LoupFinder&) *new LoupFinderInHC4(sys) : (LoupFinder&) *new LoupFinderFwdBwd(sys)),
         finder_probing(inHC4? (LoupFinder&) *new LoupFinderInHC4(normsys) : (LoupFinder&) *new LoupFinderProbing(normsys)),
         finder_x_taylor(normsys),
 	finder_ipopt(sys,normsys,extsys){
+    finder_probing.integerobj=integerobjective;
+    finder_x_taylor.integerobj=integerobjective;
+    finder_ipopt.integerobj=integerobjective;
 
 }
 

@@ -125,8 +125,9 @@ std::pair<IntervalVector, double> LoupFinderInHC4::find(const IntervalVector& bo
 	// if we reach this point: "inbox" is an inner box
 	if (mono_analysis_flag)
 		monotonicity_analysis(sys, inbox, inner_found);
-
-	return LoupFinderProbing(sys).find(inner_found? inbox : box, loup_point, loup);
+        LoupFinderProbing lfprobing (sys);
+	lfprobing.integerobj=integerobj;
+	return lfprobing.find(inner_found? inbox : box, loup_point, loup);
 }
   bool LoupFinderInHC4::integer_check(Vector& pt) {return integer_and_bound_check(sys,pt);}
   bool LoupFinderInHC4::is_inner(Vector& pt) {return is_inner0(sys,pt);}

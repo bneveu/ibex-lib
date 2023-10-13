@@ -50,7 +50,7 @@ public:
 	 *                2/ generates symbolically components of the main function (heavy)
 	 *
 	 */
-        LoupFinderDefaultIpopt( System& sys, const System& normsys, const ExtendedSystem& extsys, bool inHC4=true);
+  LoupFinderDefaultIpopt( System& sys, const System& normsys, const ExtendedSystem& extsys, bool inHC4=true, bool integeroblective=false);
 
 	/**
 	 * \brief Delete this.

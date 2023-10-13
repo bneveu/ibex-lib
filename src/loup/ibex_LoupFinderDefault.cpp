@@ -18,12 +18,14 @@ using namespace std;
 
 namespace ibex {
 
-  LoupFinderDefault::LoupFinderDefault(const System& sys, bool inHC4)  : sys(sys),
+  LoupFinderDefault::LoupFinderDefault(const System& sys, bool inHC4, bool integerobjective)  : sys(sys),
 									 //	finder_probing(inHC4? (LoupFinder&) *new LoupFinderInHC4(sys) : (LoupFinder&) *new LoupFinderFwdBwd(sys)),
         finder_probing(inHC4? (LoupFinder&) *new LoupFinderInHC4(sys) : (LoupFinder&) *new LoupFinderProbing(sys)),
-	finder_x_taylor(sys) {
-
-}
+									 finder_x_taylor(sys)
+  { 
+    finder_probing.integerobj=integerobjective;
+    finder_x_taylor.integerobj=integerobjective;
+  }
 
   bool LoupFinderDefault::integer_check(Vector& pt) {return integer_and_bound_check(sys,pt);}
   bool LoupFinderDefault::is_inner (Vector& pt) {return is_inner0(sys,pt);}
@@ -51,6 +53,7 @@ std::pair<IntervalVector, double> LoupFinderDefault::find(const IntervalVector& 
 	bool found=false;
 
 	try {
+
 		p=finder_probing.find(box,p.first,p.second,prop);
 		found=true;
 	} catch(NotFound&) { }
@@ -58,6 +61,7 @@ std::pair<IntervalVector, double> LoupFinderDefault::find(const IntervalVector& 
 	try {
 		// TODO
 		// in_x_taylor.set_inactive_ctr(entailed->norm_entailed);
+	  
 		p=finder_x_taylor.find(box,p.first,p.second,prop);
 		found=true;
 	} catch(NotFound&) { }

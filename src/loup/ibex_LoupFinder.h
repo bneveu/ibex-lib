@@ -87,14 +87,20 @@ public:
 	 */
 	virtual ~LoupFinder();
 
-  virtual bool integer_check(Vector& pt)=0;
-  virtual bool is_inner(Vector& pt)=0;
-  virtual double goal_ub(Vector&pt)=0;
-  virtual void sysbound(Vector& pt)=0;
-  virtual void sysbound(IntervalVector& pt)=0;
-  double ampltime=0;
-  double ipopttime=0;
 
+        /** 
+	* \brief boolean indicating if the objective should be integer
+	*/
+        bool integerobj=0;
+  
+        virtual bool integer_check(Vector& pt)=0;
+        virtual bool is_inner(Vector& pt)=0;
+        virtual double goal_ub(Vector&pt)=0;
+        virtual void sysbound(Vector& pt)=0;
+        virtual void sysbound(IntervalVector& pt)=0;
+        double ampltime=0;
+        double ipopttime=0;
+      
 protected:
 
 	/**
