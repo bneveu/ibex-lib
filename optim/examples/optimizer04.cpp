@@ -105,9 +105,9 @@ int main(int argc, char** argv){
 	//	LoupFinderDefault loupfinder (norm_sys,true);
 	LoupFinder* loupfinder;
 	if (loupfindermethod=="xninhc4")
-	  loupfinder = new LoupFinderDefault (norm_sys,true);
+	  loupfinder = new LoupFinderDefault (norm_sys,true,integerobjective);
 	else if (loupfindermethod=="xn")
-	  loupfinder = new LoupFinderDefault (norm_sys,false);
+	  loupfinder = new LoupFinderDefault (norm_sys,false,integerobjective);
 	else if (loupfindermethod=="prob")
 	  loupfinder = new LoupFinderProbing (norm_sys);
 	else if (loupfindermethod=="inhc4")
@@ -300,11 +300,12 @@ int main(int argc, char** argv){
 	  ctcxn = new CtcCompo (*ctcxn , *ctckkt, integ);
 	}
 
-
+	loupfinder->integerobj=integerobjective;
+	cout << "integerobj " << loupfinder->integerobj;
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
 	Optimizer o(sys->nb_var,*ctcxn,*bs,*loupfinder,*buffer,ext_sys.goal_var(),prec,goalprec,goalprec);
 
-
+        o.loup_finder.integerobj=integerobjective;
 	// the trace 
 	o.trace=1;
 	if (o.trace) cout << " sys.box " << sys->box << endl;
@@ -312,6 +313,7 @@ int main(int argc, char** argv){
 	
 	//integer objective
 	o.integerobj=integerobjective;
+
 	o.integer_tolerance=goalprec;
 	// the allowed time for search
 	o.timeout=timelimit;

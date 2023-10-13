@@ -22,23 +22,7 @@ const double initbox_limit = 1.e8;  // TODO . parameter ??
 using namespace std;
 using namespace ibex;
 
-/*
-double correct_ipopt_sol (Vector&v , Optimizer& o, System& sys){
-  IntervalVector box = sys.box;
-  double eps=1.e-6;
-  IntervalVector boxsol(v.size());
-  for ( int i=0; i< v.size() ; i++){
-    double epsi = eps;
-    if (fabs(v[i])>1) epsi= eps*fabs(v[i]);
-    boxsol[i]= box[i] & Interval(v[i]- epsi, v[i]+ epsi);
-  }
-  cout << "boxsol " << boxsol << endl;
-  o.optimize(boxsol);
-  o.report();
-  o.set_uplo(NEG_INFINITY);
-  return o.get_loup();
-}
-*/
+
 // return the loup if v is feasible (after rounding of integer variables), POS_INFINITY if not
 double check_ipopt(LoupFinder& loup_finder, Vector& v, bool integerobj, double integer_tolerance){
   double newub=POS_INFINITY;
@@ -49,13 +33,18 @@ double check_ipopt(LoupFinder& loup_finder, Vector& v, bool integerobj, double i
       //      cout << "newub " << newub << endl;
       if ( loup_finder.is_inner(v)){
 	cout << "is_inner " << endl;
-	if (!integerobj
-	    ||	    (std::ceil (newub) - newub) < integer_tolerance || (newub - std::floor(newub)) < integer_tolerance)
-	  {	  
+	if (integerobj &&
+	    	    (std::ceil (newub) - newub) < integer_tolerance || (newub - std::floor(newub)) < integer_tolerance)
+	  {
+	    Interval loupint (newub-integer_tolerance, newub+integer_tolerance);
+	    loupint=integer(loupint);
+	    newub=loupint.ub();
+	  }
+			      
 	  loup= newub;
 	  cout << " loup= " << loup << endl;
-	  }
       }
+      
     }
     return loup;
 }
@@ -125,6 +114,7 @@ void ipopt_preprocessing(Optimizer& o, System& sys, System& normsys, ExtendedSys
 	*/
 	LoupFinderIpopt loupfindipopt(sys,normsys,extsys);
 	loupfindipopt.optimizer=&o;
+	loupfindipopt.integerobj=o.integerobj;
 	loupfindipopt.write_system_ampl(sys.box);
 	res0=system("rm results.txt");
 	string ipopt_ampl_run = "/libre/neveu/ampl/ampl model_ipopt.run > amplout.txt";
@@ -233,13 +223,13 @@ int main(int argc, char** argv){
 	//	LoupFinderDefault loupfinder (norm_sys,true);
 	LoupFinder* loupfinder;
 	if (loupfindermethod=="ipoptxninhc4")
-	  loupfinder = new LoupFinderDefaultIpopt (*sys,norm_sys,ext_sys,true);
+	  loupfinder = new LoupFinderDefaultIpopt (*sys,norm_sys,ext_sys,true,integerobjective);
 	else if (loupfindermethod=="ipoptxn")
-	  loupfinder = new LoupFinderDefaultIpopt (*sys,norm_sys,ext_sys,false);
+	  loupfinder = new LoupFinderDefaultIpopt (*sys,norm_sys,ext_sys,false,integerobjective);
 	else if (loupfindermethod=="xninhc4")
-	  loupfinder = new LoupFinderDefault (norm_sys,true);
+	  loupfinder = new LoupFinderDefault (norm_sys,true,integerobjective);
 	else if (loupfindermethod=="xn")
-	  loupfinder = new LoupFinderDefault (norm_sys,false);
+	  loupfinder = new LoupFinderDefault (norm_sys,false,integerobjective);
 	else if (loupfindermethod=="prob")
 	  loupfinder = new LoupFinderProbing (norm_sys);
 	else if (loupfindermethod=="inhc4")
@@ -442,6 +432,7 @@ int main(int argc, char** argv){
 	//	if (o.trace) cout << " sys.box " << sys->box << endl;
 	cout.precision(16);
 	//integer objective
+	loupfinder->integerobj=integerobjective;
 	o.integerobj=integerobjective;
 	o.integer_tolerance=goalprec;
 
