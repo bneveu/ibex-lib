@@ -75,9 +75,13 @@ namespace ibex {
 		const ExprSymbol& x = sys.args[i];
 		if (x.dim.nb_rows()==1)
 		   ficsys << " display " << x << " > results.txt;" << endl;
+		else if (x.dim.nb_cols()==1)
+		    for (int j=0; j<x.dim.nb_rows() ; j++)
+		      ficsys << " display " << x << "[" << j+1 << "] > results.txt;" << endl;
 		else
 		  for (int j=0; j<x.dim.nb_rows() ; j++)
-		    ficsys << " display " << x << "[" << j+1 << "] > results.txt;" << endl;
+		    for  (int k=0; k<x.dim.nb_cols() ; k++)
+		      ficsys << " display " << x << "[" << j+1 <<"," << k+1 << "] > results.txt;" << endl;
 	};
 	ficsys.close();
 }

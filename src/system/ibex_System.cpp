@@ -226,7 +226,7 @@ std::ostream& operator<<(std::ostream& os, const System& sys) {
 }
   */
 
-  // Ecriture du système en format AMPL (vérifié pour les systèmes à plat)
+  // Ecriture du système en format AMPL (vérifié pour les systèmes à plat, 1D et 2D)
 std::ostream& operator<<(std::ostream& os, const System& sys) {
 
   //	os << "variables: " << endl << "  ";
@@ -235,11 +235,9 @@ std::ostream& operator<<(std::ostream& os, const System& sys) {
 		const ExprSymbol& x = sys.args[i];
 		os << "var " << x;
 		
-		if (x.dim.nb_rows()>1) os << "{1.." << x.dim.nb_rows() << "}";
-		if (x.dim.nb_cols()>1) {
-			if (x.dim.nb_rows()==1) os << "[1]";
-			os << '[' << x.dim.nb_cols() << ']';
-		}
+		if (x.dim.nb_rows()>1 && x.dim.nb_cols()==1 ) os << "{1.." << x.dim.nb_rows() << "}";
+		if (x.dim.nb_rows()>1 && x.dim.nb_cols()>1) os << "{1.." <<  x.dim.nb_rows() << ",1.." <<  x.dim.nb_cols() << "}";
+			
 		if((*(sys.get_integer_variables()))[index])
 		  os << " integer" ;
 		os << " >= " << sys.box[i].lb() << " , " << "<= " << sys.box[i].ub() ;
