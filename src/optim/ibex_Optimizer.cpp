@@ -4,7 +4,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 14, 2012
-// Last Update : Apr 08, 2021
+// Last Update : Oct 18, 2023
 //============================================================================
 
 #include "ibex_Optimizer.h"
@@ -485,6 +485,7 @@ Optimizer::Status Optimizer::optimize() {
 				if (uplo_of_epsboxes == NEG_INFINITY) {
 					break;
 				}
+
 				if (loup_changed) {
 					// In case of a new upper bound (loup_changed == true), all the boxes
 					// with a lower bound greater than (loup - goal_prec) are removed and deleted.
@@ -509,7 +510,6 @@ Optimizer::Status Optimizer::optimize() {
 				if (!anticipated_upper_bounding) // useless to check precision on objective if 'true'
 					if (get_obj_rel_prec()<rel_eps_f || get_obj_abs_prec()<abs_eps_f)
 						break;
-
 				if (timeout>0) timer.check(timeout); // TODO: not reentrant, JN: done
 				time = timer.get_time();
 
@@ -524,10 +524,10 @@ Optimizer::Status Optimizer::optimize() {
 
 			}
 	     }
+	     
 
 	 	timer.stop();
 	 	time = timer.get_time();
-
 		// No solution found and optimization stopped with empty buffer
 		// before the required precision is reached => means infeasible problem
 	 	if (uplo_of_epsboxes == NEG_INFINITY)
@@ -543,6 +543,7 @@ Optimizer::Status Optimizer::optimize() {
 	}
 	catch (TimeOutException& ) {
 		status = TIME_OUT;
+		time = timer.get_time();
 	}
 
 	/* TODO: cannot retrieve variable names here. */
@@ -648,38 +649,37 @@ void Optimizer::report() {
 		cout << " infeasible problem " << endl;
 	}
 	else {
-	  if (! integerobj) cout << " f* in\t[" << uplo << "," << loup << "]" << endl;
-	  else cout << " f *in\t" <<  integer( Interval(uplo-2* integer_tolerance, loup+2 *integer_tolerance)) << endl;
-	  
-		cout << "\t(best bound)" << endl << endl;
 
-		if (loup==initial_loup && loup_point.is_empty())
-			cout << " x* =\t--\n\t(no feasible point found)" << endl;
-		else {
-			if (loup_finder.rigorous())
-				cout << " x* in\t" << loup_point << endl;
-			else
-				cout << " x* =\t" << loup_point.lb() << endl;
-			cout << "\t(best feasible point)" << endl;
-		}
-		cout << endl;
-		double rel_prec=get_obj_rel_prec();
-		double abs_prec=get_obj_abs_prec();
-		if (integerobj) {  // with the integrality tolerance it is possible to obtain an objective lower than uplo
-		  rel_prec = fabs(rel_prec);
-		  abs_prec = fabs(abs_prec);
-		}
+	  cout << " f* in\t[" << uplo << "," << loup << "]" << endl;
+	  cout << "\t(best bound)" << endl << endl;
+
+	  if (loup==initial_loup && loup_point.is_empty())
+	    cout << " x* =\t--\n\t(no feasible point found)" << endl;
+	  else {
+	    if (loup_finder.rigorous())
+	      cout << " x* in\t" << loup_point << endl;
+	    else
+	      cout << " x* =\t" << loup_point.lb() << endl;
+	    cout << "\t(best feasible point)" << endl;
+	  }
+	  cout << endl;
+	  double rel_prec=get_obj_rel_prec();
+	  double abs_prec=get_obj_abs_prec();
+	  if (integerobj) {  // with the integrality tolerance it is possible to obtain an objective lower than uplo
+	    rel_prec = fabs(rel_prec);
+	    abs_prec = fabs(abs_prec);
+	  }
 		  
 
-		cout << " relative precision on f*:\t" << rel_prec;
-		if (rel_prec <= rel_eps_f)
-			cout << green() << " [passed] " << white();
-		cout << endl;
-
-		cout << " absolute precision on f*:\t" << abs_prec;
-		if (abs_prec <= abs_eps_f)
-			cout << green() << " [passed] " << white();
-		cout << endl;
+	  cout << " relative precision on f*:\t" << rel_prec;
+	  if (rel_prec <= rel_eps_f)
+	    cout << green() << " [passed] " << white();
+	  cout << endl;
+	  
+	  cout << " absolute precision on f*:\t" << abs_prec;
+	  if (abs_prec <= abs_eps_f)
+	    cout << green() << " [passed] " << white();
+	  cout << endl;
 	}
 
 	cout << " cpu time used:\t\t\t" << time << "s";

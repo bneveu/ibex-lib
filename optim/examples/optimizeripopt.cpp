@@ -23,124 +23,6 @@ using namespace std;
 using namespace ibex;
 
 
-// return the loup if v is feasible (after rounding of integer variables), POS_INFINITY if not
-double check_ipopt(LoupFinder& loup_finder, Vector& v, bool integerobj, double integer_tolerance){
-  double newub=POS_INFINITY;
-    double loup=POS_INFINITY;
-    if (loup_finder.integer_check(v)){
-      //      cout << "v after integer check " << v << endl;
-      newub=loup_finder.goal_ub(v);
-      //      cout << "newub " << newub << endl;
-      if ( loup_finder.is_inner(v)){
-	cout << "is_inner " << endl;
-	if (integerobj &&
-	    	    (std::ceil (newub) - newub) < integer_tolerance || (newub - std::floor(newub)) < integer_tolerance)
-	  {
-	    Interval loupint (newub-integer_tolerance, newub+integer_tolerance);
-	    loupint=integer(loupint);
-	    newub=loupint.ub();
-	  }
-			      
-	  loup= newub;
-	  cout << " loup= " << loup << endl;
-      }
-      
-    }
-    return loup;
-}
- 
-// analysis of results of a direct call of ipopt without passing through ampl
-bool ipopt_direct_results(int n,string& status, double& obj, Vector & val){
-  ifstream fic1("ipopt_res.txt");
-   if (fic1.good()){
-
-     string a;
-     string b;
-     string c;
-     double v;
-     for (string a ; fic1 >>a; ){
-       if (a=="Objective...............:")
-	 {cout << a;
-	   fic1 >> obj;
-	   cout << obj << endl;}
-       else if (a=="EXIT:"){
-	 cout << "exit " << a << endl;
-	 fic1 >> a; fic1 >>b ; fic1 >> c;
-	 cout << a << " " << b << " " << c << endl;
-	 if (a=="Optimal" && b=="Solution" && c=="Found.")
-	   status = "solved";
-       }
-       else if (a=="_svar[1]"){
-	 fic1 >> v;
-	 val[0]=v;
-	 for (int i=1;i<n;i++){
-	   fic1 >> a;
-	   fic1 >> v;
-	   val[i]=v;
-	 }
-       }
-     }
-     fic1.close();
-     cout.precision(12);
-     for (int i=0; i<n ;i++)
-       cout << "var"<<i<< " " << val[i] << endl;
-
-     cout << "status " << status << endl;
-     if (status=="solved")return 1;
-     else return 0;
-   }
-   return 0;
-}
-     
-
-void ipopt_preprocessing(Optimizer& o, System& sys, System& normsys, ExtendedSystem & extsys, double& preprocampltime, double & preprocipopttime){
-   double obj=POS_INFINITY;
-	Vector v(sys.nb_var);
-	string status= "undefined";
-	bool res;
-	int res0;
-	/*
-	if (found!=std::string::npos){
-	  cout << "appel direct nl " << endl;
-	  string str = "time /libre/neveu/ibex-lib/ampl/ampl.linux-intel64/ipopt";
-	  str.append(string(" "));
-	  str.append(string(argv[1]));
-	  str.append(" 'print_level 3 wantsol 2' > ipopt_res.txt");
-	  //	  cout << str << endl;
-	  res0= system(str.c_str());
-          res=ipopt_direct_results(sys.nb_var,status,obj,v);
-	}
-	else{
-	*/
-	LoupFinderIpopt loupfindipopt(sys,normsys,extsys);
-	loupfindipopt.optimizer=&o;
-	loupfindipopt.integerobj=o.integerobj;
-	loupfindipopt.write_system_ampl(sys.box);
-	res0=system("rm results.txt");
-	string ipopt_ampl_run = "/libre/neveu/ampl/ampl model_ipopt.run > amplout.txt";
-	res0= system(ipopt_ampl_run.c_str());
-	res=loupfindipopt.ipopt_ampl_results(sys.nb_var,status,obj,v);
-	preprocampltime= loupfindipopt.ampltime;
-	preprocipopttime= loupfindipopt.ipopttime;
-	  //	}
-
-	cout << " resultats ipopt " << status << endl;
-	double initloup=POS_INFINITY;
-	if (status=="solved" || status=="infeasible"){
-	  //	  cout << "v " << v ;
-	  //	  cout << " obj " << obj;
-	  initloup= check_ipopt(o.loup_finder,v,o.integerobj,o.abs_eps_f);
-	  if (initloup==POS_INFINITY && sys.get_integer_variables()->size() < sys.nb_var)
-	    loupfindipopt.correct_ipopt_sol(v,initloup);
-	    //	    initloup= correct_ipopt_sol(v,o,sys);
-	  cout << "initloup " << initloup << endl;
-	  o.set_loup(initloup);
-	  IntervalVector lp(v);
-	  if (initloup == POS_INFINITY) lp.set_empty();
-	  o.set_loup_point(lp);
-	}
-}
-
 
 int main(int argc, char** argv){
 	// ------------------------------------------------
@@ -208,7 +90,6 @@ int main(int argc, char** argv){
 	// the extended system
 	ExtendedSystem ext_sys(*sys,tolerance);
         NormalizedSystem norm_sys(*sys,tolerance);
-
 
 	//	ext_sys.tolerance=tolerance;
 	//	norm_sys.tolerance=tolerance;
@@ -434,15 +315,13 @@ int main(int argc, char** argv){
 	//integer objective
 	loupfinder->integerobj=integerobjective;
 	o.integerobj=integerobjective;
-	o.integer_tolerance=goalprec;
+	//	o.integer_tolerance=goalprec;
 
 	// ipopt preprocessing
-	double preprocampltime=0;
-	double preprocipopttime=0;
 
 	if (loupfindermethod=="ipoptxninhc4" || loupfindermethod=="ipoptxn")
 	  ((LoupFinderDefaultIpopt*) loupfinder)->finder_ipopt.optimizer= &o;
-	ipopt_preprocessing(o,*sys,norm_sys,ext_sys,preprocampltime,preprocipopttime);
+	o.ipopt_preprocessing(*sys,norm_sys,ext_sys);
 	if (loupfindermethod=="ipoptxn" ||loupfindermethod=="ipoptxninhc4" )
 	  ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.recursive_call=true;
        
@@ -460,7 +339,7 @@ int main(int argc, char** argv){
 
 	// printing the results     
 	o.report();
-	cout << "preprocessing ampl time " << preprocampltime << " ipopttime " << preprocipopttime << endl;
+	cout << "preprocessing ampl time " << o.preprocampltime << " ipopttime " << o.preprocipopttime << endl;
         cout << o.get_time() << "  " << o.get_nb_cells()+1 << endl;
         if (loupfindermethod == "ipoptxn" || loupfindermethod =="ipoptxninhc4"){
 	  cout << " ipopttime " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.ipopttime << " ampltime " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.ampltime << endl;

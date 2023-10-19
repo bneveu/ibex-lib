@@ -35,7 +35,7 @@ namespace ibex {
       CellHeap buffer(extsys);
       Optimizer opt(sys.nb_var,optimizer->ctc,optimizer->bsc,optimizer->loup_finder,buffer,extsys.goal_var(),optimizer->eps_x[0],optimizer->rel_eps_f, optimizer->abs_eps_f);
       opt.integerobj=optimizer->integerobj;
-      opt.integer_tolerance=optimizer->integer_tolerance;
+      //      opt.integer_tolerance=optimizer->integer_tolerance;
       opt.set_uplo(optimizer->get_uplo());
       opt.set_loup(optimizer->get_loup());
       opt.timeout=1;
@@ -44,7 +44,7 @@ namespace ibex {
       correction_nodes+=opt.get_nb_cells();
       correction_time+=opt.get_time();
       if (opt.get_loup() < optimizer->get_loup()){
-      //      cout << "new loup after correction " << opt.get_loup() << endl;
+	//	cout << "new loup after correction " << opt.get_loup() << endl;
 	loup= opt.get_loup();
 	v = opt.get_loup_point().mid();
       }
@@ -154,7 +154,7 @@ std::pair<IntervalVector, double> LoupFinderIpopt::find(const IntervalVector& bo
 	int res=ipopt_ampl_results(n,status,obj,pt);
 
 	//   	cout << " resultats ipopt status " << status << endl;
-	double ipoptloup=POS_INFINITY;
+
 	if (status=="solved" && obj < current_loup){
 	  bool _is_inner=false;
 	  if( check(normsys,pt,loup,_is_inner))
@@ -163,13 +163,14 @@ std::pair<IntervalVector, double> LoupFinderIpopt::find(const IntervalVector& bo
 	      if (optimizer->trace && !optimizer->integerobj)   cout << "*** ipopt      " ;
 	    }
 	  else if (sys.get_integer_variables()->size() < n){
-	      correct_ipopt_sol(pt, ipoptloup);
-	      if (ipoptloup < current_loup)
-		{loup_changed=true;
-		  loup_point=pt;
-		  loup=ipoptloup;
-		  if (optimizer->trace && !optimizer->integerobj) cout << "*** ipopt+corr " ;
-		}
+	    double ipoptloup=POS_INFINITY;
+	    correct_ipopt_sol(pt, ipoptloup);
+	    if (ipoptloup < current_loup)
+	      {loup_changed=true;
+		loup_point=pt;
+		loup=ipoptloup;
+		if (optimizer->trace && !optimizer->integerobj) cout << "*** ipopt+corr " ;
+	      }
 	  }
 	  
 	}

@@ -13,6 +13,7 @@
 
 #include "ibex_OptimizerConfig.h"
 #include "ibex_CovOptimData.h"
+#include "ibex_ExtendedSystem.h"
 
 #include <utility>
 //#include "ibex_NormalizedSystem.h"
@@ -142,6 +143,9 @@ public:
 	 */
 	Status optimize(const char* cov_file, double obj_init_bound=POS_INFINITY);
 
+  
+        /** IpoptPreprocessing; */
+         void  ipopt_preprocessing(System& sys, const System& normsys, const ExtendedSystem & extsys);
 	/* =========================== Output ============================= */
 
 	/**
@@ -325,11 +329,9 @@ public:
 	 */
         bool integerobj=false;
 
-        /**  
-        * \brief tolerance on the integrality of the objective in case of integer objective
-        * Default value 1.e-8
-	*/
-        double integer_tolerance=1.e-8;
+  
+        double preprocampltime=0.0;   // time due to ampl in preprocessing
+        double preprocipopttime=0.0; //  time due to ipopt in preprocessing
   
 protected:
         /** \brief Initialize the optimizer from a single box.
@@ -479,7 +481,8 @@ protected:
 	/** Result. */
 	CovOptimData* cov;
 
-       
+        
+        double check_ipopt(LoupFinder& loup_finder, Vector& v);
 };
 
 inline Optimizer::Status Optimizer::get_status() const { return status; }

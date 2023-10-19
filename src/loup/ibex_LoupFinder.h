@@ -5,6 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jul 09, 2017
+// Modified    : Oct 18, 2023
 //============================================================================
 
 #ifndef __IBEX_LOUP_FINDER__
@@ -100,7 +101,12 @@ public:
         virtual void sysbound(IntervalVector& pt)=0;
         double ampltime=0;
         double ipopttime=0;
-      
+        /**  
+        * \brief tolerance on the integrality of the objective in case of integer objective
+        * Default value 1.e-5
+	*/
+        double integer_tolerance=1.e-5;
+  
 protected:
 
 	/**

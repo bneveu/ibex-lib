@@ -383,7 +383,7 @@ namespace ibex {
       newub=loup_finder.goal_ub(v); 
       if (newub < loup && loup_finder.is_inner(v)){
 	if (!integerobj || 
-	    (std::ceil (newub) - newub) < integer_tolerance || (newub - std::floor(newub)) < integer_tolerance){
+	    (std::ceil (newub) - newub) < loup_finder.integer_tolerance || (newub - std::floor(newub)) < loup_finder.integer_tolerance){
 	loup= newub;
 	if (trace) {
 	  cout << "                    ";

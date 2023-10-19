@@ -346,7 +346,7 @@ LoupFinder& DefaultOptimizerConfig::get_loup_finder() {
 	norm_sys.tolerance=eps_h;
 
 	return rec(rigor? (LoupFinder*) new LoupFinderCertify(sys,rec(new LoupFinderDefault(norm_sys, inHC4))) :
-			(LoupFinder*) new LoupFinderDefault(norm_sys, inHC4), LOUP_FINDER_TAG);
+		   (LoupFinder*) new LoupFinderDefault(norm_sys, inHC4, integerobj), LOUP_FINDER_TAG);
 }
 
 CellBufferOptim& DefaultOptimizerConfig::get_cell_buffer() {

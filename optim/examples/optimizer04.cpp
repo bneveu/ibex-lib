@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : optimizer04int.cpp
+// File        : optimizer04.cpp
 // Author      : Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -79,7 +79,7 @@ int main(int argc, char** argv){
 	double timelimit= atof(argv[nbinput+5]);
 
 	int randomseed = atoi(argv[nbinput+6]);
-	//	double initloup=atof(argv[nbinput+5]);
+	//	double initloup=atof(argv[nbinput+7]);
 	RNG::srand(randomseed);
 	//        cout << "fin lecture parametres " << endl;
 
