@@ -38,6 +38,7 @@ public:
 	 *
 	 * 	The reference to this variable is kept
 	 * 	until the system is built.
+         *      the boolean is_integer indicates that the variable is integer
 	 */
   void add_var(const ExprSymbol& v, bool is_integer=false);
   void add_var(const ExprSymbol& v, const Interval& init_box, bool is_integer=false);

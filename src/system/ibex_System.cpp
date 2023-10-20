@@ -102,7 +102,7 @@ System::System(int n, const char* syntax, int simpl_level) : id(next_id()), nb_v
 		throw e;
 	}
 	UNLOCK;
-	//TODO / find integer variables
+
 	integer_variables= new BitSet(nb_var);
 }
 
@@ -246,18 +246,13 @@ std::ostream& operator<<(std::ostream& os, const System& sys) {
 		index+=x.dim.size();
 	}
 	os << ";" << endl;
-	/*
-	os << "box: " << endl << "  ";
-	os << sys.box << endl;
-	*/
-
 
 	if (sys.goal!=NULL){
 	  os << "minimize obj: " << endl;
 	  os << "  " << sys.goal->expr() << ";" << endl;
 	}
 	else
-		os << " obj: (none)" << endl;
+	  os << " obj: (none)" << endl;
 	if (sys.nb_ctr>0) {
 		os << "subject to" << endl;
 		for (int i=0; i<sys.ctrs.size(); i++)
@@ -500,11 +495,7 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
       ifstream fic (filename);
       string a;
       int nbvar;
-      /*
-      for (int i=0; i<7 ;i++){
-	fic >> a;
-      }
-      */
+   
       string line;
       getline(fic,line);
       fic >> nbvar;

@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_SystemFactory.cpp
-// Author      : Gilles Chabert
+// Author      : Gilles Chabert, Bertrand Neveu
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Aug 27, 2012
-// Last Update : May 15, 2023
+// Last Update : Oct 20, 2023
 //============================================================================
 
 #include "ibex_SystemFactory.h"

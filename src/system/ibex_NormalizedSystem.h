@@ -39,6 +39,8 @@ public:
 	 * \param eps - if >0, transforms an equation f=0 into two
 	 *              inequalities: f<=eps and -f<=eps. If eps==0
 	 *              equalities are duplicated.
+         *              BN : the inequalities f<=b are also relaxed by eps
+	 *              f <= 0 becomes f <= eps
 	 */
 	explicit NormalizedSystem(const System& sys, double eps=0, bool extended=false, int simpl_level=ExprNode::default_simpl_level);
 

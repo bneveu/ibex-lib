@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_System.h
-// Author      : Gilles Chabert
+// Author      : Gilles Chabert, Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jun 12, 2012
-// Last Update : Apr 08, 2019
+// Last Update : Oct 20, 2023
 //============================================================================
 
 #ifndef __IBEX_SYSTEM_H__
@@ -303,7 +303,7 @@ public:
         /** the tolerance for checking an inequality (by default no tolerance)*/
         double tolerance =0.0;
 
-        /**  \brief Find the integer variables in the .file in nl format */
+        /**  \brief Find the integer variables in the file in nl format */
         std::vector<int> find_integer_variables (char* filename);
         
 
@@ -335,7 +335,7 @@ private:
 	void init_f_ctrs(const std::vector<const ExprNode*>& fac_f_ctrs, int simpl_level);
   
 };
-
+  // the system in AMPL format
 std::ostream& operator<<(std::ostream&, const System&);
 
 inline double System::goal_ub(const Vector& x) const {

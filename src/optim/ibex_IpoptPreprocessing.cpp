@@ -4,13 +4,11 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : May 14, 2012
-// Last Update : Oct 18, 2023
+// Last Update : Oct 20, 2023
 //============================================================================
 
 #include "ibex_Optimizer.h"
 #include "ibex_Timer.h"
-#include "ibex_Function.h"
-
 #include "ibex_LoupFinderIpopt.h"
 
 #include <float.h>
@@ -70,11 +68,11 @@ bool ipopt_direct_results(int n,string& status, double& obj, Vector & val){
   double newub=POS_INFINITY;
     double loup=POS_INFINITY;
     if (loup_finder.integer_check(v)){
-      cout << "v after integer check " << v << endl;
+      //cout << "v after integer check " << v << endl;
       newub=loup_finder.goal_ub(v);
       //      cout << "newub " << newub << endl;
       if ( loup_finder.is_inner(v)){
-	cout << "is_inner " << endl;
+	//	cout << "is_inner " << endl;
 	if (integerobj)
 	  {
 	    Interval loupint (newub-loup_finder.integer_tolerance, newub+loup_finder.integer_tolerance);
@@ -127,7 +125,7 @@ bool ipopt_direct_results(int n,string& status, double& obj, Vector & val){
 	preprocipopttime= loupfindipopt.ipopttime;
 	  //	}
 
-	cout << " resultats ipopt " << status << endl;
+	if (trace) cout << " resultats ipopt " << status << endl;
 	double initloup=POS_INFINITY;
 	if (status=="solved"){
 	    	  cout << "v " << v ;

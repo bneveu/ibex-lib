@@ -3,7 +3,7 @@ constants
 
 variables
 
-x2 in [0.05,1.e8];
+x2 in [1.e-8,1.e8];
 x3 in[1.e-8,1.e8];
 x4 in [1.e-8,1.e8];
 x5 in [-1.e8,1.e8];
