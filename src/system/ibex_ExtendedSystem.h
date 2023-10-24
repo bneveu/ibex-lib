@@ -5,7 +5,7 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Jun 26, 2013
-// Last update : Aug 01, 2018
+// Last update : Oct 23, 2024
 //============================================================================
 
 #ifndef __IBEX_EXTENDED_SYSTEM_H__
@@ -42,9 +42,10 @@ public:
 	 *),
 	 * \param eps   Transforms an equation f=0 into two inequalities: f<=eps and -f<=eps.
 	 *
+         *  \param relaxineq : boolean if true the inequalities f<=b and f >=b are also relaxed by eps
 	 * The goal of the extended system is "y".
 	 */
-	explicit ExtendedSystem(const System& sys, double eps=0, int simpl_level=ExprNode::default_simpl_level);
+  explicit ExtendedSystem(const System& sys, double eps=0, bool epsineq=false, int simpl_level=ExprNode::default_simpl_level);
 
 	/**
 	 * \brief Name of the goal variable ("y").

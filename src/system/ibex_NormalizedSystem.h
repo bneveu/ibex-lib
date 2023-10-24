@@ -39,12 +39,14 @@ public:
 	 * \param eps - if >0, transforms an equation f=0 into two
 	 *              inequalities: f<=eps and -f<=eps. If eps==0
 	 *              equalities are duplicated.
-         *              BN : the inequalities f<=b are also relaxed by eps
-	 *              f <= 0 becomes f <= eps
+         * \param relaxineq : boolean
+         *              BN : if true the inequalities f<=b and f >=b are also relaxed by eps
+	 *              f <= b becomes f <= b + eps
+         *              f >=b  becomes - f <= -b +eps
 	 */
-	explicit NormalizedSystem(const System& sys, double eps=0, bool extended=false, int simpl_level=ExprNode::default_simpl_level);
+  explicit NormalizedSystem(const System& sys, double eps=0, bool relaxineq=false, bool extended=false, int simpl_level=ExprNode::default_simpl_level);
 
-	/** Default epsilon applied to equations: 1e-8. */
+	/** Default epsilon applied to equations and inequalities if relaxineq=true : 1e-8. */
 	static constexpr double default_eps_h = 1e-08;
 
 	/**

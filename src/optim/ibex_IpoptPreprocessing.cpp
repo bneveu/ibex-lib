@@ -19,7 +19,7 @@ using namespace std;
 namespace ibex {
 
 
-// analysis of results of a direct call of ipopt without passing through ampl
+// analysis of results of a direct call of Ipopt without passing through ampl
 bool ipopt_direct_results(int n,string& status, double& obj, Vector & val){
   ifstream fic1("ipopt_res.txt");
    if (fic1.good()){
@@ -64,7 +64,7 @@ bool ipopt_direct_results(int n,string& status, double& obj, Vector & val){
      
 
   
-  double Optimizer:: check_ipopt(LoupFinder& loup_finder, Vector& v){
+  double Optimizer:: check_ipopt_solution(LoupFinder& loup_finder, Vector& v){
   double newub=POS_INFINITY;
     double loup=POS_INFINITY;
     if (loup_finder.integer_check(v)){
@@ -130,7 +130,7 @@ bool ipopt_direct_results(int n,string& status, double& obj, Vector & val){
 	if (status=="solved"){
 	    	  cout << "v " << v ;
 		  cout << " obj " << obj << endl;
-	  initloup= check_ipopt(loup_finder,v);
+	  initloup= check_ipopt_solution(loup_finder,v);
 	  if (initloup==POS_INFINITY && sys.get_integer_variables()->size() < sys.nb_var)
 	    loupfindipopt.correct_ipopt_sol(v,initloup);
 	  if (trace) {

@@ -158,7 +158,7 @@ NormalizedSystem& DefaultOptimizerConfig::get_norm_sys() {
         if (found(NORMALIZED_SYSTEM_TAG)) {
 		return get<NormalizedSystem>(NORMALIZED_SYSTEM_TAG);
 		} else {
-  		return rec(new NormalizedSystem(sys,eps_h), NORMALIZED_SYSTEM_TAG);
+	  return rec(new NormalizedSystem(sys,eps_h,true), NORMALIZED_SYSTEM_TAG);
 	}
 }
 
@@ -166,7 +166,7 @@ ExtendedSystem& DefaultOptimizerConfig::get_ext_sys() {
 	if (found(EXTENDED_SYSTEM_TAG)) {
 		return get<ExtendedSystem>(EXTENDED_SYSTEM_TAG);
 	} else {
-		return rec(new ExtendedSystem(sys,eps_h), EXTENDED_SYSTEM_TAG);
+	  return rec(new ExtendedSystem(sys,eps_h,true), EXTENDED_SYSTEM_TAG);
 	}
 }
 

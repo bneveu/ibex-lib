@@ -481,8 +481,11 @@ protected:
 	/** Result. */
 	CovOptimData* cov;
 
-        
-        double check_ipopt(LoupFinder& loup_finder, Vector& v);
+        /**  
+	 * \brief Check the solution returned by ipopt
+         * return its objective value if it is feasible 
+	 */
+        double check_ipopt_solution(LoupFinder& loup_finder, Vector& v);
 };
 
 inline Optimizer::Status Optimizer::get_status() const { return status; }
