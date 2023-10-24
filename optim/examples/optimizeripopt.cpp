@@ -87,9 +87,11 @@ int main(int argc, char** argv){
 	
 	//	if (sys->minlp)	cout << " number of integer variables " << (sys->get_integer_variables())->size() << endl;
 	if (sys->minlp)	cout << " integer variables " << *(sys->get_integer_variables()) << endl;
-	// the extended system
-	ExtendedSystem ext_sys(*sys,tolerance);
-        NormalizedSystem norm_sys(*sys,tolerance);
+
+
+
+        ExtendedSystem ext_sys(*sys,tolerance,true);
+        NormalizedSystem norm_sys(*sys,tolerance,true);
 
 	//	ext_sys.tolerance=tolerance;
 	//	norm_sys.tolerance=tolerance;
@@ -315,7 +317,6 @@ int main(int argc, char** argv){
 	//integer objective
 	loupfinder->integerobj=integerobjective;
 	o.integerobj=integerobjective;
-	//	o.integer_tolerance=goalprec;
 
 	// ipopt preprocessing
 
