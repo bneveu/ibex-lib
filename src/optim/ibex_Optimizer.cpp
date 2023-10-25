@@ -510,7 +510,7 @@ Optimizer::Status Optimizer::optimize() {
 				if (!anticipated_upper_bounding) // useless to check precision on objective if 'true'
 					if (get_obj_rel_prec()<rel_eps_f || get_obj_abs_prec()<abs_eps_f)
 						break;
-				if (timeout>0) timer.check(timeout); // TODO: not reentrant, JN: done
+				if (timeout>0) timer.check(timeout-loup_finder.ampltime-loup_finder.ipopttime); // TODO: not reentrant, JN: done ; integrating external solvers time BN
 				time = timer.get_time();
 
 			}

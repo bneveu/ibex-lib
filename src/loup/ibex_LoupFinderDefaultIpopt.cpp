@@ -57,7 +57,12 @@ std::pair<IntervalVector, double> LoupFinderDefaultIpopt::find(const IntervalVec
 
         try { p=finder_ipopt.find(box,p.first,p.second);
 	      found=true;
-	} catch(NotFound&) { }
+	      ipopttime =finder_ipopt.ipopttime;
+	      ampltime =finder_ipopt.ampltime;
+	} catch(NotFound&) {
+	      ipopttime =finder_ipopt.ipopttime;
+	      ampltime =finder_ipopt.ampltime;
+	}
 
 	try {
 		p=finder_probing.find(box,p.first,p.second,prop);
