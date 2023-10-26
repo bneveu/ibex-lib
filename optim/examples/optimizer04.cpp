@@ -88,10 +88,11 @@ int main(int argc, char** argv){
 	if (sys->minlp)	cout << " number of integer variables " << (sys->get_integer_variables())->size() << endl;
 	if (sys->minlp)	cout << " integer variables " << *(sys->get_integer_variables()) << endl;
 	// the extended system
-	ExtendedSystem ext_sys(*sys,tolerance,true);
-        NormalizedSystem norm_sys(*sys,tolerance,true);
+	//	ExtendedSystem ext_sys(*sys,tolerance,true);
+	//        NormalizedSystem norm_sys(*sys,tolerance,true);
 
-
+	ExtendedSystem ext_sys(*sys,tolerance);
+        NormalizedSystem norm_sys(*sys,tolerance);
 
 	
 	//	ext_sys.tolerance=tolerance;

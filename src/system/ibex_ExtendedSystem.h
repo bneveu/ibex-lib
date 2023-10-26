@@ -45,7 +45,7 @@ public:
          *  \param relaxineq : boolean if true the inequalities f<=b and f >=b are also relaxed by eps
 	 * The goal of the extended system is "y".
 	 */
-  explicit ExtendedSystem(const System& sys, double eps=0, bool epsineq=false, int simpl_level=ExprNode::default_simpl_level);
+        explicit ExtendedSystem(const System& sys, double eps=0, bool epsineq=false, int simpl_level=ExprNode::default_simpl_level);
 
 	/**
 	 * \brief Name of the goal variable ("y").

@@ -90,8 +90,12 @@ int main(int argc, char** argv){
 
 
 
-        ExtendedSystem ext_sys(*sys,tolerance,true);
-        NormalizedSystem norm_sys(*sys,tolerance,true);
+//        ExtendedSystem ext_sys(*sys,tolerance,true);
+//        NormalizedSystem norm_sys(*sys,tolerance,true);
+         ExtendedSystem ext_sys(*sys,tolerance);
+         NormalizedSystem norm_sys(*sys,tolerance);
+
+
 
 	//	ext_sys.tolerance=tolerance;
 	//	norm_sys.tolerance=tolerance;

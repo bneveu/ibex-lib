@@ -44,9 +44,9 @@ public:
 	 *              f <= b becomes f <= b + eps
          *              f >=b  becomes - f <= -b +eps
 	 */
-  explicit NormalizedSystem(const System& sys, double eps=0, bool relaxineq=false, bool extended=false, int simpl_level=ExprNode::default_simpl_level);
+        explicit NormalizedSystem(const System& sys, double eps=0, bool relaxineq=false, bool extended=false, int simpl_level=ExprNode::default_simpl_level);
 
-	/** Default epsilon applied to equations and inequalities if relaxineq=true : 1e-8. */
+	/** Default epsilon applied to equations (and inequalities if relaxineq=true) : 1e-8. */
 	static constexpr double default_eps_h = 1e-08;
 
 	/**
