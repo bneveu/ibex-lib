@@ -64,8 +64,6 @@ std::pair<IntervalVector, double> LoupFinderXTaylor::find(const IntervalVector& 
 		// simple change to the loup point (which would be lost anyway)
 		for (uint i=0; i<n; i++) {
 		  bound_check_i(sys,loup_point,i);
-		  //			if (loup_point[i] < sys.box[i].lb()) loup_point[i] = sys.box[i].lb();
-		  //	if (loup_point[i] > sys.box[i].ub()) loup_point[i] = sys.box[i].ub();
 		}
 
 		double new_loup=current_loup;

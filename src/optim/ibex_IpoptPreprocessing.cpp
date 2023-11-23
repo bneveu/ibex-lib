@@ -84,8 +84,8 @@ bool ipopt_direct_results(int n,string& status, double& obj, Vector & val){
 	      newub=POS_INFINITY;
 	  }
 			      
-	  loup= newub;
-	  if (trace) cout << " loup= " << loup << endl;
+	loup= newub;
+	if (trace) cout << " loup= " << loup << endl;
       }
       
     }

@@ -104,19 +104,14 @@ namespace ibex {
       fic1 >> a;
       fic1 >> a;
       fic1 >> otime;
-      //      cout << "ipopttime " << otime;
+
       ipopttime +=otime;
 
       fic1 >> a;
       fic1 >> a;
       fic1 >> otime;
-      //      cout << "ampltime " << otime << endl;
       ampltime +=otime;
-
       //      cout << "ampltime " << ampltime << " ipopttime " << ipopttime << endl;
-     
-      
-
       for (int i =0 ; i< n; i++){
 	fic1 >> a;
 	fic1 >> a;

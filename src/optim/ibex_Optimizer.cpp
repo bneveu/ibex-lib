@@ -477,9 +477,9 @@ Optimizer::Status Optimizer::optimize() {
 				buffer.pop();
 				delete c; // deletes the cell.
 				//	cout << " after bisection" << c->box << endl;
-				nb_cells+=2;  // counting the cells handled ( in previous versions nb_cells was the number of cells put into the buffer after being handled)
-
+				nb_cells+=1;  // counting the cells handled ( in previous versions nb_cells was the number of cells put into the buffer after being handled)
 				handle_cell(*new_cells.first);
+				nb_cells+=1;  
 				handle_cell(*new_cells.second);
 
 				if (uplo_of_epsboxes == NEG_INFINITY) {

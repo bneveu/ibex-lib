@@ -73,7 +73,7 @@ bool LoupFinder::integer_and_bound_check(const System& sys, Vector & pt){
       vec[i]=Interval(vec[i].lb(),sys.box[i].ub());
   }		      
 
-bool LoupFinder::check(const System& sys,  Vector& pt, double& loup, bool _is_inner) {
+  bool LoupFinder::check(const System& sys,  Vector& pt, double& loup, bool _is_inner) {
 	// "res" will contain an upper bound of the criterion
       
 	double res = sys.goal_ub(pt);
@@ -86,7 +86,7 @@ bool LoupFinder::check(const System& sys,  Vector& pt, double& loup, bool _is_in
 	// is better than the loup (a cheaper test).
 	if (sys.minlp || integerobj){
 	  //	  cout << " loup " << loup << " res " << res << " pt " << pt <<  " sys inner " << sys.is_inner(pt) << endl;
-	    if (integer_and_bound_check(sys,pt) && sys.is_inner(pt)) {
+	    if (integer_and_bound_check(sys,pt)) {
 	      IntervalVector ptvec= IntervalVector(pt);
 	      Interval resvec= sys.goal_eval(ptvec);  // integer_and_bound_check may modify the loup_point by making integer the values of integer variables: we have to recompute the criterion.
 	      //     cout << "type " << typeid(*this).name() << endl;
@@ -105,7 +105,7 @@ bool LoupFinder::check(const System& sys,  Vector& pt, double& loup, bool _is_in
 	      else
 		res = resvec.ub();
 	      
-	      if (res<loup) {
+	      if (res<loup && sys.is_inner(pt)) {
 		loup = res;
 		return true;}
 	      else return false;
