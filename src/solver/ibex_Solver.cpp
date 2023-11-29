@@ -1,4 +1,3 @@
-//============================================================================
 //                                  I B E X                                   
 // File        : ibex_Solver.cpp
 // Author      : Gilles Chabert
@@ -40,11 +39,10 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 	// count the dimension of equalities
 	for (int i=0; i<sys.nb_ctr; i++) {
 		if (sys.ctrs[i].op==EQ) nb_eq+=sys.ctrs[i].f.image_dim();
-	}
-
-	if (nb_eq==sys.f_ctrs.image_dim())
+	} 
+	if (nb_eq==sys.f_ctrs.image_dim() )
 		eqs=&sys; // useless to create a new one
-	else {
+	else { 
 		ineqs=new System(sys,System::INEQ_ONLY);
 
 		if (nb_eq>0) {
@@ -54,9 +52,9 @@ Solver::Solver(const System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer,
 	}
 
 	n=sys.nb_var;
+	
 	m=eqs? eqs->f_ctrs.image_dim() : 0;
 	nb_ineq=ineqs? ineqs->f_ctrs.image_dim() : 0;
-
 	if (m==0 || m==n) {
 		boundary_test=ALL_FALSE;
 	}
@@ -148,7 +146,6 @@ void Solver::start(const CovSolverData& data) {
 		ctc.add_property(box, cell->prop);
 
 		buffer.push(cell);
-
 	}
 
 	time = 0;
@@ -199,7 +196,7 @@ bool Solver::next(CovSolverData::BoxStatus& status, const IntervalVector** sol) 
 
 			// 2nd condition: certification is performed at
 			// each intermediate step only if the system is under constrained
-			if (m<n && !is_too_large(c->box)) {
+			if (m<n && !is_too_large(c->box) || sys.nb_ctr==0) {
 				// note: cannot return PENDING status
 				status=check_sol(c->box);
 				if (status!=CovSolverData::UNKNOWN) { // <=> solution or boundary
@@ -315,8 +312,7 @@ Solver::Status Solver::solve(bool stop_at_first) {
 }
 
 bool Solver::check_ineq(const IntervalVector& box) {
-  
-	if (!ineqs)
+       if (!ineqs || ineqs->nb_ctr==0)
 		return true;
 
 	bool not_inner=false;
@@ -396,7 +392,7 @@ CovSolverData::BoxStatus Solver::check_sol(const IntervalVector& box) {
 				return CovSolverData::UNKNOWN;
 			}
 		} else {
-			// ====== well-constrained =========
+					// ====== well-constrained =========
 			if (!inflating_newton(eqs->f_ctrs, box.mid(), existence, unicity)) {
 				return CovSolverData::UNKNOWN;
 			}
@@ -410,7 +406,9 @@ CovSolverData::BoxStatus Solver::check_sol(const IntervalVector& box) {
 			throw EmptyBoxException();
 		}
 		bool solution = existence.is_subset(solve_init_box);
+		
 		solution &= check_ineq(existence);
+		
 		if (eqs && n==m) {
 			// Check if the solution is new, that is, that the solution is not included in the unicity
 			// box of a previously found solution. For efficiency reason, this test is not performed in

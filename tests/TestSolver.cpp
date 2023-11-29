@@ -21,8 +21,10 @@ using namespace std;
 namespace ibex {
 
 void TestSolver::empty() {
+
 	System sys(SRCDIR_TESTS "/minibex/empty.mbx");
 	DefaultSolver solver(sys);
+
 	Solver::Status status=solver.solve(sys.box);
 	CPPUNIT_ASSERT(status==Solver::SUCCESS);
 	CPPUNIT_ASSERT(solver.get_data().nb_solution()==1);
@@ -30,6 +32,7 @@ void TestSolver::empty() {
 }
 
 void TestSolver::circle1() {
+
 	const ExprSymbol& x=ExprSymbol::new_("x");
 	const ExprSymbol& y=ExprSymbol::new_("y");
 
@@ -45,34 +48,42 @@ void TestSolver::circle1() {
 
 	Vector sol1(2,_sol1);
 	Vector sol2(2,_sol2);
+
 	System sys(f);
+
 	RoundRobin rr(1e-3);
 	CellStack stack;
 	CtcHC4 hc4(sys);
 	Vector prec(2,1e-3);
 
 	Solver solver(sys,hc4,rr,stack,prec,prec);
+	solver.trace=2;
+
 	solver.start(IntervalVector(2,Interval(-10,10)));
 
 	CovSolverData::BoxStatus status;
 
 	bool res=solver.next(status);
+
 	CPPUNIT_ASSERT(res);
 	CPPUNIT_ASSERT(status==CovSolverData::SOLUTION);
 	CPPUNIT_ASSERT(solver.get_data().nb_solution()==1);
 	CPPUNIT_ASSERT(solver.get_data().solution(0).is_superset(sol1));
 
 	res=solver.next(status);
+
 	CPPUNIT_ASSERT(res);
 	CPPUNIT_ASSERT(status==CovSolverData::SOLUTION);
 	CPPUNIT_ASSERT(solver.get_data().nb_solution()==2);
 	CPPUNIT_ASSERT(solver.get_data().solution(1).is_superset(sol2));
 
 	res=solver.next(status);
+
 	CPPUNIT_ASSERT(!res);
 }
 
 void TestSolver::circle2() {
+
 	const ExprSymbol& x=ExprSymbol::new_("x");
 	const ExprSymbol& y=ExprSymbol::new_("y");
 

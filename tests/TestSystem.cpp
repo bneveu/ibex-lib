@@ -201,7 +201,7 @@ CPPUNIT_ASSERT(sys.ctrs[1].op==EQ);
 
 void TestSystem::extend01() {
 System& _sys(*sysex2());
-ExtendedSystem sys(_sys,0,simpl);
+ExtendedSystem sys(_sys,0,false,simpl);
 delete &_sys;
 
 CPPUNIT_ASSERT(sys.nb_ctr==4);
@@ -246,7 +246,7 @@ CPPUNIT_ASSERT(sys.ctrs[0].op==EQ);
 
 void TestSystem::normalize01() {
 	System& _sys(*sysex3());
-	NormalizedSystem sys(_sys,0.5,false,simpl);
+	NormalizedSystem sys(_sys,0.5,false,false,simpl);
 	delete &_sys;
 
 	CPPUNIT_ASSERT(sys.nb_ctr==6);
@@ -289,7 +289,7 @@ void TestSystem::normalize02() {
 	  v[0]=1; v[1]=2;
 	  fac.add_ctr(((const ExprNode&) ExprVector::new_col(e,e))=ExprConstant::new_vector(v,false));
 	  System sys(fac);
-	  NormalizedSystem nsys(sys,1,false,simpl);
+	  NormalizedSystem nsys(sys,1,false,false,simpl);
 	  //CPPUNIT_ASSERT(sys.f_ctrs.expr().size==12); // the DAG structure not kept anymore with ExprSimplify2
 	  CPPUNIT_ASSERT(sameExpr(nsys.ctrs[0].f.expr(),"(((-2+x)+y);((-3+x)+y))"));
 	  CPPUNIT_ASSERT(sameExpr(nsys.ctrs[1].f.expr(),"(((-x)-y);((1-x)-y))"));
