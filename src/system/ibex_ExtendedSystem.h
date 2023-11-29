@@ -36,16 +36,16 @@ public:
 	 * variables x_1,...,x_n and an an additional "goal" variable y.
 	 * The index of the goal variable is #goal_var(). It
 	 * also includes (m+1) constraints. The index of the constraint y-goal(x)=0
-	 * (where goal(x) is the goaoriginal_sys_id(sys.id), l function) is #goal_ctr(). The others constraints are
-	 * normalized copy of the original ones. The name of the goal
+	 * (where goal(x) is the goal function) is #goal_ctr(). The others constraints are
+	 * normalized copies of the original ones. The name of the goal
 	 * variable is #goal_name.
-	 *),
+	 *
 	 * \param eps   Transforms an equation f=0 into two inequalities: f<=eps and -f<=eps.
 	 *
-         *  \param relaxineq : boolean if true the inequalities f<=b and f >=b are also relaxed by eps
+         * \param relaxineq : boolean if true the inequalities f<=b and f >=b are also relaxed by eps
 	 * The goal of the extended system is "y".
 	 */
-        explicit ExtendedSystem(const System& sys, double eps=0, bool epsineq=false, int simpl_level=ExprNode::default_simpl_level);
+        explicit ExtendedSystem(const System& sys, double eps=0, bool relaxineq=false, int simpl_level=ExprNode::default_simpl_level);
 
 	/**
 	 * \brief Name of the goal variable ("y").
