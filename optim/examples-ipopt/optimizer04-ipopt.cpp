@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : optimizer08.cpp
+// File        : optimizeripopt.cpp
 // Author      : Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Aug 2023
-// Last Update : Nov 3, 2023
+// Last Update : Dec 12, 2023
 //============================================================================
 
 
@@ -18,8 +18,8 @@
 #include "ibex_LoupFinderDefaultIpoptB.h"
 
 const double default_relax_ratio =0.2;
-const double initbox_limit = 1.e8;  // TODO . parameter ??
-
+const double forced_initbox_limit = 1.e8;  // some bounds have been manually forced in some benches to 1.e8.
+const double initbox_limit = 1.e20;  // maximal bounds -1.e20,1.e20  for the initbox in the runs with this program.
 using namespace Ipopt;
 using namespace std;
 using namespace ibex;
@@ -36,11 +36,11 @@ int main(int argc, char** argv){
 	  Timer timer;
 	timer.start();
 	if (argc<13) {
-		cerr << "usage: optimizer04int filename filtering linear_relaxation bisection upperbounding strategy [beamsize] integerobj prec goal_prec tolerance timelimit randomseed"  << endl;
+		cerr << "usage: optimizer04int filename filtering linear_relaxation bisection upperbounding [freq qp] strategy [beamsize] integerobj prec goal_prec tolerance timelimit randomseed"  << endl;
 		exit(1);
 	}
 	  
-	System * sys;
+      	System * sys;
 	#ifdef __IBEX_AMPL_INTERFACE_H__
 	std::size_t found = string(argv[1]).find(".nl");
 	if (found!=std::string::npos){
@@ -60,13 +60,24 @@ int main(int argc, char** argv){
 	#endif
 
 	if (!(sys->goal)) {cout << " No goal " << endl; return -1;}
-	for (int i=0; i< sys->box.size(); i++){
-	  if (sys->box[i].lb() < -initbox_limit) 
-	    sys->box[i]= Interval(-initbox_limit, sys->box[i].ub()) ;
-	  if (sys->box[i].ub() >initbox_limit)
- 	    sys->box[i] = Interval(sys->box[i].lb(), initbox_limit);
-	}
 
+	
+	for (int i=0; i< sys->box.size(); i++){
+	  if (sys->box[i].lb() == -forced_initbox_limit || sys->box[i].lb() < -initbox_limit ) 
+	    sys->box[i]= Interval(-initbox_limit, sys->box[i].ub()) ;
+	  if (sys->box[i].ub() == forced_initbox_limit || sys->box[i].ub() > initbox_limit)
+ 	    sys->box[i] = Interval(sys->box[i].lb(),initbox_limit);
+	}
+	
+	/*
+	for (int i=0; i< sys->box.size(); i++){
+	  if (sys->box[i].lb() == -forced_initbox_limit)
+	    sys->box[i]= Interval(NEG_INFINITY, sys->box[i].ub()) ;
+	  if (sys->box[i].ub() == forced_initbox_limit)
+ 	    sys->box[i] = Interval(sys->box[i].lb(),POS_INFINITY);
+	}
+	*/
+	
 	string filtering = argv[2];
 	string linearrelaxation= argv[3];
 	string bisection= argv[4];
@@ -110,7 +121,7 @@ int main(int argc, char** argv){
 
 	//	cout << "ext_sys" << ext_sys << endl;
 	
-	//	LoupFinderDefault loupfinder (norm_sys,true);
+
 	LoupFinder* loupfinder;
 	if (loupfindermethod=="ipoptxninhc4")
 	  loupfinder = new LoupFinderDefaultIpoptB (*sys,norm_sys,ext_sys,true,integerobjective);
@@ -146,6 +157,7 @@ int main(int argc, char** argv){
 	cout << " filtering " << filtering; 
         cout << " linearrelaxation " << linearrelaxation;
 	cout << " bisection " << bisection ;
+	cout << " loupfinder " << loupfindermethod ;
 	cout << " strategy " << strategy ;
 	cout << " randomseed " << randomseed << endl;
 	
@@ -348,19 +360,19 @@ int main(int argc, char** argv){
 	//	std::streambuf* OldBuf = std::cerr.rdbuf(Out.rdbuf());
 	
 	if (o.trace) cout << " sys.box " << sys->box << endl;
-		timer.stop();
-	double presolvetime = timer.get_time();
-	cout << " presolve time " << presolvetime << endl;
+	timer.stop();
+	double presolve_time = timer.get_time();
+	cout << " presolve time " << presolve_time << endl;
 	o.optimize(sys->box,o.get_loup());
 	//	std::cerr.rdbuf(OldBuf);
 
 	// printing the results     
 	o.report();
 	//	cout << "preprocessing ampl time " << o.preprocampltime << " ipopttime " << o.preprocipopttime << endl;
-        cout << o.get_time() << "  " << o.get_nb_cells()+1 << endl;
+        cout << o.get_time() + presolve_time << "  " << o.get_nb_cells()+1 << endl;
         if (loupfindermethod == "ipoptxn" || loupfindermethod =="ipoptxninhc4"){
 	  //	  cout << " ipopttime " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.ipopttime << " ampltime " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.ampltime << endl;
-	  cout << " correction nodes " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.correction_nodes << " correction time " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.correction_time << endl;
+	  cout << " correction nodes " << ((LoupFinderDefaultIpoptB*)loupfinder)->finder_ipopt.correction_nodes << " correction time " << ((LoupFinderDefaultIpoptB*)loupfinder)->finder_ipopt.correction_time << endl;
 	}
 	//	if (filtering == "acidhc4"  )
 	//cout    << " nbcidvar " <<  acidhc4.nbvar_stat() << endl;

@@ -1,0 +1,88 @@
+Appel de Ipopt pour obtenir des points réalisables (minima locaux).
+C'est un algorithme cher, à utiliser en complément des algorithmes
+de recherche de point réalisable d'Ibex.
+
+Pour cela, 2 stratégies ont été implantées dans LoupFinderDefaultIpoptB
+ipoptxn ; appel de probing et inxtaylor avant éventuel appel de ipopt
+ipoptxninhc4 : appel de innch4 et inxtaylor avant éventuel appel de ipopt
+
+- Paramétrage
+
+- fréquence d'appel n : ipopt est lancé tous les n appels au loup finder ou quand un nouveau meilleur point réalisable a été trouvé par un autre algorithme de LoupFinderDefaultIpopt.
+
+- problème quadratique : une optimisation en temps de calcul est faite dans le cas d'un problème QP
+d'optimisation avec objectif quadratique et contraintes linéaires : le calcul du lagrangien n'est fait
+qu'une seule fois. (par défault false)
+
+Ipopt est lancé avec pour domaine :
+ - pour les problèmes NLP la boîte entière après  contraction sur la racine (avant bissection),
+ - pour les problèmes MINLP la boîte courante,
+ 
+dans le cas d'un lancement sans avoir trouvé de nouveau meilleur point réalisable, le point initial pour Ipopt est le centre de la boîte courante.
+dans le cas d'un lancement après avoir trouvé un nouveu meilleur point réalisable, le point initial pour Ipopt est ce nouveau point réalisable.
+
+
+
+Implantation :
+
+Prérequis : Ipopt et ses dépendances doivent avoir été installés.
+
+Question : les installe-t-on avec Ibex ? (en utilisant mumps comme solveur linéaire libre).
+
+La nouvelle méthode de recherche de point réalisable utilisant Ipopt est implantée dans LoupFinderIpoptB 
+dans le répertoire optim/examples-ipopt.
+
+Cette méthode est appelée par 2 nouvelles méthodes par défaut également dans le
+répertoire optim/examples-ipopt dans LoupFinderDefaultIpoptB.cpp 
+
+Ces méthodes étant des "LoupFinder", elles devraient être dans le source dans le répertoire loup
+quand les problèmes de dépendance avec Ipopt auront été réglés.
+
+
+Ces méthodes peuvent être mises dans l'optimiseur générique optimizeripopt dans optim/examples-ipopt
+avec le paramètre loupfinder à
+ - ipoptxn : appel de ipopt, xtaylor et probing
+ - ipoptxninhc4 appel de ipopt, xtaylor et inhc4
+
+Dans la ligne de commande, il faut ajoute apres ipoptxn et ipoptxnonhc4 2 paramètres
+ - la fréquence d'appels
+ - le fait d'avoir un problème QP. (1)
+
+exemple pour un problème QP
+./optimizeripopt ~/RECHERCHE/ibex/ibex-neveu/ibex-lib/benchs/optim/medium/ex2_1_9.bch acidhc4 compo lsmearmg  ipoptxninhc4 100 1  bs 1 0 0 1.e-6 1.e-8 10000 1
+
+exemple pour un problème NLP
+./optimizeripopt ~/RECHERCHE/ibex/ibex-neveu/ibex-lib/benchs/optim/coconutbenchmark-library2/hs100.nl acidhc4 compo lsmearmg  ipoptxninhc4 100 0 bs 1 0 1.e-7 1.e-6 1.e-8 10000 1
+
+
+Cet optimiseur est compilé avec le makefile dans ce répertoire qui sait trouver ipopt et ses dépendances
+
+
+Le point rendu par Ipopt est ensuite vérifié.
+Si ce point améliore le loup courant, c'est un candidat à un nouveau loup.
+Dans le cas de problème continu, on teste les contraintes sur ce point.
+Si les contraintes sont satisfaites, on a un nouveau point réalisable.
+On crée une boîte de largeur 1.e-6 (en dur dans le code actuellement)
+autour de ce point  et on relance un  solveur
+Ibexopt sur cette petite boîte.
+Si une solution est trouvée et améliore le point réalisable courant, elle devient le
+nouveau point réalisable.
+
+Dans le cas d'un problème mixte, on arrondit les valeurs des variables entières du point rendu par ipopt
+à l'entier le plus proche.
+Puis ce point est testé, et si les contraintes ne sont pas satisfaites, on élargit les domaines
+des variables continues de 10-6 et on lance ibexopt sur cette petite boîte.
+
+Généralement, il n'y a pas besoin de lancer un arbre de recherche : le nouveau loup
+est trouvé par un simple traitement (handle_cell) de la petite boîte.
+
+
+_____________________________________________________________________________
+
+
+
+La résolution avec IPOPT n'est pas reproductible sur une machine multi-coeurs.  (à cause de Mumps ?)
+Peut-on empêcher le "multi-threading" ?
+
+
+_____________________________________________________________________

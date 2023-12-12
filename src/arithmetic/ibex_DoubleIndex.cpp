@@ -14,11 +14,13 @@
 
 namespace ibex {
 
+
+  // for writing files in .mod (ampl format) change the () by [].
 std::ostream& operator<<(std::ostream& os, const DoubleIndex idx) {
 	if (idx.all()) return os;
 
-		os << "(";
-	//	os << "["; // change for AMPL compatibilty
+	os << "(";  // for tests
+	//	os << "["; // change for AMPL compatibility
 	switch (idx.dim.type()) {
 	case Dim::ROW_VECTOR:
 		if (idx.one_col()) os << idx.first_col()+1;
@@ -38,8 +40,8 @@ std::ostream& operator<<(std::ostream& os, const DoubleIndex idx) {
 		else if (idx.one_col()) os << idx.first_col()+1;
 		else os << idx.first_col()+1 << ":" << idx.last_col()+1;
 	}
-	return os << ")";
-	//return os << "]";
+	return os << ")"; // for tests
+	//   return os << "]";  // change for AMPL compatibility
 }
 
 } /* namespace ibex */

@@ -3,7 +3,6 @@
 #include <fstream>
 #include <stdio.h>
 #include "ibex_LoupFinderIpoptB.h"
-#include "ibex_LoupFinderDefault.h"
 #include "ibex_DefaultOptimizerConfig.h"
 #include "ibex.h"
 
@@ -17,7 +16,7 @@ using namespace std;
 namespace ibex {
   double expansion_precisionB=1.e-6;
 
-  LoupFinderIpoptB::LoupFinderIpoptB(const System& sys,const System& normsys, const ExtendedSystem& extsys) : sys(sys), normsys(normsys), extsys(extsys), solution(sys.nb_var), the_box(sys.nb_var) {
+  LoupFinderIpoptB::LoupFinderIpoptB(const System& sys,const System& normsys, const ExtendedSystem& extsys) : sys(sys), normsys(normsys), extsys(extsys), solution(sys.nb_var), the_box(sys.box), ipopt_box(sys.box) {
 	try {
 		df = new Function(*sys.goal,Function::DIFF);
                 cout << " nb ctr " << sys.nb_ctr << endl;
@@ -39,7 +38,7 @@ namespace ibex {
 		df = NULL;
 		dg = NULL;
 	}
-	cout << " fin initialisation gradients " << endl;
+	//	cout << " fin initialisation gradients " << endl;
       //The IpOPT initialization should be here
       app = IpoptApplicationFactory();
       app->RethrowNonIpoptException(true);
@@ -73,48 +72,49 @@ namespace ibex {
 
     std::pair<IntervalVector, double> LoupFinderIpoptB::find(const IntervalVector& box, const IntervalVector& loup_point, double loup) {
       double loup0=loup;
+      if (ipopt_calls== -1) ipopt_box=box;  // initialization of ipopt_box before first call.
+      if (sys.minlp) ipopt_box=box;  // in case of Minlp, ipopt is run with the current box.
+ 
       the_box  = box;
       double newloup=false;
       IntervalVector loup_point0=loup_point;
       if (recursive_call){
 	ipopt_calls++;
 	if(ipopt_calls%ipopt_frequency==0 || force ){
-	//	if(ipopt_calls%ipopt_frequency==0){
-
+	
 	  cout << "nb_cells " <<  optimizer->get_nb_cells() << endl;
 	  ApplicationReturnStatus status = app->OptimizeTNLP(this);
 	  force=0;
 	  //	  cout << " status " << status << endl;
 	  //	  if (status == Solve_Succeeded) {
 	  //        	std::cout << std::endl << std::endl << "*** The problem solved!" << std::endl;
-	  //	 	cout << " optimal_value ipopt "<< optimalValue << endl;
-	  //	  	cout << " solution ipopt " << solution << endl;
+	  //	  cout << " optimal_value ipopt "<< optimalValue << endl;
+	  //	  cout << " solution ipopt " << solution << endl;
 	  if( optimalValue< loup){
 	    
 	    for (int i=0; i< box.size(); i++) {
 	      bound_check_i(sys,solution,i);
 	    }
-	    
-	    if (check(normsys,solution,optimalValue,false))
+	    //	    cout << " pt avant check "  << solution << endl;
+	    if (check(normsys,solution,loup,false))
 		  { 
 		    loup_point0=solution;
-		    loup=optimalValue;
-		    //		    if (optimizer->trace && !optimizer->integerobj)
+		    if (optimizer->trace) 
 		    cout << "*** ipopt      " ;
 		  }
-	  
-	    else if (optimalValue< loup && sys.get_integer_variables()->size() < sys.nb_var){
-		  //                  cout << " solution " << solution << endl;
-		  //		  cout << " optimal value " << optimalValue << endl;
+
+	    if (sys.get_integer_variables()->size() < sys.nb_var){
+	    //	    else if (optimalValue< loup && sys.get_integer_variables()->size() < sys.nb_var){
+	      //	      cout << " solution " << solution << endl;
+	      //	      cout << " optimal value " << optimalValue << " loup " << loup << endl;
 		  double ipoptloup=POS_INFINITY;
 		  correct_ipopt_sol(solution, ipoptloup);
-
 		  if (ipoptloup < loup)
 		    {
 		      loup_point0=solution;
 		      loup=ipoptloup;
-		      //		      if (optimizer->trace && !optimizer->integerobj)
-		      cout << "*** ipopt+corr " ;
+		      if (optimizer->trace)
+			cout << "*** ipopt+corr " ;
 		      newloup=true;
 		    }
 	    }
@@ -128,7 +128,9 @@ namespace ibex {
       else  throw NotFound();
 
 
-    }
+}
+
+
 
     bool LoupFinderIpoptB::get_nlp_info(int& n, int& m, int& nnz_jac_g,
 					int& nnz_h_lag, IndexStyleEnum& index_style)
@@ -157,29 +159,16 @@ namespace ibex {
 
         assert(n == sys.nb_var);
         assert(m == sys.nb_ctr);
-
+	//        cout << "ipopt box " << ipopt_box << endl;
         Array<NumConstraint> contrains = sys.ctrs;
-
         for (int i = 0; i < n; i++) {
-	  /*	  
-	  	  x_l[i] = the_box[i].lb()-0.1*the_box[i].diam();
-	  if (x_l[i]<sys.box[i].lb())
-	    x_l[i] = sys.box[i].lb();
-	  */
-	  //	  x_l[i] = the_box[i].lb();
-	  x_l[i] = sys.box[i].lb();   // Ipopt has the initial box
+	  x_l[i] = ipopt_box[i].lb();   // Ipopt has for domain the initial box after contraction
+
         }
 
 
         for (int i = 0; i < n; i++) {
-	  /*
-            x_u[i] = the_box[i].ub()+0.1*the_box[i].diam() ;
-	    if (x_u[i] > sys.box[i].ub())
-	      x_u[i] = sys.box[i].ub();
-	  */
-	  //	  x_u[i] = the_box[i].ub();
-	  x_u[i] = sys.box[i].ub();
-	  
+	  x_u[i]=ipopt_box[i].ub();
         }
 	
 	
@@ -219,7 +208,7 @@ namespace ibex {
         Number* lambda)
     {
         // the starting point is the center of the current box, and in case of a
-        // new loup found by another loup finder , the corresponding point (solution)
+        // new loup found by another loup finder (force=true) , the corresponding point (solution)
 
         assert(init_x == true);
 
@@ -229,7 +218,10 @@ namespace ibex {
         // initialize to the given starting point
 	//	ibex::Vector v = the_box.random();
 	ibex::Vector v = the_box.mid();
+	//	cout << " force " << force << endl;
 	if (force)  v=solution;
+
+	//	cout << " v " << v << endl;
 	for (int i=0; i<n ; i++)
 	  x[i]=v[i];
         return true;
@@ -259,7 +251,7 @@ namespace ibex {
 
       
         ibex::IntervalVector v(n);
-	//	cout << " avant goal " << endl;
+
         Function* funcion = sys.goal;
 	//	cout << " goal " << *funcion << endl;
 	
@@ -481,21 +473,23 @@ namespace ibex {
            {return goal_ub0(normsys,pt);}
   void LoupFinderIpoptB::sysbound(Vector& pt) {bound_check(normsys,pt);}
     void LoupFinderIpoptB::sysbound(IntervalVector& vec) {bound_check(normsys,vec);}
-  // ne marche pas ; pourquoi ??
+  // OK only for QP problems (quadratic objective and linear constraints)
   void LoupFinderIpoptB::set_quadratic(bool quadra){
     if (quadra) app->Options()->SetStringValue("hessian_constant", "yes");
   }
   
   void LoupFinderIpoptB::correct_ipopt_sol (Vector&v, double& loup){
     if (recursive_call){
+      
       recursive_call=false;
       IntervalVector box = sys.box;
       double eps=expansion_precisionB;
+      //      if (sys.minlp) eps=0.01;
       IntervalVector boxsol(v.size());
       for ( int i=0; i< v.size() ; i++){
 	double epsi = eps;
 	if (fabs(v[i])>1) epsi= eps*fabs(v[i]);
-	boxsol[i]= box[i] & Interval(v[i]- epsi, v[i]+ epsi);
+	boxsol[i]= sys.box[i] & Interval(v[i]- epsi, v[i]+ epsi);
       }
       CellHeap buffer(extsys);
 
@@ -506,13 +500,16 @@ namespace ibex {
       opt.set_uplo(optimizer->get_uplo());
       opt.set_loup(optimizer->get_loup());
       opt.timeout=1;
-
+      //      cout << " boxsol " << boxsol << endl;
       opt.optimize(boxsol);
       recursive_call=true;
       correction_nodes+=opt.get_nb_cells();
       correction_time+=opt.get_time();
+      if (optimizer->trace)
+	cout << " correction nodes " << correction_nodes << " correction_time " << correction_time << endl;
       if (opt.get_loup() < optimizer->get_loup()){
-	cout << "new loup after correction " << opt.get_loup() << endl;
+	if (optimizer->trace)
+	  cout << "new loup after correction " << opt.get_loup() << endl;
 	loup= opt.get_loup();
 	v = opt.get_loup_point().mid();
       }

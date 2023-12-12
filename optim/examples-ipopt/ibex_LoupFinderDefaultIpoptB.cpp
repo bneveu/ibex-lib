@@ -50,10 +50,11 @@ std::pair<IntervalVector, double> LoupFinderDefaultIpoptB::find(const IntervalVe
 
 	IntervalVector box1(box);
 
-	try {
+	try {   // if (!(finder_ipopt.recursive_call)) cout << " recursive box " << box << endl; 
 		p=finder_probing.find(box,p.first,p.second,prop);
 		found=true;
-		if (finder_ipopt.recursive_call) cout << "probing " << p.second << endl;;
+		if (finder_ipopt.recursive_call) cout << "probing " << p.second << endl;
+		//	else cout << " probing recursive " << p.second << endl;
 	} catch(NotFound&) { }
 
 	try {
@@ -61,26 +62,18 @@ std::pair<IntervalVector, double> LoupFinderDefaultIpoptB::find(const IntervalVe
 		// in_x_taylor.set_inactive_ctr(entailed->norm_entailed);
 		p=finder_x_taylor.find(box,p.first,p.second,prop);
 		found=true;
+		
 		if (finder_ipopt.recursive_call) cout << "xtaylor " << p.second << endl;
+		//	else cout << " xtaylor recursive " << p.second << endl;
+		
 	} catch(NotFound&) { }
 	
-        if (found && finder_ipopt.recursive_call && !integerobj) {
+        if (found && finder_ipopt.recursive_call) {
 	  
 	  finder_ipopt.force=true;
 	  finder_ipopt.solution=p.first.mid();
-	  /*
-	  for (int i=0; i< box.size(); i++){
-	    box1[i] = Interval(box[i].lb()-2*box[i].diam(),box[i].ub() + 2*box[i].diam()) ;
-	    if ( box1[i].lb() < sys.box[i].lb())
-	      box1[i]= Interval(sys.box[i].lb(),box1[i].ub());
-	    if ( box1[i].ub() > sys.box[i].ub())
-	      box1[i]= Interval(box1[i].lb(),sys.box[i].ub());
-
-	  }
-	  */
 	}
 	      
-
 	try { p=finder_ipopt.find(box1,p.first,p.second);
 	      found=true;
 	      ipopttime =finder_ipopt.ipopttime;

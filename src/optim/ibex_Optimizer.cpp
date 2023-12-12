@@ -389,8 +389,13 @@ Optimizer::Status Optimizer::optimize(const char* cov_file, double obj_init_boun
 	cov = new CovOptimData(extended_COV? n+1 : n, extended_COV);
 	cov->data->_optim_time = 0;
 	cov->data->_optim_nb_cells = 0;
+        Timer timer;
+	timer.start();
 
 	handle_cell(*root);
+	timer.stop();
+	time+= timer.get_time();
+	if (trace) cout << " root time " << timer.get_time() << endl;
 }
 
 void Optimizer::start(const CovOptimData& data, double obj_init_bound) {
@@ -510,13 +515,14 @@ Optimizer::Status Optimizer::optimize() {
 				if (!anticipated_upper_bounding) // useless to check precision on objective if 'true'
 					if (get_obj_rel_prec()<rel_eps_f || get_obj_abs_prec()<abs_eps_f)
 						break;
-				if (timeout>0) timer.check(timeout-loup_finder.ampltime-loup_finder.ipopttime); // TODO: not reentrant, JN: done ; integrating external solvers time BN
-				time = timer.get_time();
+				if (timeout>0)
+				  timer.check(timeout-loup_finder.ampltime-loup_finder.ipopttime); // TODO: not reentrant, JN: done ; integrating external solvers time BN
+				//			time = timer.get_time();
 
 			}
 			catch (NoBisectableVariableException& ) {
-			  cout << "box " << c->box << endl;
-			  cout << "NoBisectableVariableException" << endl;
+			  //			  cout << "box " << c->box << endl;
+			  //			  cout << "NoBisectableVariableException" << endl;
 				update_uplo_of_epsboxes((c->box)[goal_var].lb());
 				buffer.pop();
 				delete c; // deletes the cell.
@@ -527,7 +533,7 @@ Optimizer::Status Optimizer::optimize() {
 	     
 
 	 	timer.stop();
-	 	time = timer.get_time();
+	 	time += timer.get_time();
 		// No solution found and optimization stopped with empty buffer
 		// before the required precision is reached => means infeasible problem
 	 	if (uplo_of_epsboxes == NEG_INFINITY)

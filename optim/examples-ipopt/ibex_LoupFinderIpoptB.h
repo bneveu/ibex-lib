@@ -46,14 +46,17 @@ namespace ibex {
       /** \brief the current box
        */
       IntervalVector the_box;
+      /** \brief the  box for ipopt 
+       */
+      IntervalVector ipopt_box;
 	/**
 	 * \brief Symbolic gradient of the objective.
 	 */
       Function* df=nullptr;;
 
-	/**
-	 * \brief Symbolic gradient of constraints.
-	 */
+      /**
+       * \brief Symbolic gradient of constraints.
+       */
       Function** dg=nullptr;;
     public:
 
@@ -72,9 +75,9 @@ namespace ibex {
       const ExtendedSystem& extsys; // the extended system : used by recursive call of ipopt for correcting a solution 
       Optimizer* optimizer=nullptr; // optimizer data are used for building an optimizer for correcting the point returned by ipopt if it does not verify the constraints
       bool recursive_call=true; // boolean to prevent double recursion of optimizer ; when true, the optimizer can be recursevely called
-      int ipopt_frequency=1; // frequency of ipopt calls in number of calls.
-      int ipopt_calls=-1;
-      bool force=false; // when true it forces Ipopt call (after a new loup is found by another loup finder
+      int ipopt_frequency=100; // frequency of ipopt calls in number of calls.
+
+
       int correction_nodes=0;  // additional nodes for correcting the point given by ipopt
       double correction_time=0.0; // additional time for correcting the point given by ipopt
 
@@ -139,8 +142,9 @@ namespace ibex {
         double goal_ub(Vector& pt);
         void sysbound(Vector& pt);
         void sysbound(IntervalVector& vec);  
-        void set_quadratic(bool quadratic);
-
+        void set_quadratic(bool quadratic); // in case of QP problems, the hessian is called once.
+        bool force=false; // when true it forces Ipopt call, i.e. after a new loup is found by another loup finder.
+      
     private:
         /**@name Methods to block default compiler methods.
          * The compiler automatically generates the following three methods.
@@ -152,11 +156,13 @@ namespace ibex {
          *  knowing. (See Scott Meyers book, "Effective C++")
          *
          */
-         //@{
+        
         LoupFinderIpoptB();
         LoupFinderIpoptB(const LoupFinderIpoptB&);
         LoupFinderIpoptB& operator=(const LoupFinderIpoptB&);
-        //@}
+
+        int ipopt_calls=-1; // 
+
 
 
     };

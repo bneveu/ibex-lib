@@ -152,9 +152,11 @@ std::pair<IntervalVector, double> LoupFinderIpopt::find(const IntervalVector& bo
 
 	if (status=="solved" && obj < current_loup){
 	  bool _is_inner=false;
+	  //	  cout << "pt avant check " << pt << endl;
 	  if( check(normsys,pt,loup,_is_inner))
 	    { loup_changed=true;
 	      loup_point=pt;
+	      //	      cout << "pt  " << pt << endl;
 	      if (optimizer->trace && !optimizer->integerobj)   cout << "*** ipopt      " ;
 	    }
 	  else if (sys.get_integer_variables()->size() < n){
