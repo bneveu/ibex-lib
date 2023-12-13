@@ -6,7 +6,9 @@ Pour cela, 2 stratégies ont été implantées dans LoupFinderDefaultIpoptB
 ipoptxn ; appel de probing et inxtaylor avant éventuel appel de ipopt
 ipoptxninhc4 : appel de innch4 et inxtaylor avant éventuel appel de ipopt
 
-- Paramétrage
+Cet appel à Ipopt a lieu quand un nouveau meilleur point réalisable a été trouvé ou tous les n appels.
+
+Paramétrage
 
 - fréquence d'appel n : ipopt est lancé tous les n appels au loup finder ou quand un nouveau meilleur point réalisable a été trouvé par un autre algorithme de LoupFinderDefaultIpopt.
 
@@ -25,15 +27,16 @@ dans le cas d'un lancement après avoir trouvé un nouveu meilleur point réalisabl
 
 Implantation :
 
-Prérequis : Ipopt et ses dépendances doivent avoir été installés.
-
-Question : les installe-t-on avec Ibex ? (en utilisant mumps comme solveur linéaire libre).
+Prérequis : Ipopt et ses dépendances (mumps pour utiliser un solveur linéaire libre) doivent avoir été installés.
 
 La nouvelle méthode de recherche de point réalisable utilisant Ipopt est implantée dans LoupFinderIpoptB 
 dans le répertoire optim/examples-ipopt.
+La classe LoupFinderIpoptB est une sous classe en effet de TNLP (Ipopt) et LoupFinder (Ibex).
+Elle implante les méthodes décrites dans la documentation Ipopt.
+
 
 Cette méthode est appelée par 2 nouvelles méthodes par défaut également dans le
-répertoire optim/examples-ipopt dans LoupFinderDefaultIpoptB.cpp 
+répertoire optim/examples-ipopt dans LoupFinderDefaultIpoptB.cpp
 
 Ces méthodes étant des "LoupFinder", elles devraient être dans le source dans le répertoire loup
 quand les problèmes de dépendance avec Ipopt auront été réglés.
@@ -44,7 +47,7 @@ avec le paramètre loupfinder à
  - ipoptxn : appel de ipopt, xtaylor et probing
  - ipoptxninhc4 appel de ipopt, xtaylor et inhc4
 
-Dans la ligne de commande, il faut ajoute apres ipoptxn et ipoptxnonhc4 2 paramètres
+Dans la ligne de commande, il faut ajoute apres ipoptxn et ipoptxninhc4 2 paramètres
  - la fréquence d'appels
  - le fait d'avoir un problème QP. (1)
 
@@ -53,7 +56,6 @@ exemple pour un problème QP
 
 exemple pour un problème NLP
 ./optimizeripopt ~/RECHERCHE/ibex/ibex-neveu/ibex-lib/benchs/optim/coconutbenchmark-library2/hs100.nl acidhc4 compo lsmearmg  ipoptxninhc4 100 0 bs 1 0 1.e-7 1.e-6 1.e-8 10000 1
-
 
 Cet optimiseur est compilé avec le makefile dans ce répertoire qui sait trouver ipopt et ses dépendances
 

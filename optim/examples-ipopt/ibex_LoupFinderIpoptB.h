@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X
-// File        : ibex_LoupFinderIpoptA.h
+// File        : ibex_LoupFinderIpoptB.h
 // Author      : Bertrand Neveu,Ignacio Araya
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file

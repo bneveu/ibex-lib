@@ -13,7 +13,6 @@
 
 #include "ibex_LinearizerAffine2.h"
 #include "ibex_AmplInterface.h"
-#include "ibex_LoupFinderIpoptA.h"
 #include "ibex_LoupFinderIpoptB.h"
 #include "ibex_LoupFinderDefaultIpoptB.h"
 
@@ -135,8 +134,6 @@ int main(int argc, char** argv){
 	  loupfinder = new LoupFinderProbing (norm_sys);
 	else if (loupfindermethod=="inhc4")
 	  loupfinder = new LoupFinderInHC4 (norm_sys);
-	else  if (loupfindermethod=="ipopt")
-	  loupfinder = new LoupFinderIpoptA(sys, norm_sys, ext_sys, (new LoupFinderDefault (norm_sys,false,integerobjective)));	  
 	else
 	  {cout << loupfindermethod <<  " is not an implemented  feasible point finding method "  << endl; return -1;}
 
@@ -346,11 +343,7 @@ int main(int argc, char** argv){
 	  ((LoupFinderDefaultIpoptB*) loupfinder)->finder_ipopt.ipopt_frequency= ipoptfrequency;
 	  ((LoupFinderDefaultIpoptB*) loupfinder)->finder_ipopt.set_quadratic(ipoptquadratic);
 	}
-	//	o.ipopt_preprocessing(*sys,norm_sys,ext_sys);
-	//if (loupfindermethod=="ipoptxn" ||loupfindermethod=="ipoptxninhc4" )
-	//	  ((LoupFinderDefaultIpoptB*)loupfinder)->finder_ipopt.recursive_call=true;
-	if (loupfindermethod=="ipopt")
-	  ((LoupFinderIpoptA*) loupfinder)->optimizer=&o;
+	
 	// the allowed time for search
 	o.timeout=timelimit;
 
@@ -371,7 +364,6 @@ int main(int argc, char** argv){
 	//	cout << "preprocessing ampl time " << o.preprocampltime << " ipopttime " << o.preprocipopttime << endl;
         cout << o.get_time() + presolve_time << "  " << o.get_nb_cells()+1 << endl;
         if (loupfindermethod == "ipoptxn" || loupfindermethod =="ipoptxninhc4"){
-	  //	  cout << " ipopttime " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.ipopttime << " ampltime " << ((LoupFinderDefaultIpopt*)loupfinder)->finder_ipopt.ampltime << endl;
 	  cout << " correction nodes " << ((LoupFinderDefaultIpoptB*)loupfinder)->finder_ipopt.correction_nodes << " correction time " << ((LoupFinderDefaultIpoptB*)loupfinder)->finder_ipopt.correction_time << endl;
 	}
 	//	if (filtering == "acidhc4"  )
@@ -383,7 +375,7 @@ int main(int argc, char** argv){
 
 	  delete bs1;
 	
-	//	delete loupfinder;
+	//	delete loupfinder;  // error with this delete in case of ipoptxninhc4
 
 	delete buffer;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn" || linearrelaxation=="xnart") {
