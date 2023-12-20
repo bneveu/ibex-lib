@@ -69,9 +69,12 @@ std::pair<IntervalVector, double> LoupFinderDefaultIpoptB::find(const IntervalVe
 	} catch(NotFound&) { }
 	
         if (found && finder_ipopt.recursive_call) {
-	  
-	  finder_ipopt.force=true;
-	  finder_ipopt.solution=p.first.mid();
+	  double ymax=finder_ipopt.optimizer->compute_ymax();
+	  //	  cout << " ymax " << ymax << " p.second " << p.second << endl;
+	  if (p.second <= ymax){
+	    finder_ipopt.force=true;
+	    finder_ipopt.solution=p.first.mid();
+	  }
 	}
 	      
 	try { p=finder_ipopt.find(box1,p.first,p.second);

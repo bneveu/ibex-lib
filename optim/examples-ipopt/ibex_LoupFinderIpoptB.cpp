@@ -19,7 +19,7 @@ namespace ibex {
   LoupFinderIpoptB::LoupFinderIpoptB(const System& sys,const System& normsys, const ExtendedSystem& extsys) : sys(sys), normsys(normsys), extsys(extsys), solution(sys.nb_var), the_box(sys.box), ipopt_box(sys.box) {
 	try {
 		df = new Function(*sys.goal,Function::DIFF);
-                cout << " nb ctr " << sys.nb_ctr << endl;
+		//                cout << " nb ctr " << sys.nb_ctr << endl;
 		if (sys.nb_ctr>0) {
 			dg = new Function*[sys.f_ctrs.image_dim()];
 
@@ -80,9 +80,9 @@ namespace ibex {
       IntervalVector loup_point0=loup_point;
       if (recursive_call){
 	ipopt_calls++;
-	if(ipopt_calls%ipopt_frequency==0 || force ){
+	if(ipopt_calls%ipopt_frequency==0 || ipopt_calls==10 || ipopt_calls==20  || ipopt_calls==50 || force ){
 	
-	  cout << "nb_cells " <<  optimizer->get_nb_cells() << endl;
+	  //	  cout << "nb_cells " <<  optimizer->get_nb_cells() << endl;
 	  ApplicationReturnStatus status = app->OptimizeTNLP(this);
 	  force=0;
 	  //	  cout << " status " << status << endl;
@@ -376,7 +376,6 @@ namespace ibex {
         }
   
       else {
-	//        cout << "hessian call " << endl;
 	ibex::IntervalVector v(n);
 	for (int i = 0; i < n; i++) {
 	  v[i] = x[i];

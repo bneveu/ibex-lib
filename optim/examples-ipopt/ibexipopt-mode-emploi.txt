@@ -4,7 +4,7 @@ de recherche de point réalisable d'Ibex.
 
 Pour cela, 2 stratégies ont été implantées dans LoupFinderDefaultIpoptB
 ipoptxn ; appel de probing et inxtaylor avant éventuel appel de ipopt
-ipoptxninhc4 : appel de innch4 et inxtaylor avant éventuel appel de ipopt
+ipoptxninhc4 : appel de inhc4 et inxtaylor avant éventuel appel de ipopt
 
 Cet appel à Ipopt a lieu quand un nouveau meilleur point réalisable a été trouvé ou tous les n appels.
 
@@ -29,8 +29,9 @@ Implantation :
 
 Prérequis : Ipopt et ses dépendances (mumps pour utiliser un solveur linéaire libre) doivent avoir été installés.
 
+Tout le code utilisant Ipopt est dans le répertoire optim/examples-ipopt
+
 La nouvelle méthode de recherche de point réalisable utilisant Ipopt est implantée dans LoupFinderIpoptB 
-dans le répertoire optim/examples-ipopt.
 La classe LoupFinderIpoptB est une sous classe en effet de TNLP (Ipopt) et LoupFinder (Ibex).
 Elle implante les méthodes décrites dans la documentation Ipopt.
 
@@ -47,9 +48,9 @@ avec le paramètre loupfinder à
  - ipoptxn : appel de ipopt, xtaylor et probing
  - ipoptxninhc4 appel de ipopt, xtaylor et inhc4
 
-Dans la ligne de commande, il faut ajoute apres ipoptxn et ipoptxninhc4 2 paramètres
+Dans la ligne de commande, il faut ajoute après ipoptxn et ipoptxninhc4 2 paramètres
  - la fréquence d'appels
- - le fait d'avoir un problème QP. (1)
+ - le fait d'avoir un problème QP. (1 pour QP, 0 sinon)
 
 exemple pour un problème QP
 ./optimizeripopt ~/RECHERCHE/ibex/ibex-neveu/ibex-lib/benchs/optim/medium/ex2_1_9.bch acidhc4 compo lsmearmg  ipoptxninhc4 100 1  bs 1 0 0 1.e-6 1.e-8 10000 1

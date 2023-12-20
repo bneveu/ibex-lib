@@ -45,7 +45,7 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 
   Optimizer::Optimizer(int n, Ctc& ctc, Bsc& bsc, LoupFinder& finder,
 		CellBufferOptim& buffer,
-		       int goal_var, double eps_x, double rel_eps_f, double abs_eps_f) :   n(n), goal_var(goal_var),
+	       int goal_var, double eps_x, double rel_eps_f, double abs_eps_f) :   n(n), goal_var(goal_var),
 										ctc(ctc), bsc(bsc), loup_finder(finder), buffer(buffer),
 											   eps_x(n,eps_x), rel_eps_f(rel_eps_f), abs_eps_f(abs_eps_f),
 										trace(0), timeout(-1), extended_COV(true), anticipated_upper_bounding(true),

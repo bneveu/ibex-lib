@@ -228,6 +228,13 @@ public:
 	 */
 	const CovOptimData& get_data() const;
 
+	/**
+	 * \brief Computes and returns  the value ymax (the loup decreased with the precision)
+	 * the heap and the current box are actually contracted with y <= ymax
+	 *
+	 */
+	double compute_ymax ();
+  
 	/* =========================== Settings ============================= */
 
 	/**
@@ -402,13 +409,7 @@ protected:
 	 * \brief Main procedure for updating the loup.
 	 */
         virtual bool update_loup(const IntervalVector& box, BoxProperties& prop);
-	/**
-	 * \brief Computes and returns  the value ymax (the loup decreased with the precision)
-	 * the heap and the current box are actually contracted with y <= ymax
-	 *
-	 */
-	double compute_ymax ();
-
+	
   
         double compute_emptybuffer_uplo();
 	/**
