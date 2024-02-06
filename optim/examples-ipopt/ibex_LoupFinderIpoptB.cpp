@@ -2,6 +2,7 @@
 #include <sstream>
 #include <fstream>
 #include <stdio.h>
+#include <limits>
 #include "ibex_LoupFinderIpoptB.h"
 #include "ibex_DefaultOptimizerConfig.h"
 #include "ibex.h"
@@ -15,7 +16,8 @@ using namespace std;
 
 namespace ibex {
   double expansion_precisionB=1.e-6;
-
+  double ipopt_diam=1.e8;
+  
   LoupFinderIpoptB::LoupFinderIpoptB(const System& sys,const System& normsys, const ExtendedSystem& extsys) : sys(sys), normsys(normsys), extsys(extsys), solution(sys.nb_var), the_box(sys.box), ipopt_box(sys.box) {
 	try {
 		df = new Function(*sys.goal,Function::DIFF);
@@ -80,7 +82,7 @@ namespace ibex {
       IntervalVector loup_point0=loup_point;
       if (recursive_call){
 	ipopt_calls++;
-	if(ipopt_calls%ipopt_frequency==0 || ipopt_calls==10 || ipopt_calls==20  || ipopt_calls==50 || force ){
+	if(ipopt_calls%ipopt_frequency==0 || ipopt_calls==10 || ipopt_calls==20  || ipopt_calls==50 || (force && box.max_diam()<= ipopt_diam) ){
 	
 	  //	  cout << "nb_cells " <<  optimizer->get_nb_cells() << endl;
 	  ApplicationReturnStatus status = app->OptimizeTNLP(this);

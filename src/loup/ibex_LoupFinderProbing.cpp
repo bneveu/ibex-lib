@@ -27,7 +27,8 @@ std::pair<IntervalVector, double> LoupFinderProbing::find(const IntervalVector& 
 	bool _is_inner = sys.is_inner(box);
 
 	for(int i=0; i<sample_size; i++) {
-		pt = box.random();
+	  //		pt = box.random();
+	  pt=box.mid();
 		//	cout << " box " << box << " pt " << pt << endl;
 		if (check(sys, pt, loup, _is_inner)) {
 			loup_changed = true;

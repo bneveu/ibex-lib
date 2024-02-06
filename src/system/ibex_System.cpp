@@ -499,7 +499,7 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
       string line;
       getline(fic,line);
       fic >> nbvar;
-      cout << " nbvar " << nbvar << endl;
+      //      cout << " nbvar " << nbvar << endl;
       for (int i=0; i<10 ;i++){
 	fic >> a;
 	//    cout << "  " << a ;
@@ -518,7 +518,7 @@ IntervalMatrix System::active_ctrs_jacobian(const IntervalVector& box) const {
       fic >> nlvarc;
       fic >> nlvaro;
       fic >> nlvarb;
-      cout << " nlvarc " << nlvarc << " nlvaro " <<  nlvaro << " nlvarb " << nlvarb << endl;
+      //      cout << " nlvarc " << nlvarc << " nlvaro " <<  nlvaro << " nlvarb " << nlvarb << endl;
       for (int i=0; i<7 ;i++){
 	fic >> a;
 	//    cout << "  " << a ;

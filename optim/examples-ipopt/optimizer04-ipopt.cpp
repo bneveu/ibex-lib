@@ -9,6 +9,7 @@
 //============================================================================
 
 
+
 #include "ibex.h"
 
 #include "ibex_LinearizerAffine2.h"
@@ -60,7 +61,7 @@ int main(int argc, char** argv){
 
 	if (!(sys->goal)) {cout << " No goal " << endl; return -1;}
 
-	
+		
 	for (int i=0; i< sys->box.size(); i++){
 	  if (sys->box[i].lb() == -forced_initbox_limit || sys->box[i].lb() < -initbox_limit ) 
 	    sys->box[i]= Interval(-initbox_limit, sys->box[i].ub()) ;
@@ -84,7 +85,7 @@ int main(int argc, char** argv){
 	int nbinput=6;
 	int ipoptfrequency=1;
 	int ipoptquadratic=0;
-	if (loupfindermethod=="ipoptxn" || loupfindermethod=="ipoptxninhc4"){
+	if (loupfindermethod=="ipoptxn" || loupfindermethod=="ipoptxninhc4" || loupfindermethod=="ipoptprob"){
 	  ipoptfrequency=atoi(argv[nbinput++]);
 	  ipoptquadratic=atoi(argv[nbinput++]);
 	}
@@ -107,7 +108,7 @@ int main(int argc, char** argv){
 
 	
 	//	if (sys->minlp)	cout << " number of integer variables " << (sys->get_integer_variables())->size() << endl;
-	if (sys->minlp)	cout << " integer variables " << *(sys->get_integer_variables()) << endl;
+	//	if (sys->minlp)	cout << " integer variables " << *(sys->get_integer_variables()) << endl;
 
 	ExtendedSystem ext_sys(*sys,tolerance,true);
 	NormalizedSystem norm_sys(*sys,tolerance,true);
@@ -123,9 +124,11 @@ int main(int argc, char** argv){
 
 	LoupFinder* loupfinder;
 	if (loupfindermethod=="ipoptxninhc4")
-	  loupfinder = new LoupFinderDefaultIpoptB (*sys,norm_sys,ext_sys,true,integerobjective);
+	  loupfinder = new LoupFinderDefaultIpoptB (*sys,norm_sys,ext_sys,true,true,integerobjective);
 	else if (loupfindermethod=="ipoptxn")
-	  loupfinder = new LoupFinderDefaultIpoptB (*sys,norm_sys,ext_sys,false,integerobjective);
+	  loupfinder = new LoupFinderDefaultIpoptB (*sys,norm_sys,ext_sys,false,true,integerobjective);
+	else if (loupfindermethod=="ipoptprob")
+	  loupfinder = new LoupFinderDefaultIpoptB (*sys,norm_sys,ext_sys,false,false,integerobjective);
 	else if (loupfindermethod=="xninhc4")
 	  loupfinder = new LoupFinderDefault (norm_sys,true,integerobjective);
 	else if (loupfindermethod=="xn")
@@ -150,14 +153,14 @@ int main(int argc, char** argv){
 	  {cout << strategy <<  " is not an implemented  node selection strategy "  << endl; return -1;}
 	cout << "file " << argv[1] << endl;
 	
-
+	/*
 	cout << " filtering " << filtering; 
         cout << " linearrelaxation " << linearrelaxation;
 	cout << " bisection " << bisection ;
 	cout << " loupfinder " << loupfindermethod ;
 	cout << " strategy " << strategy ;
 	cout << " randomseed " << randomseed << endl;
-	
+	*/
 
 	// Build the bisection heuristic
 	// --------------------------
@@ -318,10 +321,13 @@ int main(int argc, char** argv){
 	
 	else
 	  ctcxn = ctc;
-	if (sys->nb_ctr==0 && sys->minlp==false){  // CtcKuhnTucker for unconstrained continuous problems
+	if (sys->nb_ctr==0 && sys->minlp==false // CtcKuhnTucker for unconstrained continuous problems
+	    //&& loupfindermethod != "ipoptxninhc4" && loupfindermethod != "ipoptxn" ){  
+	    )
+	  {
 	  Ctc* ctckkt = new CtcKuhnTucker(norm_sys, true);
 	  ctcxn = new CtcCompo (*ctcxn , *ctckkt, integ);
-	}
+	  }
 
 
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
@@ -338,7 +344,7 @@ int main(int argc, char** argv){
 
 	// ipopt preprocessing
 
-	if (loupfindermethod=="ipoptxninhc4" || loupfindermethod=="ipoptxn"){
+	if (loupfindermethod=="ipoptxninhc4" || loupfindermethod=="ipoptxn" ||loupfindermethod=="ipoptprob" ){
 	  ((LoupFinderDefaultIpoptB*) loupfinder)->finder_ipopt.optimizer= &o;
 	  ((LoupFinderDefaultIpoptB*) loupfinder)->finder_ipopt.ipopt_frequency= ipoptfrequency;
 	  ((LoupFinderDefaultIpoptB*) loupfinder)->finder_ipopt.set_quadratic(ipoptquadratic);
@@ -355,15 +361,15 @@ int main(int argc, char** argv){
 	if (o.trace) cout << " sys.box " << sys->box << endl;
 	timer.stop();
 	double presolve_time = timer.get_time();
-	cout << " presolve time " << presolve_time << endl;
+	if (o.trace) cout << " presolve time " << presolve_time << endl;
 	o.optimize(sys->box,o.get_loup());
 	//	std::cerr.rdbuf(OldBuf);
 
 	// printing the results     
-	o.report();
+	if (o.trace)	o.report();
 	//	cout << "preprocessing ampl time " << o.preprocampltime << " ipopttime " << o.preprocipopttime << endl;
-        cout << o.get_time() + presolve_time << "  " << o.get_nb_cells()+1 << endl;
-        if (loupfindermethod == "ipoptxn" || loupfindermethod =="ipoptxninhc4"){
+        cout << o.get_status() << " ; " << o.get_time() + presolve_time << " ; " << o.get_nb_cells()+1 << endl;
+        if (loupfindermethod == "ipoptxn" || loupfindermethod =="ipoptxninhc4" || loupfindermethod =="ipoptprob" ){
 	  cout << " correction nodes " << ((LoupFinderDefaultIpoptB*)loupfinder)->finder_ipopt.correction_nodes << " correction time " << ((LoupFinderDefaultIpoptB*)loupfinder)->finder_ipopt.correction_time << endl;
 	}
 	//	if (filtering == "acidhc4"  )

@@ -9,7 +9,7 @@
 
 #ifndef __IBEX_ATANHCCC_H__
 #define __IBEX_ATANHCCC_H__
-
+#include <limits>
 #include "ibex_ExprOperators.h"
 
 namespace ibex {
