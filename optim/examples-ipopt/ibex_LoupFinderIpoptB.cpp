@@ -82,7 +82,11 @@ namespace ibex {
       IntervalVector loup_point0=loup_point;
       if (recursive_call){
 	ipopt_calls++;
-	if(ipopt_calls%ipopt_frequency==0 || ipopt_calls==10 || ipopt_calls==20  || ipopt_calls==50 || (force && box.max_diam()<= ipopt_diam) ){
+	if (
+	    (!sys.minlp ||box.max_diam()<= ipopt_diam)
+	    &&
+	    (ipopt_calls%ipopt_frequency==0 || ipopt_calls==10 || ipopt_calls==20  || ipopt_calls==50 || (force && box.max_diam()<= ipopt_diam) )
+	    ){
 	
 	  //	  cout << "nb_cells " <<  optimizer->get_nb_cells() << endl;
 	  ApplicationReturnStatus status = app->OptimizeTNLP(this);
