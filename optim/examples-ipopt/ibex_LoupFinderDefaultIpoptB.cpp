@@ -8,6 +8,7 @@
 // Last update : Nov 20, 2023
 //============================================================================
 
+#include <limits>
 #include "ibex_LoupFinderDefaultIpoptB.h"
 #include "ibex_LoupFinderInHC4.h"
 #include "ibex_LoupFinderFwdBwd.h"
@@ -19,7 +20,7 @@ using namespace std;
 
 namespace ibex {
 
-  LoupFinderDefaultIpoptB::LoupFinderDefaultIpoptB(System& sys, const System& normsys, const ExtendedSystem& extsys, bool inHC4,bool integerobjective )  : sys(sys), normsys(normsys), extsys(extsys),									 //	finder_probing(inHC4? (LoupFinder&) *new LoupFinderInHC4(sys) : (LoupFinder&) *new LoupFinderFwdBwd(sys)),
+  LoupFinderDefaultIpoptB::LoupFinderDefaultIpoptB(System& sys, const System& normsys, const ExtendedSystem& extsys, bool inHC4,bool xtaylor, bool integerobjective )  : sys(sys), normsys(normsys), extsys(extsys),	xtaylor(xtaylor),								 //	finder_probing(inHC4? (LoupFinder&) *new LoupFinderInHC4(sys) : (LoupFinder&) *new LoupFinderFwdBwd(sys)),
         finder_probing(inHC4? (LoupFinder&) *new LoupFinderInHC4(normsys) : (LoupFinder&) *new LoupFinderProbing(normsys)),
         finder_x_taylor(normsys),
 	finder_ipopt(sys,normsys,extsys){
@@ -53,24 +54,24 @@ std::pair<IntervalVector, double> LoupFinderDefaultIpoptB::find(const IntervalVe
 	try {   // if (!(finder_ipopt.recursive_call)) cout << " recursive box " << box << endl; 
 		p=finder_probing.find(box,p.first,p.second,prop);
 		found=true;
-		if (finder_ipopt.recursive_call) cout << "probing " << p.second << endl;
+		//		if (finder_ipopt.recursive_call) cout << "probing " << p.second << endl;
 		//	else cout << " probing recursive " << p.second << endl;
 	} catch(NotFound&) { }
-
+        if (xtaylor){
 	try {
 		// TODO
 		// in_x_taylor.set_inactive_ctr(entailed->norm_entailed);
 		p=finder_x_taylor.find(box,p.first,p.second,prop);
 		found=true;
 		
-		if (finder_ipopt.recursive_call) cout << "xtaylor " << p.second << endl;
+		//		if (finder_ipopt.recursive_call) cout << "xtaylor " << p.second << endl;
 		//	else cout << " xtaylor recursive " << p.second << endl;
 		
 	} catch(NotFound&) { }
-	
+	}
         if (found && finder_ipopt.recursive_call) {
 	  double ymax=finder_ipopt.optimizer->compute_ymax();
-	  //	  cout << " ymax " << ymax << " p.second " << p.second << endl;
+	  //cout << " ymax " << ymax << " p.second " << p.second << endl;
 	  if (p.second <= ymax){
 	    finder_ipopt.force=true;
 	    finder_ipopt.solution=p.first.mid();
