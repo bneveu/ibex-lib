@@ -1,13 +1,23 @@
-#include <iostream>
-#include <sstream>
-#include <fstream>
+//============================================================================
+//                                  I B E X
+// File        : ibex_LoupFinderIpoptB.cpp
+// Author      : Bertrand Neveu
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Created     : Aug 03, 2023
+// Last update : Mar 07, 2024
+//============================================================================
+
+
+
+
+
 #include <stdio.h>
 #include <limits>
 #include "ibex_LoupFinderIpoptB.h"
-#include "ibex_DefaultOptimizerConfig.h"
-#include "ibex.h"
 
-#include "ibex_NormalizedSystem.h"
+
+
 #include <cassert>
 
 using namespace Ipopt;
@@ -81,7 +91,7 @@ namespace ibex {
       double newloup=false;
       IntervalVector loup_point0=loup_point;
       if (recursive_call){
-	ipopt_calls++;
+	ipopt_calls++;  // at first call, ipopt_calls=0
 	if (
 	    (!sys.minlp ||box.max_diam()<= ipopt_diam)
 	    &&
@@ -90,7 +100,7 @@ namespace ibex {
 	
 	  //	  cout << "nb_cells " <<  optimizer->get_nb_cells() << endl;
 	  ApplicationReturnStatus status = app->OptimizeTNLP(this);
-	  force=0;
+	  force=0;  // after call , force is reset to 0
 	  //	  cout << " status " << status << endl;
 	  //	  if (status == Solve_Succeeded) {
 	  //        	std::cout << std::endl << std::endl << "*** The problem solved!" << std::endl;
@@ -106,7 +116,7 @@ namespace ibex {
 		  { 
 		    loup_point0=solution;
 		    if (optimizer->trace) 
-		    cout << "*** ipopt      " ;
+		      cout << "*** ipopt      " ;
 		  }
 
 	    if (sys.get_integer_variables()->size() < sys.nb_var){

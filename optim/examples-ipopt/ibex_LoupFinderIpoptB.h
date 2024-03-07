@@ -74,9 +74,8 @@ namespace ibex {
       const System& normsys;
       const ExtendedSystem& extsys; // the extended system : used by recursive call of ipopt for correcting a solution 
       Optimizer* optimizer=nullptr; // optimizer data are used for building an optimizer for correcting the point returned by ipopt if it does not verify the constraints
-      bool recursive_call=true; // boolean to prevent double recursion of optimizer ; when true, the optimizer can be recursevely called
-      int ipopt_frequency=100; // frequency of ipopt calls in number of calls.
-
+      bool recursive_call=true; // boolean to prevent double recursion of optimizer ; when true, the optimizer can be recursevely called, and Ipopt will not be called.
+      int ipopt_frequency=100; // frequency of Ipopt calls in number of loup finder calls.
 
       int correction_nodes=0;  // additional nodes for correcting the point given by ipopt
       double correction_time=0.0; // additional time for correcting the point given by ipopt

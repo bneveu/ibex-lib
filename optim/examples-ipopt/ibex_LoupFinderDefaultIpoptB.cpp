@@ -5,17 +5,12 @@
 // Copyright   : IMT Atlantique (France)
 // License     : See the LICENSE file
 // Created     : Aug 03, 2023
-// Last update : Nov 20, 2023
+// Last update : Mar 07, 2024
 //============================================================================
 
 #include <limits>
 #include "ibex_LoupFinderDefaultIpoptB.h"
-#include "ibex_LoupFinderInHC4.h"
-#include "ibex_LoupFinderFwdBwd.h"
-#include "ibex_BxpLinearRelaxArgMin.h"
-#include "ibex_LoupFinderProbing.h"
-#include "ibex_LoupFinderIpopt.h"
-#include "ibex_CellHeap.h"
+
 using namespace std;
 
 namespace ibex {

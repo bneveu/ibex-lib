@@ -2,29 +2,38 @@ Appel de Ipopt pour obtenir des points réalisables (minima locaux).
 C'est un algorithme cher, à utiliser en complément des algorithmes
 de recherche de point réalisable d'Ibex.
 
-Pour cela, 2 stratégies ont été implantées dans LoupFinderDefaultIpoptB
+Pour cela, 3 stratégies ont été implantées dans LoupFinderDefaultIpoptB
 ipoptxn ; appel de probing et inxtaylor avant éventuel appel de ipopt
 ipoptxninhc4 : appel de inhc4 et inxtaylor avant éventuel appel de ipopt
+ipoptprob : appel de probing avant éventuel appel de ipopt
 
-Cet appel à Ipopt a lieu quand un nouveau meilleur point réalisable a été trouvé ou tous les n appels.
+
+Cet appel à Ipopt a lieu quand un nouveau meilleur point réalisable a été trouvé ou tous les n appels. (avec un seuil de lancement ipopt_diam : cf ci-après).
 
 Paramétrage
 
-- fréquence d'appel n : ipopt est lancé tous les n appels au loup finder ou quand un nouveau meilleur point réalisable a été trouvé par un autre algorithme de LoupFinderDefaultIpopt.
+- fréquence d'appel n : ipopt est lancé tous les n appels au loup finder et au 10ème, 20ème et 50ème appel ou quand un nouveau meilleur point réalisable a été trouvé par un autre algorithme de LoupFinderDefaultIpopt.
 
 - problème quadratique : une optimisation en temps de calcul est faite dans le cas d'un problème QP
 d'optimisation avec objectif quadratique et contraintes linéaires : le calcul du lagrangien n'est fait
 qu'une seule fois. (par défault false)
 
 Ipopt est lancé avec pour domaine :
- - pour les problèmes NLP la boîte entière après  contraction sur la racine (avant bissection),
+ - pour les problèmes NLP la boîte entière après contraction sur la racine (avant bissection),
  - pour les problèmes MINLP la boîte courante,
  
 dans le cas d'un lancement sans avoir trouvé de nouveau meilleur point réalisable, le point initial pour Ipopt est le centre de la boîte courante.
-dans le cas d'un lancement après avoir trouvé un nouveu meilleur point réalisable, le point initial pour Ipopt est ce nouveau point réalisable.
+dans le cas d'un lancement après avoir trouvé un nouveau meilleur point réalisable, le point initial pour Ipopt est ce nouveau point réalisable.
 
+Constantes fixées
 
+ expansion_precisionB 1.e-6 : taille de la petite boite autour de la solution ipopt pour trouver un point réalisable
+ ipopt_diam :1.e8
+ Ipopt n'est lancé :
+ - pour les problèmes mixtes que si toutes les variables ont un domaine de diamètre < ipopt_diam
+ - pour les problèmes continus dans le cas d'un lancement après un nouveau point réalisable que si toutes les variables ont un domaine de diamètre < ipopt_diam.
 
+ 
 Implantation :
 
 Prérequis : Ipopt et ses dépendances (mumps pour utiliser un solveur linéaire libre) doivent avoir été installés.
@@ -36,6 +45,7 @@ La classe LoupFinderIpoptB est une sous classe en effet de TNLP (Ipopt) et LoupF
 Elle implante les méthodes décrites dans la documentation Ipopt.
 
 
+
 Cette méthode est appelée par 2 nouvelles méthodes par défaut également dans le
 répertoire optim/examples-ipopt dans LoupFinderDefaultIpoptB.cpp
 
@@ -45,10 +55,11 @@ quand les problèmes de dépendance avec Ipopt auront été réglés.
 
 Ces méthodes peuvent être mises dans l'optimiseur générique optimizeripopt dans optim/examples-ipopt
 avec le paramètre loupfinder à
- - ipoptxn : appel de ipopt, xtaylor et probing
- - ipoptxninhc4 appel de ipopt, xtaylor et inhc4
-
-Dans la ligne de commande, il faut ajoute après ipoptxn et ipoptxninhc4 2 paramètres
+ - ipoptxn : appels de probing,  xtaylor et sous conditions ipopt
+ - ipoptxninhc4 appels de inhc4 xtaylor et  sous conditions ipopt
+ - ipoptprob : appels de probing et sous conditions ipopt
+ 
+Dans la ligne de commande, il faut ajouter après ipoptxn,  ipoptxninhc4 ou ipoptprob 2 paramètres
  - la fréquence d'appels
  - le fait d'avoir un problème QP. (1 pour QP, 0 sinon)
 

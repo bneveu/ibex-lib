@@ -14,6 +14,11 @@
 #include "ibex_LoupFinderIpoptB.h"
 #include "ibex_System.h"
 #include "ibex_LoupFinderXTaylor.h"
+#include "ibex_LoupFinderProbing.h"
+#include "ibex_LoupFinderIpopt.h"
+#include "ibex_LoupFinderInHC4.h"
+#include "ibex_LoupFinderFwdBwd.h"
+
 
 namespace ibex {
 
